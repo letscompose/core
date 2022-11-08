@@ -1,0 +1,24 @@
+{
+  "name": "letscompose/core",
+  "type": "library",
+  "description": "LetsCompose Core package - object and array mapping via yaml definition, and other LetsCompose core tools",
+  "keywords": ["letscompose","php","object mapping","array mapping"],
+  "homepage": "https://github.com/letscompose/core",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Igor ZLOBINE",
+      "email": "izlobine@gmail.com",
+      "homepage": "https://letscompose.io",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=8.0.0"
+  },
+  "autoload": {
+    "psr-0": {
+      "LetsCompose\\Core\\": "src"
+    }
+  }
+}
