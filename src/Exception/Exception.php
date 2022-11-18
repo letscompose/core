@@ -16,6 +16,11 @@ use Throwable;
 class Exception extends PHPException implements ExceptionInterface
 {
     /**
+     * @var Throwable
+     */
+    private Throwable $previous;
+
+    /**
      * @inheritDoc
      */
     public function setMessage(string $message, ...$params): ExceptionInterface

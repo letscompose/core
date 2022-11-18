@@ -10,10 +10,12 @@
 
 namespace LetsCompose\Core\Storage;
 
+use LetsCompose\Core\Exception\Exception;
+
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class FileNotFoundException extends \Exception
+class FileNotFoundException extends Exception
 {
 
 }

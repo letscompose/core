@@ -10,7 +10,8 @@
 
 namespace LetsCompose\Core\Tools;
 
-use Symfony\Component\ExpressionLanguage\ExpressionFunction;
+use Exception;
+use LetsCompose\Core\Exception\ExceptionInterface;
 
 class ExceptionHelper
 {
@@ -35,11 +36,11 @@ class ExceptionHelper
     private array $closureMap = [];
 
     /**
-     * @param \Exception $exception
+     * @param ExceptionInterface $exception
      */
     public function __construct
     (
-        private \Exception $exception
+        private readonly ExceptionInterface $exception
     ) {
         $this->closureMap = [
             self::CLOSURE_SET_MESSAGE => fn (string $message, ...$params) => $this->message = sprintf($message, ...$params),
@@ -54,31 +55,18 @@ class ExceptionHelper
     }
 
     /**
-     * @param string $exception
+     * @param ExceptionInterface $exception
      * @return ExceptionHelper
      */
-    public static function create($exception)
+    public static function create(ExceptionInterface $exception): self
     {
-
-//        if (!\class_exists($exception))
-//        {
-//            throw new \InvalidArgumentException('passed argument must be an valid existing class name or \Exception object');
-//        }
-
-//        $exception = eval("return (new class() extends $exception {});");
-
-        if (false === $exception instanceof \Exception)
-        {
-            throw new \InvalidArgumentException('argument must be an valid instance of \Exception object');
-        }
-
         return new self($exception);
     }
 
     /**
      * @param string $message
      * @param ...$params
-     * @return $this
+     * @return ExceptionHelper
      */
     public function message(string $message, ...$params): self {
         $this->closureMap[__FUNCTION__]($message, ...$params);
@@ -87,7 +75,7 @@ class ExceptionHelper
 
     /**
      * @param int $code
-     * @return $this
+     * @return ExceptionHelper
      */
     public function code(int $code): self {
         $this->closureMap[__FUNCTION__]($code);
@@ -96,7 +84,7 @@ class ExceptionHelper
 
     /**
      * @param \Throwable $exception
-     * @return $this
+     * @return ExceptionHelper
      */
     public function previous(\Throwable $exception): self {
         $this->closureMap[__FUNCTION__]($exception);
@@ -105,7 +93,7 @@ class ExceptionHelper
 
     /**
      * @return never
-     * @throws \Exception
+     * @throws Exception|ExceptionInterface
      */
     public function throw(): never {
         throw $this->exception;
