@@ -8,13 +8,18 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\Object;
+namespace LetsCompose\Core\Storage\Resource;
+
+use LetsCompose\Core\Exception\ExceptionInterface;
+use LetsCompose\Core\Exception\InvalidArgumentException;
+use LetsCompose\Core\Tools\ExceptionHelper;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
 abstract class AbstractResource implements ResourceInterface
 {
+
     /**
      * @var string
      */
@@ -39,6 +44,11 @@ abstract class AbstractResource implements ResourceInterface
      * @var mixed
      */
     protected mixed $stream;
+
+    /**
+     * @var string
+     */
+    protected string $storageClass;
 
     /**
      * @param string $name
@@ -78,10 +88,18 @@ abstract class AbstractResource implements ResourceInterface
 
     /**
      * @param string $type
-     * @return AbstractResource
+     * @return ResourceInterface
+     * @throws ExceptionInterface
      */
     public function setType(string $type): ResourceInterface
     {
+        if (false === \in_array($type, self::TYPE_MAP))
+        {
+            ExceptionHelper
+                ::create(new InvalidArgumentException())
+                ->message('Unknown resource type, type can be only one of theses [%s]', implode(',', self::TYPE_MAP))
+                ->throw();
+        }
         $this->type = $type;
         return $this;
     }
@@ -96,13 +114,17 @@ abstract class AbstractResource implements ResourceInterface
 
     /**
      * @param string $state
-     * @return AbstractResource
+     * @return ResourceInterface
+     * @throws ExceptionInterface
      */
     public function setState(string $state): ResourceInterface
     {
         if (false === \in_array($state, self::STATE_MAP))
         {
-            throw new \InvalidArgumentException();
+            ExceptionHelper
+                ::create(new InvalidArgumentException())
+                ->message('Unknown resource state, state can be only one of theses [%s]', implode(',', self::STATE_MAP))
+                ->throw();
         }
         $this->state = $state;
         return $this;
@@ -142,4 +164,29 @@ abstract class AbstractResource implements ResourceInterface
         return self::STATE_CLOSED_STREAM === $this->getState();
     }
 
+    /**
+     * @return string
+     */
+    public function getStorageClass(): string
+    {
+        return $this->storageClass;
+    }
+
+    /**
+     * @param string $class
+     * @return AbstractResource
+     * @throws ExceptionInterface
+     */
+    public function setStorageClass(string $class): AbstractResource
+    {
+        if (false === class_exists($class))
+        {
+            ExceptionHelper::create(new InvalidArgumentException())
+                ->message('You try bind File to unknown storage class [%s]', $class)
+                ->throw()
+                ;
+        }
+        $this->storageClass = $class;
+        return $this;
+    }
 }

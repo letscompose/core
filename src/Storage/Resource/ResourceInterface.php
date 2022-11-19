@@ -8,13 +8,23 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\Object;
+namespace LetsCompose\Core\Storage\Resource;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
 interface ResourceInterface
 {
+    /**
+     * @var string
+     */
+    const TYPE_FILE = 'file';
+
+    /**
+     * @var string
+     */
+    const TYPE_DIRECTORY = 'file';
+
     /**
      * @var string
      */
@@ -34,9 +44,23 @@ interface ResourceInterface
     ];
 
     /**
+     * @var string[]
+     */
+    const TYPE_MAP = [
+        self::TYPE_FILE,
+        self::TYPE_DIRECTORY,
+    ];
+
+    /**
+     * @param string $class
+     * @return ResourceInterface
+     */
+    public function setStorageClass(string $class): ResourceInterface;
+
+    /**
      * @return string
      */
-    public function getName(): string;
+    public function getStorageClass(): string;
 
     /**
      * @param string $name
@@ -47,7 +71,7 @@ interface ResourceInterface
     /**
      * @return string
      */
-    public function getPath(): string;
+    public function getName(): string;
 
     /**
      * @param string $path
@@ -56,15 +80,21 @@ interface ResourceInterface
     public function setPath(string $path): ResourceInterface;
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getStream(): mixed;
+    public function getPath(): string;
 
     /**
      * @param mixed $stream
      * @return ResourceInterface
      */
     public function setStream(mixed $stream): ResourceInterface;
+
+    /**
+     * @return mixed
+     */
+    public function getStream(): mixed;
+
 
     /**
      * @param string $type

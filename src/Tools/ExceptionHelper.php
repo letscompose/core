@@ -48,6 +48,10 @@ class ExceptionHelper
             self::CLOSURE_SET_PREVIOUS => (fn (\Throwable $previous) => $this->previous = $previous),
         ];
 
+        $test = function (string $message, ...$params) {
+            $this->message = sprintf($message, ...$params);
+        };
+
         foreach ($this->closureMap as &$closure)
         {
             $closure = $closure->bindTo($this->exception, $this->exception);

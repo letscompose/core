@@ -8,20 +8,14 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Tools\Storage;
+namespace LetsCompose\Core\Storage;
+
+use LetsCompose\Core\Exception\Exception;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface FileLocatorInterface
+class FileNotReadableException extends Exception
 {
 
-    /**
-     * locate file by file path.
-     * if file exist return full file path otherwise throw an exception
-     *
-     * @param string $filePath
-     * @return mixed
-     */
-    public function locate(string $filePath);
 }

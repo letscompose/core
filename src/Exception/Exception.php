@@ -13,6 +13,10 @@ namespace LetsCompose\Core\Exception;
 use \Exception as PHPException;
 use Throwable;
 
+
+/**
+ * @author Igor ZLOBINE <izlobine@gmail.com>
+ */
 class Exception extends PHPException implements ExceptionInterface
 {
     /**

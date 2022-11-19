@@ -10,22 +10,12 @@
 
 namespace LetsCompose\Core\Storage;
 
-use phpDocumentor\Reflection\Types\Resource_;
+use LetsCompose\Core\Exception\Exception;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface FileSystemStorageInterface
+class PathNotFoundException extends Exception
 {
-    /**
-     * method must open file and return a resource
-     * @return mixed
-     */
-    public function read(): mixed;
 
-    /**
-     * check if file exist
-     * @return bool
-     */
-    public function fileExists(): bool;
 }

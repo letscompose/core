@@ -8,17 +8,14 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\Object;
+namespace LetsCompose\Core\Storage;
+
+use LetsCompose\Core\Exception\Exception;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface FileInterface extends ResourceInterface
+class FileNotWritableException extends Exception
 {
-    public function getExtension(): ?string;
-
-    public function getMimeType(): string;
-
-    public function setMimeType(): FileInterface;
 
 }
