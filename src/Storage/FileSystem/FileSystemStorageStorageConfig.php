@@ -18,7 +18,7 @@ class FileSystemStorageStorageConfig implements FileSystemStorageConfigInterface
     /**
      * @var string
      */
-    private string $storageClass;
+    private string $storageClass = FileSystemStorage::class;
 
     /**
      * @var string

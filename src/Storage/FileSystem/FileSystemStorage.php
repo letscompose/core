@@ -96,8 +96,30 @@ class FileSystemStorage extends AbstractStorage implements FileSystemStorageInte
         {
             $file = $this->open($file->getPath(), self::OPEN_MODE_READ);
         }
-        return fread($file->getStream(), $chunkSize);
+        $stream = $file->getStream();
+        return !feof($stream) ? fread($stream, $chunkSize) : false;
     }
+
+    public function readLine(FileInterface|ResourceInterface $file)
+    {
+        $line = null;
+        while ($data = $this->read($file))
+        {
+            $i = 0;
+            $length = strlen($data)-1;
+            while ($i < $length)
+            {
+                $line .= $data[$i++];
+                if ($line[-1] === PHP_EOL)
+                {
+                    yield $line;
+                    $line = null;
+                }
+            }
+        }
+        yield $line;
+    }
+
 
     /**
      * @inheritDoc

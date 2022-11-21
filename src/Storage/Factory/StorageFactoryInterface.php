@@ -22,5 +22,5 @@ interface StorageFactoryInterface
      * @param ConfigInterface $config
      * @return StorageInterface
      */
-    public function create(ConfigInterface $config): StorageInterface;
+    public static function create(ConfigInterface $config): StorageInterface;
 }
