@@ -10,14 +10,15 @@
 
 namespace LetsCompose\Core\Storage\FileSystem;
 
+use Generator;
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
 use LetsCompose\Core\Storage\AbstractStorage;
-use LetsCompose\Core\Storage\FileNotFoundException;
-use LetsCompose\Core\Storage\FileNotReadableException;
-use LetsCompose\Core\Storage\FileNotWritableException;
+use LetsCompose\Core\Storage\Exception\FileNotFoundException;
+use LetsCompose\Core\Storage\Exception\FileNotReadableException;
+use LetsCompose\Core\Storage\Exception\FileNotWritableException;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
-use LetsCompose\Core\Storage\PathNotFoundException;
+use LetsCompose\Core\Storage\Exception\PathNotFoundException;
 use LetsCompose\Core\Tools\ExceptionHelper;
 use LetsCompose\Core\Tools\Storage\Path;
 
@@ -100,7 +101,11 @@ class FileSystemStorage extends AbstractStorage implements FileSystemStorageInte
         return !feof($stream) ? fread($stream, $chunkSize) : false;
     }
 
-    public function readLine(FileInterface|ResourceInterface $file)
+    /**
+     * @param FileInterface|ResourceInterface $file
+     * @return Generator
+     */
+    public function readLine(FileInterface|ResourceInterface $file): Generator
     {
         $line = null;
         while ($data = $this->read($file))

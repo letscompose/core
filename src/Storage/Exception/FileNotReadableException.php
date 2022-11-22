@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage;
+namespace LetsCompose\Core\Storage\Exception;
 
 use LetsCompose\Core\Exception\Exception;
 
