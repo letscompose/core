@@ -11,6 +11,7 @@
 namespace LetsCompose\Core\Storage;
 
 use LetsCompose\Core\Storage\Config\ConfigInterface;
+use LetsCompose\Core\Storage\Resource\ResourceInterface;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
@@ -21,6 +22,11 @@ abstract class AbstractStorage implements StorageInterface
      * @var string
      */
     protected string $rootPath;
+
+    /**
+     * @var string[]
+     */
+    protected array $supportedResources = [];
 
     /**
      * @var ConfigInterface
@@ -61,6 +67,17 @@ abstract class AbstractStorage implements StorageInterface
     {
         return $this->config;
     }
+
+    /**
+     * @param ResourceInterface $resource
+     * @return bool
+     */
+    public function isResourceSupported(ResourceInterface $resource): bool
+    {
+        return true === \in_array($resource::class, $this->supportedResources, true);
+    }
+
+
 //
 //    /**
 //     * @inheritDoc

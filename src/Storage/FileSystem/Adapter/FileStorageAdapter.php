@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem;
+namespace LetsCompose\Core\Storage\FileSystem\Adapter;
 
 use Generator;
 use LetsCompose\Core\Exception\ExceptionInterface;
@@ -17,15 +17,20 @@ use LetsCompose\Core\Storage\AbstractStorage;
 use LetsCompose\Core\Storage\Exception\FileNotFoundException;
 use LetsCompose\Core\Storage\Exception\FileNotReadableException;
 use LetsCompose\Core\Storage\Exception\FileNotWritableException;
+use LetsCompose\Core\Storage\FileSystem\LocalStorage;
+use LetsCompose\Core\Storage\FileSystem\LocalStorageInterface;
+use LetsCompose\Core\Storage\FileSystem\Resource\File;
+use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
 use LetsCompose\Core\Storage\Exception\PathNotFoundException;
+use LetsCompose\Core\Storage\StorageInterface;
 use LetsCompose\Core\Tools\ExceptionHelper;
 use LetsCompose\Core\Tools\Storage\Path;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class FileSystemStorage extends AbstractStorage implements FileSystemStorageInterface
+class FileStorageAdapter extends AbstractStorage implements LocalStorageInterface
 {
     /**
      * @var string[]
@@ -38,23 +43,18 @@ class FileSystemStorage extends AbstractStorage implements FileSystemStorageInte
     ];
 
     /**
-     * @param FileSystemStorageStorageConfig $config
+     * @param LocalStorage $storage
      * @throws ExceptionInterface
      */
-    public function __construct(FileSystemStorageStorageConfig $config)
+    public function __construct(private readonly LocalStorage $storage)
     {
-        $this->setRootPath($config->getRootPath());
+        $this->setRootPath($storage->getRootPath());
     }
 
-    /**
-     * @inheritDoc
-     * @throws ExceptionInterface
-     */
-    public function open(string $path, ?string $mode = self::OPEN_MODE_MAP[self::OPEN_MODE_READ]): File
-    {
-        $file = $this->createFileObject($path);
 
-        if (false === $this->fileExists($file))
+    public function open(ResourceInterface $file, ?string $mode = self::OPEN_MODE_READ): FileInterface
+    {
+        if (false === $this->isExists($file))
         {
             ExceptionHelper::create(new FileNotFoundException())
                 ->message('Can\'t open file at path [%s]. File does not exist on storage [%s]', $file->getPath(), $file->getStorageClass())
@@ -64,7 +64,7 @@ class FileSystemStorage extends AbstractStorage implements FileSystemStorageInte
 
         switch ($mode) {
             case self::OPEN_MODE_READ:
-                if (false === $this->isFileReadable($file)) {
+                if (false === $this->isReadable($file)) {
                     ExceptionHelper::create(new FileNotReadableException())
                         ->message('Not readable file at path [%s] on storage [%s]', $file->getPath(), $file->getStorageClass())
                         ->throw();
@@ -73,7 +73,7 @@ class FileSystemStorage extends AbstractStorage implements FileSystemStorageInte
             case self::OPEN_MODE_WRITE:
             case self::OPEN_MODE_RE_WRITE:
             case self::OPEN_MODE_APPEND:
-                if (false === $this->isFileWritable($file)) {
+                if (false === $this->isWritable($file)) {
                     ExceptionHelper::create(new FileNotWritableException())
                         ->message('Not writable file at path [%s] on storage [%s]', $file->getPath(), $file->getStorageClass())
                         ->throw();
@@ -81,9 +81,9 @@ class FileSystemStorage extends AbstractStorage implements FileSystemStorageInte
                 break;
         }
 
-        $fullFilePath = $this->getFullFilePath($file);
+        $fullFilePath = $this->getFullPath($file);
 
-        $stream = fopen($fullFilePath, $mode);
+        $stream = fopen($fullFilePath, self::OPEN_MODE_MAP[$mode]);
 
         return $file->setStream($stream);
     }
@@ -95,7 +95,7 @@ class FileSystemStorage extends AbstractStorage implements FileSystemStorageInte
     {
         if (!$file->isOpen())
         {
-            $file = $this->open($file->getPath(), self::OPEN_MODE_READ);
+            $file = $this->open($file, self::OPEN_MODE_READ);
         }
         $stream = $file->getStream();
         return !feof($stream) ? fread($stream, $chunkSize) : false;
@@ -129,35 +129,39 @@ class FileSystemStorage extends AbstractStorage implements FileSystemStorageInte
     /**
      * @inheritDoc
      */
-    public function close(ResourceInterface $resource): File
+    public function close(ResourceInterface $resource): ResourceInterface
     {
-        // TODO: Implement close() method.
+        $stream = $resource->getStream();
+        fflush($stream);
+        fclose($stream);
+        $resource->setState(ResourceInterface::STATE_CLOSED_STREAM);
+        return $resource;
     }
 
     /**
      * @inheritDoc
      */
-    public function fileExists(FileInterface $file): bool
+    public function isExists(ResourceInterface $resource): bool
     {
-        $fullFilePath = $this->getFullFilePath($file);
+        $fullFilePath = $this->getFullPath($resource);
         return file_exists($fullFilePath) && is_file($fullFilePath);
     }
 
     /**
      * @inheritDoc
      */
-    public function isFileReadable(FileInterface $file): bool
+    public function isReadable(ResourceInterface $resource): bool
     {
-        $fullFilePath = $this->getFullFilePath($file);
+        $fullFilePath = $this->getFullPath($resource);
         return is_readable($fullFilePath);
     }
 
     /**
      * @inheritDoc
      */
-    public function isFileWritable(FileInterface $file): bool
+    public function isWritable(ResourceInterface $resource): bool
     {
-        $fullFilePath = $this->getFullFilePath($file);
+        $fullFilePath = $this->getFullPath($resource);
         return is_writable($fullFilePath);
     }
 
@@ -190,39 +194,44 @@ class FileSystemStorage extends AbstractStorage implements FileSystemStorageInte
     }
 
     /**
-     * @param File $file
+     * @param ResourceInterface $resource
      * @return string
      */
-    public function getFullFilePath(File $file): string
+    public function getFullPath(ResourceInterface $resource): string
     {
-        $path = sprintf('%s/%s', $this->getRootPath(), $file->getPath());
+        $path = sprintf('%s/%s', $this->getRootPath(), $resource->getPath());
 
         return Path::normalize($path);
     }
 
     /**
      * @param string $path
-     * @return File
+     * @return FileInterface
      * @throws ExceptionInterface
      */
-    private function createFileObject(string $path): File
+    public function initResource(string $path): FileInterface
     {
         return
             (new File())
                 ->setPath($path)
-                ->setStorageClass(self::class);
+                ->setStorageClass($this->storage::class);
     }
 
+    /**
+     * @param FileInterface $file
+     * @return FileInterface
+     * @throws ExceptionInterface
+     */
     public function refreshFileInfo(FileInterface $file): FileInterface
     {
-        if (false === $this->fileExists($file))
+        if (false === $this->isExists($file))
         {
             ExceptionHelper::create(new FileNotFoundException())
                 ->message('File at path [%s] does not exist on storage [%s]', $file->getPath(), $file->getStorageClass())
                 ->throw()
             ;
         }
-        $filePath = $this->getFullFilePath($file);
+        $filePath = $this->getFullPath($file);
         $fileMimeType = $this->detectFileMimeType($file);
         $fileSize = filesize($filePath);
 
@@ -241,12 +250,20 @@ class FileSystemStorage extends AbstractStorage implements FileSystemStorageInte
     }
 
     /**
+     * @inheritDoc
+     */
+    public function remove(ResourceInterface $resource): ResourceInterface
+    {
+        // TODO: Implement remove() method.
+    }
+
+    /**
      * @param FileInterface $file
      * @return string|null
      */
     private function detectFileMimeType(FileInterface $file): ?string
     {
-        $fullFilePath = $this->getFullFilePath($file);
+        $fullFilePath = $this->getFullPath($file);
         return \mime_content_type($fullFilePath) ?? null;
     }
 }

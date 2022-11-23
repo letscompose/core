@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem;
+namespace LetsCompose\Core\Storage\FileSystem\Resource;
 
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
 

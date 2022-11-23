@@ -23,7 +23,7 @@ interface ResourceInterface
     /**
      * @var string
      */
-    const TYPE_DIRECTORY = 'file';
+    const TYPE_DIRECTORY = 'directory';
 
     /**
      * @var string

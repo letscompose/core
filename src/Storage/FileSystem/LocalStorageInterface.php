@@ -15,11 +15,7 @@ use LetsCompose\Core\Storage\StorageInterface;
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface FileSystemStorageInterface extends StorageInterface
+interface LocalStorageInterface extends StorageInterface
 {
-    /**
-     * @param FileInterface $file
-     * @return bool
-     */
-    public function fileExists(FileInterface $file): bool;
+
 }

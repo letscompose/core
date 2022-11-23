@@ -38,7 +38,7 @@ abstract class AbstractResource implements ResourceInterface
     /**
      * @var string
      */
-    protected string $state;
+    protected string $state = self::STATE_CLOSED_STREAM;
 
     /**
      * @var mixed
@@ -52,9 +52,9 @@ abstract class AbstractResource implements ResourceInterface
 
     /**
      * @param string $name
-     * @return AbstractResource
+     * @return $this
      */
-    public function setName(string $name): ResourceInterface
+    public function setName(string $name): self
     {
         $this->name = $name;
         return $this;
@@ -70,9 +70,9 @@ abstract class AbstractResource implements ResourceInterface
 
     /**
      * @param string $path
-     * @return AbstractResource
+     * @return $this
      */
-    public function setPath(string $path): ResourceInterface
+    public function setPath(string $path): self
     {
         $this->path = $path;
         return $this;
@@ -114,10 +114,10 @@ abstract class AbstractResource implements ResourceInterface
 
     /**
      * @param string $state
-     * @return ResourceInterface
+     * @return $this
      * @throws ExceptionInterface
      */
-    public function setState(string $state): ResourceInterface
+    public function setState(string $state): self
     {
         if (false === \in_array($state, self::STATE_MAP))
         {
@@ -140,9 +140,9 @@ abstract class AbstractResource implements ResourceInterface
 
     /**
      * @param mixed $stream
-     * @return AbstractResource
+     * @return $this
      */
-    public function setStream(mixed $stream): ResourceInterface
+    public function setStream(mixed $stream): self
     {
         $this->stream = $stream;
         return $this;
@@ -161,7 +161,7 @@ abstract class AbstractResource implements ResourceInterface
      */
     public function isOpen(): bool
     {
-        return self::STATE_CLOSED_STREAM === $this->getState();
+        return self::STATE_OPENED_STREAM === $this->getState();
     }
 
     /**
@@ -174,10 +174,10 @@ abstract class AbstractResource implements ResourceInterface
 
     /**
      * @param string $class
-     * @return AbstractResource
+     * @return $this
      * @throws ExceptionInterface
      */
-    public function setStorageClass(string $class): AbstractResource
+    public function setStorageClass(string $class): self
     {
         if (false === class_exists($class))
         {

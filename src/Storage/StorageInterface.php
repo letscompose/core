@@ -39,11 +39,11 @@ interface StorageInterface
     public const OPEN_MODE_APPEND = 'append';
 
     /**
-     * @param string $path
+     * @param ResourceInterface $resource
      * @param string|null $mode
      * @return ResourceInterface
      */
-    public function open(string $path, ?string $mode = null): ResourceInterface;
+    public function open(ResourceInterface $resource, ?string $mode = null): ResourceInterface;
 
     /**
      * @param ResourceInterface $resource
@@ -65,6 +65,30 @@ interface StorageInterface
     public function close(ResourceInterface $resource): ResourceInterface;
 
     /**
+     * @param ResourceInterface $resource
+     * @return ResourceInterface
+     */
+    public function remove(ResourceInterface $resource): ResourceInterface;
+
+    /**
+     * @param ResourceInterface $resource
+     * @return bool
+     */
+    public function isExists(ResourceInterface $resource): bool;
+
+    /**
+     * @param ResourceInterface $resource
+     * @return bool
+     */
+    public function isReadable(ResourceInterface $resource): bool;
+
+    /**
+     * @param ResourceInterface $resource
+     * @return bool
+     */
+    public function isWritable(ResourceInterface $resource): bool;
+
+    /**
      * @param string $path
      * @return StorageInterface
      */
@@ -74,6 +98,12 @@ interface StorageInterface
      * @return string
      */
     public function getRootPath(): string;
+
+    /**
+     * @param ResourceInterface $resource
+     * @return string
+     */
+    public function getFullPath(ResourceInterface $resource): string;
 
     /**
      * @param ConfigInterface $config
@@ -86,5 +116,9 @@ interface StorageInterface
      */
     public function getConfig(): ConfigInterface;
 
-
+    /**
+     * @param ResourceInterface $resource
+     * @return bool
+     */
+    public function isResourceSupported(ResourceInterface $resource): bool;
 }
