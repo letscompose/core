@@ -15,17 +15,17 @@ use LetsCompose\Core\Storage\Resource\ResourceInterface;
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface ConfigInterface
+interface ActionConfigInterface
 {
-    public function setStorageClass(string $storageClass): ConfigInterface;
+  public function setName(string $string): self;
 
-    public function getStorageClass(): string;
+  public function getName(): self;
 
-    public function setRootPath(string $rootPath): ConfigInterface;
+  public function setNameSpace(string $string): self;
+  
+  public function getNameSpace(): string;
 
-    public function getRootPath(): string;
+  public function setClass(string $string): string;
 
-    public function setResources(array $resources): ConfigInterface;
-
-    public function getStorageResources(): array;
+  public function getClass(): self;
 }

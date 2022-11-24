@@ -8,14 +8,18 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem;
-
-use LetsCompose\Core\Storage\Config\ConfigInterface;
+namespace LetsCompose\Core\Storage\Config;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface FileSystemStorageConfigInterface extends ConfigInterface
+interface ResourceConfigInterface
 {
+    public function setClass(string $class): self;
 
+    public function getClass(): string;
+
+    public function setActionNameSpace(?string $actionNameSpace): self;
+
+    public function getActionNameSpace(): ?string;
 }

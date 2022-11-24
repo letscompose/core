@@ -18,9 +18,6 @@ use LetsCompose\Core\Storage\Resource\ResourceInterface;
  */
 abstract class AbstractStorage implements StorageInterface
 {
-    /**
-     * @var string
-     */
     protected string $rootPath;
 
     /**
@@ -28,76 +25,33 @@ abstract class AbstractStorage implements StorageInterface
      */
     protected array $supportedResources = [];
 
-    /**
-     * @var ConfigInterface
-     */
     protected ConfigInterface $config;
 
-    /**
-     * @inheritDoc
-     */
     public function getRootPath(): string
     {
         return $this->rootPath;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function setRootPath(string $path): StorageInterface
     {
         $this->rootPath = $path;
         return $this;
     }
 
-    /**
-     * @param ConfigInterface $config
-     * @return AbstractStorage
-     */
     public function setConfig(ConfigInterface $config): StorageInterface
     {
         $this->config = $config;
         return $this;
     }
 
-    /**
-     * @return ConfigInterface
-     */
     public function getConfig(): ConfigInterface
     {
         return $this->config;
     }
 
-    /**
-     * @param ResourceInterface $resource
-     * @return bool
-     */
     public function isResourceSupported(ResourceInterface $resource): bool
     {
         return true === \in_array($resource::class, $this->supportedResources, true);
     }
-
-
-//
-//    /**
-//     * @inheritDoc
-//     */
-//    abstract public function open(string $path, ?string $mode = null): ResourceInterface;
-//
-//    /**
-//     * @inheritDoc
-//     */
-//    abstract public function read(ResourceInterface $resource): mixed;
-//
-//    /**
-//     * @inheritDoc
-//     */
-//    abstract public function write(ResourceInterface $resource, mixed $data): mixed;
-//
-//    /**
-//     * @inheritDoc
-//     */
-//    abstract public function close(ResourceInterface $resource): ResourceInterface;
-
 
 }

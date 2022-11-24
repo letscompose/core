@@ -10,56 +10,54 @@
 
 namespace LetsCompose\Core\Storage\FileSystem;
 
+use LetsCompose\Core\Storage\Config\ConfigInterface;
+use LetsCompose\Core\Storage\Config\ResourceConfig;
+use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
+
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class FileSystemStorageStorageConfig implements FileSystemStorageConfigInterface
+class LocalStorageConfig implements LocalStorageConfigInterface
 {
-    /**
-     * @var string
-     */
+
     private string $storageClass = LocalStorage::class;
 
-    /**
-     * @var string
-     */
     private string $rootPath;
 
-    /**
-     * @param string $storageClass
-     * @return $this
-     */
     public function setStorageClass(string $storageClass): self
     {
         $this->storageClass = $storageClass;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getStorageClass(): string
     {
         return $this->storageClass;
     }
 
-    /**
-     * @param string $rootPath
-     * @return FileSystemStorageStorageConfig
-     */
     public function setRootPath(string $rootPath): self
     {
         $this->rootPath = $rootPath;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getRootPath(): string
     {
         return $this->rootPath;
     }
 
+    public function setResources(array $resources): ConfigInterface
+    {
+        // TODO: Implement setResources() method.
+    }
 
+    /**
+     * @return ResourceConfig[]
+     */
+    public function getStorageResources(): array
+    {
+        return [
+            new ResourceConfig(FileInterface::class)
+        ];
+    }
 }

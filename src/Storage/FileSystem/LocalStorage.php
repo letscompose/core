@@ -33,15 +33,11 @@ class LocalStorage extends AbstractStorage implements LocalStorageInterface
      */
     private array $resourceAdapters = [];
 
-    const action = [
-            'read' => 'test'
-            ];
-
     /**
-     * @param FileSystemStorageStorageConfig $config
+     * @param LocalStorageConfig $config
      * @throws ExceptionInterface
      */
-    public function __construct(FileSystemStorageStorageConfig $config)
+    public function __construct(LocalStorageConfig $config)
     {
         $this->setRootPath($config->getRootPath());
         $this->resourceAdapters = [
