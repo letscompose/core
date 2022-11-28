@@ -8,27 +8,18 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\Config;
+namespace LetsCompose\Core\Storage\Config\Adapter;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
-use LetsCompose\Core\Exception\InvalidArgumentException;
+use LetsCompose\Core\Storage\Config\AbstractConfig;
+use LetsCompose\Core\Storage\Config\Resource\ResourceConfigInterface;
+use LetsCompose\Core\Storage\Exception\ConfigAlreadyDefinedException;
 use LetsCompose\Core\Tools\ExceptionHelper;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-abstract class AbstractConfig implements ConfigInterface
+class AdapterConfig extends AbstractAdapterConfig
 {
-    protected string $class = '';
 
-    public function setClass(string $class): self
-    {
-        $this->class = $class;
-        return $this;
-    }
-
-    public function getClass(): string
-    {
-        return $this->class;
-    }
 }

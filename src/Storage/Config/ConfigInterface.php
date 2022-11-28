@@ -10,6 +10,7 @@
 
 namespace LetsCompose\Core\Storage\Config;
 
+use LetsCompose\Core\Storage\Adapter\AdapterInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
 
 /**
@@ -17,15 +18,8 @@ use LetsCompose\Core\Storage\Resource\ResourceInterface;
  */
 interface ConfigInterface
 {
-    public function setStorageClass(string $storageClass): ConfigInterface;
+    public function setClass(string $class): self;
 
-    public function getStorageClass(): string;
+    public function getClass(): string;
 
-    public function setRootPath(string $rootPath): ConfigInterface;
-
-    public function getRootPath(): string;
-
-    public function setResources(array $resources): ConfigInterface;
-
-    public function getStorageResources(): array;
 }

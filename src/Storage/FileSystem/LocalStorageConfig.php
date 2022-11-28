@@ -10,54 +10,27 @@
 
 namespace LetsCompose\Core\Storage\FileSystem;
 
-use LetsCompose\Core\Storage\Config\ConfigInterface;
-use LetsCompose\Core\Storage\Config\ResourceConfig;
-use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
+use LetsCompose\Core\Storage\Config\Adapter\AdapterConfig;
+use LetsCompose\Core\Storage\Config\Resource\ResourceConfig;
+use LetsCompose\Core\Storage\Config\Storage\AbstractStorageConfig;
+use LetsCompose\Core\Storage\FileSystem\Adapter\FileStorageAdapterTest;
+use LetsCompose\Core\Storage\FileSystem\Resource\File;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class LocalStorageConfig implements LocalStorageConfigInterface
+class LocalStorageConfig extends AbstractStorageConfig implements LocalStorageConfigInterface
 {
-
-    private string $storageClass = LocalStorage::class;
-
-    private string $rootPath;
-
-    public function setStorageClass(string $storageClass): self
+    public function __construct()
     {
-        $this->storageClass = $storageClass;
-        return $this;
-    }
+        $this->setClass(LocalStorageTest::class);
 
-    public function getStorageClass(): string
-    {
-        return $this->storageClass;
-    }
+        $adapterConfig = new AdapterConfig();
+        $adapterConfig->setClass(FileStorageAdapterTest::class);
 
-    public function setRootPath(string $rootPath): self
-    {
-        $this->rootPath = $rootPath;
-        return $this;
-    }
+        $resourceConfig = new ResourceConfig(File::class);
+        $adapterConfig->addResourceConfig($resourceConfig);
 
-    public function getRootPath(): string
-    {
-        return $this->rootPath;
-    }
-
-    public function setResources(array $resources): ConfigInterface
-    {
-        // TODO: Implement setResources() method.
-    }
-
-    /**
-     * @return ResourceConfig[]
-     */
-    public function getStorageResources(): array
-    {
-        return [
-            new ResourceConfig(FileInterface::class)
-        ];
+        $this->addAdapterConfig($adapterConfig);
     }
 }

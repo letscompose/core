@@ -10,48 +10,23 @@
 
 namespace LetsCompose\Core\Storage;
 
-use LetsCompose\Core\Storage\Config\ConfigInterface;
-use LetsCompose\Core\Storage\Resource\ResourceInterface;
+
+use LetsCompose\Core\Storage\Adapter\AdapterInterface;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface StorageInterface
+interface StorageInterface extends ResourceStorageInterface
 {
+    /**
+     * @param AdapterInterface[] $resourceAdapters
+     */
+    public function setResourceAdapters(array $resourceAdapters): self;
 
-    public const OPEN_MODE_READ = 'read';
+    /**
+     * @return AdapterInterface[]
+     */
+    public function getResourceAdapters(): array;
 
-    public const OPEN_MODE_WRITE = 'write';
-
-    public const OPEN_MODE_RE_WRITE = 're-write';
-
-    public const OPEN_MODE_APPEND = 'append';
-
-    public function open(ResourceInterface $resource, ?string $mode = null): ResourceInterface;
-
-    public function read(ResourceInterface $resource): mixed;
-
-    public function write(ResourceInterface $resource, mixed $data): mixed;
-
-    public function close(ResourceInterface $resource): ResourceInterface;
-
-    public function remove(ResourceInterface $resource): ResourceInterface;
-
-    public function isExists(ResourceInterface $resource): bool;
-
-    public function isReadable(ResourceInterface $resource): bool;
-
-    public function isWritable(ResourceInterface $resource): bool;
-
-    public function setRootPath(string $path): StorageInterface;
-
-    public function getRootPath(): string;
-
-    public function getFullPath(ResourceInterface $resource): string;
-
-    public function setConfig(ConfigInterface $config): StorageInterface;
-
-    public function getConfig(): ConfigInterface;
-
-    public function isResourceSupported(ResourceInterface $resource): bool;
+    public function getResourceAdapter(string $resourceClass): AdapterInterface;
 }

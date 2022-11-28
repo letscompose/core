@@ -13,7 +13,9 @@ namespace LetsCompose\Core\Storage\FileSystem;
 use Generator;
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
-use LetsCompose\Core\Storage\AbstractStorage;
+use LetsCompose\Core\Storage\AbstractResourceStorage;
+use LetsCompose\Core\Storage\Exception\ActionNotFoundException;
+use LetsCompose\Core\Storage\Exception\ActionNotImplementedException;
 use LetsCompose\Core\Storage\Exception\UnsupportedStorageResourceException;
 use LetsCompose\Core\Storage\FileSystem\Adapter\FileStorageAdapter;
 use LetsCompose\Core\Storage\FileSystem\Resource\File;
@@ -26,7 +28,7 @@ use LetsCompose\Core\Tools\Storage\Path;
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class LocalStorage extends AbstractStorage implements LocalStorageInterface
+class LocalStorage extends AbstractResourceStorage implements LocalResourceStorageInterface
 {
     /**
      * @var array
@@ -59,70 +61,48 @@ class LocalStorage extends AbstractStorage implements LocalStorageInterface
         return $this->resourceAdapters[$resource::class]->open($resource, $mode);
     }
 
-
     /**
-     * @inheritDoc
+     * @param ResourceInterface $resource
+     * @param int $chunkSize
+     * @return mixed
      * @throws ExceptionInterface
+     * @throws ActionNotFoundException
+     * @throws ActionNotImplementedException
      */
     public function read(ResourceInterface $resource, int $chunkSize = 1024): mixed
     {
-        $this->exceptionIfResourceNotSupported($resource);
-        return $this->resourceAdapters[$resource::class]->read($resource, $chunkSize);
+        return $this->execute(__FUNCTION__, $resource, $chunkSize);
     }
 
-    /**
-     * @param FileInterface $file
-     * @return Generator
-     * @throws ExceptionInterface
-     */
     public function readLine(FileInterface $file): Generator
     {
         $this->exceptionIfResourceNotSupported($file);
         return $this->resourceAdapters[$file::class]->readLine($file);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function remove(ResourceInterface $resource): ResourceInterface
     {
         // TODO: Implement remove() method.
     }
 
-    /**
-     * @inheritDoc
-     * @throws ExceptionInterface
-     */
     public function close(ResourceInterface $resource): ResourceInterface
     {
         $this->exceptionIfResourceNotSupported($resource);
         return $this->resourceAdapters[$resource::class]->close($resource);
     }
 
-    /**
-     * @inheritDoc
-     * @throws ExceptionInterface
-     */
     public function isExists(ResourceInterface $resource): bool
     {
         $this->exceptionIfResourceNotSupported($resource);
         return $this->resourceAdapters[$resource::class]->isExists($resource);
     }
 
-    /**
-     * @inheritDoc
-     * @throws ExceptionInterface
-     */
     public function isReadable(ResourceInterface $resource): bool
     {
         $this->exceptionIfResourceNotSupported($resource);
         return $this->resourceAdapters[$resource::class]->isReadable($resource);
     }
 
-    /**
-     * @inheritDoc
-     * @throws ExceptionInterface
-     */
     public function isWritable(ResourceInterface $resource): bool
     {
         $this->exceptionIfResourceNotSupported($resource);
@@ -130,11 +110,6 @@ class LocalStorage extends AbstractStorage implements LocalStorageInterface
     }
 
 
-    /**
-     * @param string $rootPath
-     * @return $this
-     * @throws ExceptionInterface
-     */
     public function setRootPath(string $rootPath): self
     {
         if (false === Path::isAbsolute($rootPath))
@@ -157,40 +132,22 @@ class LocalStorage extends AbstractStorage implements LocalStorageInterface
         return parent::setRootPath($realPath);
     }
 
-    /**
-     * @param ResourceInterface $resource
-     * @return string
-     * @throws ExceptionInterface
-     */
     public function getFullPath(ResourceInterface $resource): string
     {
         $this->exceptionIfResourceNotSupported($resource);
         return $this->resourceAdapters[$resource::class]->getFullPath($resource);
     }
 
-    /**
-     * @param string $path
-     * @return FileInterface
-     * @throws ExceptionInterface
-     */
     public function createFileResource(string $path): FileInterface
     {
         return $this->resourceAdapters[File::class]->initResource($path);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function write(ResourceInterface $resource, mixed $data): mixed
     {
-        // TODO: Implement write() method.
+        return $this->execute($resource, __FUNCTION__);
     }
 
-    /**
-     * @param ResourceInterface $resource
-     * @return void
-     * @throws ExceptionInterface
-     */
     private function exceptionIfResourceNotSupported(ResourceInterface $resource)
     {
         if (false === $this->isResourceSupported($resource))

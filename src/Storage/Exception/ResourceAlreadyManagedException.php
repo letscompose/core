@@ -8,14 +8,14 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem;
+namespace LetsCompose\Core\Storage\Exception;
 
-use LetsCompose\Core\Storage\StorageInterface;
+use LetsCompose\Core\Exception\Exception;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface LocalStorageInterface extends StorageInterface
+class ResourceAlreadyManagedException extends Exception
 {
 
 }

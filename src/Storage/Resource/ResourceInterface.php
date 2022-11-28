@@ -15,10 +15,6 @@ namespace LetsCompose\Core\Storage\Resource;
  */
 interface ResourceInterface
 {
-    const TYPE_FILE = 'file';
-
-    const TYPE_DIRECTORY = 'directory';
-
     const STATE_OPENED_STREAM = 'stream-opened';
 
     const STATE_CLOSED_STREAM = 'stream-closed';
@@ -28,13 +24,6 @@ interface ResourceInterface
         self::STATE_CLOSED_STREAM,
     ];
 
-    /**
-     * @var string[]
-     */
-    const TYPE_MAP = [
-        self::TYPE_FILE,
-        self::TYPE_DIRECTORY,
-    ];
 
     public function setStorageClass(string $class): ResourceInterface;
 
@@ -51,10 +40,6 @@ interface ResourceInterface
     public function setStream(mixed $stream): ResourceInterface;
 
     public function getStream(): mixed;
-
-    public function setType(string $type): ResourceInterface;
-
-    public function getType(): string;
 
     public function setState(string $state): ResourceInterface;
 

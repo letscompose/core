@@ -8,15 +8,18 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\Factory;
+namespace LetsCompose\Core\Storage\Adapter;
 
 use LetsCompose\Core\Storage\Actions\ActionInterface;
-use LetsCompose\Core\Storage\Config\ActionConfigInterface;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface ActionFactoryInterface
+interface CompositeAdapterInterface extends AdapterInterface
 {
-    public static function create(ActionConfigInterface $config): ActionInterface;
+    public function hasAction(string $name): bool;
+
+    public function getAction(string $name): ActionInterface;
+
+    public function addAction(ActionInterface $action);
 }

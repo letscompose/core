@@ -8,14 +8,14 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem;
+namespace LetsCompose\Core\Storage\Actions;
 
-use LetsCompose\Core\Storage\Config\Storage\StorageConfigInterface;
+use LetsCompose\Core\Storage\Config\ActionConfigInterface;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface LocalStorageConfigInterface extends StorageConfigInterface
+interface ActionHandlerInterface
 {
-
+    public function create(ActionConfigInterface $actionConfig): ActionInterface;
 }

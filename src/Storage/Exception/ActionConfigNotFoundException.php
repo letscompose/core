@@ -8,14 +8,14 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem;
+namespace LetsCompose\Core\Storage\Exception;
 
-use LetsCompose\Core\Storage\Config\Storage\StorageConfigInterface;
+use LetsCompose\Core\Exception\Exception;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface LocalStorageConfigInterface extends StorageConfigInterface
+class ActionConfigNotFoundException extends Exception
 {
 
 }

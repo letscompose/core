@@ -8,14 +8,15 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem;
+namespace LetsCompose\Core\Storage\Factory;
 
-use LetsCompose\Core\Storage\Config\Storage\StorageConfigInterface;
+use LetsCompose\Core\Storage\Adapter\AdapterInterface;
+use LetsCompose\Core\Storage\Config\Adapter\AdapterConfigInterface;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface LocalStorageConfigInterface extends StorageConfigInterface
+interface AdapterFactoryInterface
 {
-
+    public static function create(AdapterConfigInterface $config): AdapterInterface;
 }

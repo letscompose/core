@@ -8,18 +8,18 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\Actions;
-
-use LetsCompose\Core\Storage\Config\ActionConfigInterface;
+namespace LetsCompose\Core\Storage\Config;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface ActionsListInterface
+interface ActionsConfigListInterface
 {
     public function addAction(ActionConfigInterface $action): self;
 
     public function getAction(string $name): ActionConfigInterface;
 
     public function hasAction(string $name): bool;
+
+    public function hasActions(): bool;
 }

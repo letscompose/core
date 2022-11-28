@@ -8,14 +8,13 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem;
+namespace LetsCompose\Core\Exception;
 
-use LetsCompose\Core\Storage\Config\Storage\StorageConfigInterface;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface LocalStorageConfigInterface extends StorageConfigInterface
+class InterfaceNotAcceptedException extends Exception
 {
 
 }

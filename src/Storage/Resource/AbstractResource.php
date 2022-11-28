@@ -23,8 +23,6 @@ abstract class AbstractResource implements ResourceInterface
 
     protected string $path;
 
-    protected string $type;
-
     protected string $state = self::STATE_CLOSED_STREAM;
 
     /**
@@ -54,24 +52,6 @@ abstract class AbstractResource implements ResourceInterface
     public function getPath(): string
     {
         return $this->path;
-    }
-
-    public function setType(string $type): ResourceInterface
-    {
-        if (false === \in_array($type, self::TYPE_MAP))
-        {
-            ExceptionHelper
-                ::create(new InvalidArgumentException())
-                ->message('Unknown resource type, type can be only one of theses [%s]', implode(',', self::TYPE_MAP))
-                ->throw();
-        }
-        $this->type = $type;
-        return $this;
-    }
-
-    public function getType(): string
-    {
-        return $this->type;
     }
 
     /**

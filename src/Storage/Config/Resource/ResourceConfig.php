@@ -8,34 +8,25 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\Config;
+namespace LetsCompose\Core\Storage\Config\Resource;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
+use LetsCompose\Core\Storage\Config\AbstractConfig;
 use LetsCompose\Core\Tools\ExceptionHelper;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class ResourceConfig implements ResourceConfigInterface
+class ResourceConfig extends AbstractConfig implements ResourceConfigInterface
 {
     public function __construct
     (
         protected string  $class,
-        protected ?string $actionNameSpace = null
+        protected ?string $actionNameSpace = null,
+        protected ?string $storageClass = null
     )
     {
-    }
-
-    public function setClass(string $class): self
-    {
-        $this->class = $class;
-        return $this;
-    }
-
-    public function getClass(): string
-    {
-        return $this->actionNameSpace;
     }
 
     public function setActionNameSpace(?string $actionNameSpace): ResourceConfigInterface
@@ -48,4 +39,17 @@ class ResourceConfig implements ResourceConfigInterface
     {
         return $this->actionNameSpace;
     }
+
+    public function setStorageClass(string $class): ResourceConfigInterface
+    {
+        $this->storageClass = $class;
+        return $this;
+    }
+
+    public function getStorageClass(): string
+    {
+        return $this->storageClass;
+    }
+
+
 }

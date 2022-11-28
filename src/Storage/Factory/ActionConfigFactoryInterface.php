@@ -10,14 +10,13 @@
 
 namespace LetsCompose\Core\Storage\Factory;
 
-use LetsCompose\Core\Storage\Config\ConfigInterface;
-use LetsCompose\Core\Storage\Config\Storage\StorageConfigInterface;
-use LetsCompose\Core\Storage\ResourceStorageInterface;
+use LetsCompose\Core\Storage\Config\ActionsConfigListInterface;
+use LetsCompose\Core\Storage\Config\Resource\ResourceConfigInterface;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface StorageFactoryInterface
+interface ActionConfigFactoryInterface
 {
-    public static function create(StorageConfigInterface $config): ResourceStorageInterface;
+    public static function create(ResourceConfigInterface $config): ActionsConfigListInterface;
 }

@@ -8,14 +8,17 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem;
+namespace LetsCompose\Core\Object;
 
-use LetsCompose\Core\Storage\Config\Storage\StorageConfigInterface;
-
-/**
- * @author Igor ZLOBINE <izlobine@gmail.com>
- */
-interface LocalStorageConfigInterface extends StorageConfigInterface
+class Storage
 {
+    private \SplObjectStorage $list;
+
+    public static function create(): StorageInterface
+    {
+        return new self();
+    }
+
+
 
 }

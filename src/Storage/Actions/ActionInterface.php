@@ -10,9 +10,12 @@
 
 namespace LetsCompose\Core\Storage\Actions;
 
+use LetsCompose\Core\Storage\Resource\ResourceInterface;
+
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
 interface ActionInterface
 {
+    public function execute(ResourceInterface $resource, ...$params): mixed;
 }

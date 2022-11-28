@@ -20,25 +20,13 @@ use LetsCompose\Core\Tools\ExceptionHelper;
  */
 class File extends AbstractResource implements FileInterface
 {
-    /**
-     * @var string
-     */
-    protected string $type = self::TYPE_FILE;
 
-    /**
-     * @var ?string
-     */
     protected ?string $mimeType = null;
 
-    /**
-     * @var int
-     */
     protected int $size = 0;
 
-
     /**
-     * @param mixed $stream
-     * @return $this
+     * @throws InvalidArgumentException
      * @throws ExceptionInterface
      */
     public function setStream(mixed $stream): self
@@ -57,45 +45,28 @@ class File extends AbstractResource implements FileInterface
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function getExtension(): ?string
     {
         return pathinfo($this->getPath(), PATHINFO_EXTENSION);
     }
 
-    /**
-     * @param string|null $mimeType
-     * @return File
-     */
     public function setMimeType(?string $mimeType): File
     {
         $this->mimeType = $mimeType;
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     public function getMimeType(): ?string
     {
         return $this->mimeType;
     }
 
-    /**
-     * @param int $size
-     * @return File
-     */
     public function setSize(int $size): File
     {
         $this->size = $size;
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getSize(): int
     {
         return $this->size;
