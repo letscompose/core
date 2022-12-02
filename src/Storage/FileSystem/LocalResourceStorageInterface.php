@@ -10,6 +10,7 @@
 
 namespace LetsCompose\Core\Storage\FileSystem;
 
+use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
 use LetsCompose\Core\Storage\ResourceStorageInterface;
 
 /**
@@ -17,5 +18,5 @@ use LetsCompose\Core\Storage\ResourceStorageInterface;
  */
 interface LocalResourceStorageInterface extends ResourceStorageInterface
 {
-
+    public function initFile(string $path): FileInterface;
 }

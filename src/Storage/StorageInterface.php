@@ -18,10 +18,15 @@ use LetsCompose\Core\Storage\Adapter\AdapterInterface;
  */
 interface StorageInterface extends ResourceStorageInterface
 {
+
+    public function __construct(string $rootPath);
+
     /**
      * @param AdapterInterface[] $resourceAdapters
      */
     public function setResourceAdapters(array $resourceAdapters): self;
+
+    public function addResourceAdapter(AdapterInterface $adapter);
 
     /**
      * @return AdapterInterface[]

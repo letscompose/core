@@ -10,74 +10,67 @@
 
 namespace LetsCompose\Core\Storage\FileSystem;
 
-use Generator;
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
-use LetsCompose\Core\Storage\AbstractResourceStorage;
-use LetsCompose\Core\Storage\Exception\ActionNotFoundException;
-use LetsCompose\Core\Storage\Exception\ActionNotImplementedException;
-use LetsCompose\Core\Storage\Exception\UnsupportedStorageResourceException;
-use LetsCompose\Core\Storage\FileSystem\Adapter\FileStorageAdapter;
+use LetsCompose\Core\Storage\AbstractStorage;
+use LetsCompose\Core\Storage\Exception\UnknownStorageResourceClassException;
+use LetsCompose\Core\Storage\FileSystem\Adapter\FileStorageActionAdapter;
+use LetsCompose\Core\Storage\FileSystem\Adapter\FileStorageAdapterFirst;
 use LetsCompose\Core\Storage\FileSystem\Resource\File;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
 use LetsCompose\Core\Storage\Exception\PathNotFoundException;
+use LetsCompose\Core\Storage\ResourceStorageInterface;
 use LetsCompose\Core\Tools\ExceptionHelper;
 use LetsCompose\Core\Tools\Storage\Path;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class LocalStorage extends AbstractResourceStorage implements LocalResourceStorageInterface
+class LocalStorage extends AbstractStorage implements LocalResourceStorageInterface
 {
     /**
-     * @var array
-     */
-    private array $resourceAdapters = [];
-
-    /**
-     * @param LocalStorageConfig $config
+     * @throws UnknownStorageResourceClassException
      * @throws ExceptionInterface
      */
-    public function __construct(LocalStorageConfig $config)
+    public function __construct(string $rootPath)
     {
-        $this->setRootPath($config->getRootPath());
-        $this->resourceAdapters = [
-            File::class => new FileStorageAdapter($this)
+        $this->setRootPath($rootPath);
+        $adapters = [
+            new FileStorageActionAdapter($this)
         ];
-
-        $this->supportedResources = array_keys($this->resourceAdapters);
+        $this->setResourceAdapters($adapters);
     }
 
     /**
-     * @param ResourceInterface $resource
-     * @param string|null $mode
-     * @return FileInterface
+     * @throws UnknownStorageResourceClassException
      * @throws ExceptionInterface
      */
-    public function open(ResourceInterface $resource, ?string $mode = self::OPEN_MODE_READ): FileInterface
+    public function initFile(string $path): FileInterface
     {
-        $this->exceptionIfResourceNotSupported($resource);
-        return $this->resourceAdapters[$resource::class]->open($resource, $mode);
+        $file = parent::initResource(File::class);
+        $file->setPath($path);
+        return $file;
     }
 
-    /**
-     * @param ResourceInterface $resource
-     * @param int $chunkSize
-     * @return mixed
-     * @throws ExceptionInterface
-     * @throws ActionNotFoundException
-     * @throws ActionNotImplementedException
-     */
-    public function read(ResourceInterface $resource, int $chunkSize = 1024): mixed
+    public function open(ResourceInterface $resource, ?string $mode = null): ResourceInterface
     {
-        return $this->execute(__FUNCTION__, $resource, $chunkSize);
+        // TODO: Implement open() method.
     }
 
-    public function readLine(FileInterface $file): Generator
+    public function read(ResourceInterface $resource): mixed
     {
-        $this->exceptionIfResourceNotSupported($file);
-        return $this->resourceAdapters[$file::class]->readLine($file);
+        // TODO: Implement read() method.
+    }
+
+    public function write(ResourceInterface $resource, mixed $data): mixed
+    {
+        // TODO: Implement write() method.
+    }
+
+    public function close(ResourceInterface $resource): ResourceInterface
+    {
+        // TODO: Implement close() method.
     }
 
     public function remove(ResourceInterface $resource): ResourceInterface
@@ -85,46 +78,41 @@ class LocalStorage extends AbstractResourceStorage implements LocalResourceStora
         // TODO: Implement remove() method.
     }
 
-    public function close(ResourceInterface $resource): ResourceInterface
-    {
-        $this->exceptionIfResourceNotSupported($resource);
-        return $this->resourceAdapters[$resource::class]->close($resource);
-    }
-
     public function isExists(ResourceInterface $resource): bool
     {
-        $this->exceptionIfResourceNotSupported($resource);
-        return $this->resourceAdapters[$resource::class]->isExists($resource);
+        // TODO: Implement isExists() method.
     }
 
     public function isReadable(ResourceInterface $resource): bool
     {
-        $this->exceptionIfResourceNotSupported($resource);
-        return $this->resourceAdapters[$resource::class]->isReadable($resource);
+        // TODO: Implement isReadable() method.
     }
 
     public function isWritable(ResourceInterface $resource): bool
     {
-        $this->exceptionIfResourceNotSupported($resource);
-        return $this->resourceAdapters[$resource::class]->isWritable($resource);
+        // TODO: Implement isWritable() method.
     }
 
-
-    public function setRootPath(string $rootPath): self
+    public function getFullPath(ResourceInterface $resource): string
     {
-        if (false === Path::isAbsolute($rootPath))
+        // TODO: Implement getFullPath() method.
+    }
+
+    public function setRootPath(string $path): ResourceStorageInterface
+    {
+        if (false === Path::isAbsolute($path))
         {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message('Invalid storage root path [%s]. Path must beginning with "/"', $rootPath)
+                ->message('Invalid storage root path [%s]. Path must beginning with "/"', $path)
                 ->throw()
-                ;
+            ;
         }
 
-        $realPath = realpath($rootPath);
+        $realPath = realpath($path);
         if (false === $realPath)
         {
             ExceptionHelper::create(new PathNotFoundException())
-                ->message('Invalid storage root path [%s]. Path does not found "/"', $rootPath)
+                ->message('Invalid storage root path [%s]. Path does not found "/"', $path)
                 ->throw()
             ;
         }
@@ -132,30 +120,5 @@ class LocalStorage extends AbstractResourceStorage implements LocalResourceStora
         return parent::setRootPath($realPath);
     }
 
-    public function getFullPath(ResourceInterface $resource): string
-    {
-        $this->exceptionIfResourceNotSupported($resource);
-        return $this->resourceAdapters[$resource::class]->getFullPath($resource);
-    }
-
-    public function createFileResource(string $path): FileInterface
-    {
-        return $this->resourceAdapters[File::class]->initResource($path);
-    }
-
-    public function write(ResourceInterface $resource, mixed $data): mixed
-    {
-        return $this->execute($resource, __FUNCTION__);
-    }
-
-    private function exceptionIfResourceNotSupported(ResourceInterface $resource)
-    {
-        if (false === $this->isResourceSupported($resource))
-        {
-            ExceptionHelper::create(new UnsupportedStorageResourceException())
-                ->message('Unsupported storage resource [%s], resource must be one of theses [%s]', $resource::class, implode(',', $this->supportedResources))
-                ->throw();
-        }
-    }
 
 }

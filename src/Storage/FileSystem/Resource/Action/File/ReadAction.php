@@ -10,22 +10,22 @@
 
 namespace LetsCompose\Core\Storage\FileSystem\Resource\Action\File;
 
-use LetsCompose\Core\Storage\Actions\ActionInterface;
+use LetsCompose\Core\Storage\Actions\AbstractAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
-use LetsCompose\Core\Storage\Resource\ResourceInterface;
 
-class ReadAction implements ActionInterface
+class ReadAction extends AbstractAction
 {
-    public function execute(ResourceInterface $resource, ...$params): string
+    const STORAGE_METHOD  = 'initResource';
+
+    public function execute(...$params): string
     {
-        return $this->read($resource, ...$params);
+        return $this->read(...$params);
     }
 
-    private function read(FileInterface $file, int $chunkSize = 0): string
+    private function read($path): string
     {
-        dump($file->getPath(), $chunkSize);
-        die();
-        return 'hello';
-    }
+        $this->getStorage()->read($path);
 
+        return $path;
+    }
 }

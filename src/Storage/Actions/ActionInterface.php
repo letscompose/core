@@ -11,11 +11,18 @@
 namespace LetsCompose\Core\Storage\Actions;
 
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
+use LetsCompose\Core\Storage\ResourceStorageInterface;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
 interface ActionInterface
 {
-    public function execute(ResourceInterface $resource, ...$params): mixed;
+    public function execute(...$params): mixed;
+
+    public function setStorage(ResourceStorageInterface $storage): self;
+
+    public function getStorage(): ResourceStorageInterface;
+
+    public static function storageMethod(): string;
 }

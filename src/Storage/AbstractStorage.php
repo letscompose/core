@@ -12,7 +12,7 @@ namespace LetsCompose\Core\Storage;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Storage\Adapter\AdapterInterface;
-use LetsCompose\Core\Storage\Config\Storage\StorageConfigInterface;
+use LetsCompose\Core\Storage\Exception\ResourceAlreadyManagedException;
 use LetsCompose\Core\Storage\Exception\UnknownStorageResourceClassException;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
 use LetsCompose\Core\Tools\ExceptionHelper;
@@ -20,16 +20,15 @@ use LetsCompose\Core\Tools\ExceptionHelper;
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-abstract class AbstractResourceStorage implements StorageInterface
+abstract class AbstractStorage implements StorageInterface
 {
-    protected string $rootPath;
-
-    protected StorageConfigInterface $config;
-
     /**
      * @var AdapterInterface[]
      */
     protected array $resourceAdapters = [];
+
+    private string $rootPath;
+
 
     public function getRootPath(): string
     {
@@ -39,18 +38,8 @@ abstract class AbstractResourceStorage implements StorageInterface
     public function setRootPath(string $path): ResourceStorageInterface
     {
         $this->rootPath = $path;
-        return $this;
-    }
 
-    public function setConfig(StorageConfigInterface $config): ResourceStorageInterface
-    {
-        $this->config = $config;
         return $this;
-    }
-
-    public function getConfig(): StorageConfigInterface
-    {
-        return $this->config;
     }
 
     /**
@@ -83,13 +72,36 @@ abstract class AbstractResourceStorage implements StorageInterface
     }
 
     /**
-     * @param array $resourceAdapters
-     * @return AbstractResourceStorage
+     * @throws UnknownStorageResourceClassException
+     * @throws ExceptionInterface
      */
-    public function setResourceAdapters(array $resourceAdapters): AbstractResourceStorage
+    public function setResourceAdapters(array $resourceAdapters): AbstractStorage
     {
-        $this->resourceAdapters = $resourceAdapters;
+        $this->resourceAdapters = [];
+        foreach ($resourceAdapters as $adapter)
+        {
+            $this->addResourceAdapter($adapter);
+        }
         return $this;
+    }
+
+    /**
+     * @throws UnknownStorageResourceClassException
+     * @throws ExceptionInterface
+     */
+    public function addResourceAdapter(AdapterInterface $adapter)
+    {
+        $resourceClass = $adapter->getSupportedResource();
+
+        if ($this->isResourceSupported($resourceClass))
+        {
+            $resourceAdapter = $this->getResourceAdapter($resourceClass);
+            ExceptionHelper::create(new ResourceAlreadyManagedException())
+                ->message('You try to add an adapter [%s] for resource [%s] supported by an other adapter [%s]. Check your storage config', $adapter::class, $resourceClass, $resourceAdapter::class)
+                ->throw();
+        }
+        $adapter->setStorage($this);
+        $this->resourceAdapters[$adapter::class] = $adapter;
     }
 
     /**

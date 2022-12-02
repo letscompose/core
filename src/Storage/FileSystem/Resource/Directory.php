@@ -20,20 +20,6 @@ use LetsCompose\Core\Tools\ExceptionHelper;
  */
 class Directory extends AbstractResource implements DirectoryInterface
 {
-    /**
-     * @var string
-     */
-    protected string $type = self::TYPE_DIRECTORY;
-
-    /**
-     * @var string
-     */
-    protected string $state = self::STATE_CLOSED_STREAM;
-
-    /**
-     * @var mixed
-     */
-    protected mixed $stream;
 
     /**
      * @param mixed $stream

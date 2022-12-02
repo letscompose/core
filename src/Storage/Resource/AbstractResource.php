@@ -32,6 +32,11 @@ abstract class AbstractResource implements ResourceInterface
 
     protected string $storageClass;
 
+    public function getResourceClass(string $type): string
+    {
+        return $this::class;
+    }
+
     public function setName(string $name): self
     {
         $this->name = $name;

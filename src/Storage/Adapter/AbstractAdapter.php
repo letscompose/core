@@ -10,25 +10,21 @@
 
 namespace LetsCompose\Core\Storage\Adapter;
 
-
-use LetsCompose\Core\Storage\Config\Resource\ResourceConfigInterface;
-use LetsCompose\Core\Storage\Exception\ConfigAlreadyDefinedException;
-use LetsCompose\Core\Storage\Exception\UnknownStorageResourceClassException;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
 use LetsCompose\Core\Storage\ResourceStorageInterface;
-use LetsCompose\Core\Tools\ExceptionHelper;
+use LetsCompose\Core\Storage\StorageInterface;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
 abstract class AbstractAdapter implements AdapterInterface
 {
-    private ResourceStorageInterface $storage;
+    protected ResourceStorageInterface $storage;
 
-    /**
-     * @var ResourceConfigInterface[]
-     */
-    private array $resourceConfigList = [];
+    public function __construct(StorageInterface $storage)
+    {
+        $this->setStorage($storage);
+    }
 
     /**
      * @return ResourceStorageInterface
@@ -48,67 +44,6 @@ abstract class AbstractAdapter implements AdapterInterface
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function setResourceConfigList(array $resourceConfigList): self
-    {
-        $this->resourceConfigList = $resourceConfigList;
-        foreach ($resourceConfigList as $resourceConfig)
-        {
-            $this->addResourceConfig($resourceConfig);
-        }
-        return $this;
-    }
-
-    public function addResourceConfig(ResourceConfigInterface $resourceConfig): self
-    {
-        if (true === $this->hasResourceConfig($resourceConfig->getClass()))
-        {
-            ExceptionHelper::create(new ConfigAlreadyDefinedException())
-                ->message('Resource config already defined for [%s] at storage adapter [%s]', $resourceConfig->getClass(), $this::class)
-                ->throw()
-            ;
-        }
-        $this->resourceConfigList[$resourceConfig->getClass()] = $resourceConfig;
-        return $this;
-    }
-
-    public function getResourceConfig(string $resourceClass): ResourceConfigInterface
-    {
-        if (!$this->hasResourceConfig($resourceClass))
-        {
-            ExceptionHelper::create(new UnknownStorageResourceClassException())
-                ->message('You try to get unknown resource config [%s] at storage adapter [%s]', $resourceClass, $this::class)
-                ->throw()
-            ;
-        }
-        return $this->resourceConfigList[$resourceClass];
-    }
-
-    /**
-     * @param string $resourceClass
-     * @return bool
-     */
-    public function hasResourceConfig(string $resourceClass): bool
-    {
-        return \array_key_exists($resourceClass, $this->resourceConfigList);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getResourceConfigList(): array
-    {
-        return $this->resourceConfigList;
-    }
-
-
-    public function isResourceSupported(string $resourceClass): bool
-    {
-        return $this->hasResourceConfig($resourceClass);
-    }
-
     public function initResource(string $resourceClass): ResourceInterface
     {
         /**
@@ -123,6 +58,5 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         return $this->{$action}(...$params);
     }
-
 
 }

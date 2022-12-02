@@ -25,23 +25,25 @@ interface ResourceInterface
     ];
 
 
-    public function setStorageClass(string $class): ResourceInterface;
+    public function setStorageClass(string $class): self;
 
     public function getStorageClass(): string;
 
-    public function setName(string $name): ResourceInterface;
+    public function getResourceClass(string $type): string;
+
+    public function setName(string $name): self;
 
     public function getName(): string;
 
-    public function setPath(string $path): ResourceInterface;
+    public function setPath(string $path): self;
 
     public function getPath(): string;
 
-    public function setStream(mixed $stream): ResourceInterface;
+    public function setStream(mixed $stream): self;
 
     public function getStream(): mixed;
 
-    public function setState(string $state): ResourceInterface;
+    public function setState(string $state): self;
 
     public function getState(): string;
 

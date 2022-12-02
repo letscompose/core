@@ -10,7 +10,6 @@
 
 namespace LetsCompose\Core\Storage;
 
-use LetsCompose\Core\Storage\Config\Storage\StorageConfigInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
 
 /**
@@ -47,10 +46,6 @@ interface ResourceStorageInterface
     public function getRootPath(): string;
 
     public function getFullPath(ResourceInterface $resource): string;
-
-    public function setConfig(StorageConfigInterface $config): self;
-
-    public function getConfig(): StorageConfigInterface;
 
     public function isResourceSupported(string $resourceClass): bool;
 
