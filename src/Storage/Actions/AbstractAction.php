@@ -35,4 +35,9 @@ abstract class AbstractAction implements ActionInterface
     {
         return get_called_class()::STORAGE_METHOD;
     }
+
+    public function execute(...$params): mixed
+    {
+        return $this->{self::storageMethod()}(...$params);
+    }
 }

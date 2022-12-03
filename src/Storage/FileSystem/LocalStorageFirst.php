@@ -28,7 +28,7 @@ use LetsCompose\Core\Tools\Storage\Path;
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class LocalStorageFirst extends AbstractStorage implements LocalResourceStorageInterface
+class LocalStorageFirst extends AbstractStorage implements LocalStorageInterface
 {
     /**
      * @var array

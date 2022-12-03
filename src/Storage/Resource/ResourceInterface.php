@@ -24,12 +24,11 @@ interface ResourceInterface
         self::STATE_CLOSED_STREAM,
     ];
 
-
     public function setStorageClass(string $class): self;
 
     public function getStorageClass(): string;
 
-    public function getResourceClass(string $type): string;
+    public function getResourceClass(): string;
 
     public function setName(string $name): self;
 

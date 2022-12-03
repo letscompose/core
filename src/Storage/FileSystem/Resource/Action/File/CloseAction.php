@@ -14,18 +14,19 @@ use LetsCompose\Core\Storage\Actions\AbstractAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
 
-class ReadAction extends AbstractAction
+class CloseAction extends AbstractAction
 {
-    protected const STORAGE_METHOD  = 'read';
+    protected const STORAGE_METHOD  = 'close';
 
-    protected function read(FileInterface|ResourceInterface $file, int $chunkSize = 1024): string|bool
+    protected function close(FileInterface|ResourceInterface $file): string|bool
     {
-        $storage = $this->getStorage();
-        if (!$file->isOpen())
+        $result = false;
+        if ($file->isOpen())
         {
-            $file = $storage->open($file);
+            $stream = $file->getStream();
+            fflush($stream);
+            $result = fclose($stream);
         }
-        $stream = $file->getStream();
-        return !feof($stream) ? fread($stream, $chunkSize) : false;
+        return $result;
     }
 }

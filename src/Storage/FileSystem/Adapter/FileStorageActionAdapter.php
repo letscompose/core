@@ -10,8 +10,18 @@
 
 namespace LetsCompose\Core\Storage\FileSystem\Adapter;
 
+use LetsCompose\Core\Exception\ExceptionInterface;
+use LetsCompose\Core\Exception\MustImplementException;
 use LetsCompose\Core\Storage\Adapter\AbstractCompositeAdapter;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\CloseAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\FlushAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\GetFullPathAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\IsExistsAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\IsReadableAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\OpenAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\ReadAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\ReadLineAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\RemoveAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\File;
 use LetsCompose\Core\Storage\StorageInterface;
 
@@ -20,19 +30,26 @@ use LetsCompose\Core\Storage\StorageInterface;
  */
 class FileStorageActionAdapter extends AbstractCompositeAdapter
 {
+    /**
+     * @throws MustImplementException
+     * @throws ExceptionInterface
+     */
     public function __construct(StorageInterface $storage)
     {
         $actions = [
-           ReadAction::class,
+            OpenAction::class,
+            CloseAction::class,
+            ReadAction::class,
+            ReadLineAction::class,
+            RemoveAction::class,
+            FlushAction::class,
+            GetFullPathAction::class,
+            IsExistsAction::class,
+            IsReadableAction::class,
         ];
         $this->registerActions($actions);
 
         parent::__construct($storage);
-    }
-
-    public function isResourceSupported(string $resourceClass): bool
-    {
-        return $resourceClass === $this->getSupportedResource();
     }
 
     public function getSupportedResource(): string

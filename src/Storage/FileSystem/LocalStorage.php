@@ -14,8 +14,10 @@ use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
 use LetsCompose\Core\Storage\AbstractStorage;
 use LetsCompose\Core\Storage\Exception\UnknownStorageResourceClassException;
+use LetsCompose\Core\Storage\FileSystem\Adapter\DirectoryStorageActionAdapter;
 use LetsCompose\Core\Storage\FileSystem\Adapter\FileStorageActionAdapter;
-use LetsCompose\Core\Storage\FileSystem\Adapter\FileStorageAdapterFirst;
+use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
+use LetsCompose\Core\Storage\FileSystem\Resource\DirectoryInterface;
 use LetsCompose\Core\Storage\FileSystem\Resource\File;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
@@ -27,7 +29,7 @@ use LetsCompose\Core\Tools\Storage\Path;
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class LocalStorage extends AbstractStorage implements LocalResourceStorageInterface
+class LocalStorage extends AbstractStorage implements LocalStorageInterface
 {
     /**
      * @throws UnknownStorageResourceClassException
@@ -37,7 +39,8 @@ class LocalStorage extends AbstractStorage implements LocalResourceStorageInterf
     {
         $this->setRootPath($rootPath);
         $adapters = [
-            new FileStorageActionAdapter($this)
+            new FileStorageActionAdapter($this),
+            new DirectoryStorageActionAdapter($this),
         ];
         $this->setResourceAdapters($adapters);
     }
@@ -53,50 +56,90 @@ class LocalStorage extends AbstractStorage implements LocalResourceStorageInterf
         return $file;
     }
 
-    public function open(ResourceInterface $resource, ?string $mode = null): ResourceInterface
+    /**
+     * @throws UnknownStorageResourceClassException
+     * @throws ExceptionInterface
+     */
+    public function initDirectory(string $path): DirectoryInterface
     {
-        // TODO: Implement open() method.
+        $directory = parent::initResource(Directory::class);
+        $directory->setPath($path);
+        return $directory;
     }
 
-    public function read(ResourceInterface $resource): mixed
+
+    /**
+     * @throws UnknownStorageResourceClassException
+     * @throws ExceptionInterface
+     */
+    public function createDirectory(DirectoryInterface $directory): DirectoryInterface
     {
-        // TODO: Implement read() method.
+        return $this->execute($directory::class, __FUNCTION__, $directory);
+    }
+
+    /**
+     * @throws UnknownStorageResourceClassException
+     * @throws ExceptionInterface
+     */
+    public function open(ResourceInterface $resource, ?string $mode = null): ResourceInterface
+    {
+        return $this->execute($resource::class, __FUNCTION__, $resource);
+    }
+
+    /**
+     * @throws UnknownStorageResourceClassException
+     * @throws ExceptionInterface
+     */
+    public function read(ResourceInterface $resource, int $chunkSize = 1024): mixed
+    {
+        return $this->execute($resource::class, __FUNCTION__, $resource, $chunkSize);
     }
 
     public function write(ResourceInterface $resource, mixed $data): mixed
     {
-        // TODO: Implement write() method.
+        return $this->execute($resource::class, __FUNCTION__, $data);
     }
 
     public function close(ResourceInterface $resource): ResourceInterface
     {
-        // TODO: Implement close() method.
+        return $this->execute($resource::class, __FUNCTION__, $resource);
     }
 
     public function remove(ResourceInterface $resource): ResourceInterface
     {
-        // TODO: Implement remove() method.
+        return $this->execute($resource::class, __FUNCTION__, $resource);
     }
 
     public function isExists(ResourceInterface $resource): bool
     {
-        // TODO: Implement isExists() method.
+        return $this->execute($resource::class, __FUNCTION__, $resource);
     }
 
     public function isReadable(ResourceInterface $resource): bool
     {
-        // TODO: Implement isReadable() method.
+        return $this->execute($resource::class, __FUNCTION__, $resource);
     }
 
     public function isWritable(ResourceInterface $resource): bool
     {
-        // TODO: Implement isWritable() method.
+        return $this->execute($resource::class, __FUNCTION__, $resource);
     }
 
     public function getFullPath(ResourceInterface $resource): string
     {
-        // TODO: Implement getFullPath() method.
+        return $this->execute($resource::class, __FUNCTION__, $resource);
     }
+
+    public function readLine(FileInterface $file): mixed
+    {
+        return $this->execute($file::class, __FUNCTION__, $file);
+    }
+
+    public function flush(FileInterface $file): bool
+    {
+        return $this->execute($file::class, __FUNCTION__, $file);
+    }
+
 
     public function setRootPath(string $path): ResourceStorageInterface
     {

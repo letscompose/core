@@ -10,13 +10,22 @@
 
 namespace LetsCompose\Core\Storage\FileSystem;
 
+use LetsCompose\Core\Storage\FileSystem\Resource\DirectoryInterface;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
 use LetsCompose\Core\Storage\ResourceStorageInterface;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface LocalResourceStorageInterface extends ResourceStorageInterface
+interface LocalStorageInterface extends ResourceStorageInterface
 {
     public function initFile(string $path): FileInterface;
+
+    public function initDirectory(string $path): DirectoryInterface;
+
+    public function readLine(FileInterface $file): mixed;
+
+    public function flush(FileInterface $file): bool;
+
+    public function createDirectory(DirectoryInterface $directory): DirectoryInterface;
 }

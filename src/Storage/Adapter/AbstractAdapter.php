@@ -54,6 +54,11 @@ abstract class AbstractAdapter implements AdapterInterface
         return $resource;
     }
 
+    public function isResourceSupported(string $resourceClass): bool
+    {
+        return $resourceClass === $this->getSupportedResource();
+    }
+
     public function execute(string $action, ...$params)
     {
         return $this->{$action}(...$params);

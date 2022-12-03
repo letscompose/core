@@ -18,7 +18,7 @@ use LetsCompose\Core\Storage\Exception\FileNotFoundException;
 use LetsCompose\Core\Storage\Exception\FileNotReadableException;
 use LetsCompose\Core\Storage\Exception\FileNotWritableException;
 use LetsCompose\Core\Storage\FileSystem\LocalStorageFirst;
-use LetsCompose\Core\Storage\FileSystem\LocalResourceStorageInterface;
+use LetsCompose\Core\Storage\FileSystem\LocalStorageInterface;
 use LetsCompose\Core\Storage\FileSystem\Resource\File;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
@@ -30,7 +30,7 @@ use LetsCompose\Core\Tools\Storage\Path;
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class FileStorageAdapterFirst extends AbstractStorage implements LocalResourceStorageInterface
+class FileStorageAdapterFirst extends AbstractStorage implements LocalStorageInterface
 {
     /**
      * @var string[]
