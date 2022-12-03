@@ -50,6 +50,16 @@ class File extends AbstractResource implements FileInterface
         return pathinfo($this->getPath(), PATHINFO_EXTENSION);
     }
 
+    public function getDirectoryPath(): string
+    {
+        return pathinfo($this->getPath(), PATHINFO_DIRNAME);
+    }
+
+    public function getName(): string
+    {
+        return pathinfo($this->getPath(), PATHINFO_BASENAME);
+    }
+
     public function setMimeType(?string $mimeType): File
     {
         $this->mimeType = $mimeType;

@@ -19,6 +19,8 @@ interface FileInterface extends ResourceInterface
 {
     public function getExtension(): ?string;
 
+    public function getDirectoryPath(): string;
+
     public function setMimeType(string $mimeType): FileInterface;
 
     public function getMimeType(): ?string;
