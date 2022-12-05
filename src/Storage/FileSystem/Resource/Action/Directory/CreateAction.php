@@ -11,18 +11,18 @@
 namespace LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory;
 
 use LetsCompose\Core\Storage\Actions\AbstractAction;
-use LetsCompose\Core\Storage\Resource\ResourceInterface;
-use Symfony\Component\Config\Resource\DirectoryResource;
+use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
 
 class CreateAction extends AbstractAction
 {
-    protected const STORAGE_METHOD  = 'createDirectory';
+    protected const STORAGE_METHOD  = 'create';
 
-    protected function createDirectory(DirectoryResource $directory): bool
+    protected function create(Directory $directory): Directory
     {
         $storage = $this->getStorage();
         $path = $storage->getFullPath($directory);
 
         mkdir(directory: $path, recursive: true);
+        return $directory;
     }
 }

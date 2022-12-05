@@ -13,6 +13,8 @@ namespace LetsCompose\Core\Storage\FileSystem\Resource\Action\File;
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Storage\Actions\AbstractAction;
 use LetsCompose\Core\Storage\Exception\FileAlreadyExistException;
+use LetsCompose\Core\Storage\FileSystem\Enum\FileOpenModeEnum;
+use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
 use LetsCompose\Core\Tools\ExceptionHelper;
@@ -37,10 +39,18 @@ class CreateAction extends AbstractAction
                 ->throw();
         }
 
+        /**
+         * @var Directory $directory
+         */
         $directory = $storage->initDirectory($file->getDirectoryPath());
+
         if (false === $storage->isExists($directory))
         {
-            // FIXME Continue here
+            $storage->create($directory);
         }
+
+        touch($fullFilePath);
+        return $storage->open($file, FileOpenModeEnum::WRITE);
+
     }
 }

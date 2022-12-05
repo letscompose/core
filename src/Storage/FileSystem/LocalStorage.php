@@ -16,6 +16,7 @@ use LetsCompose\Core\Storage\AbstractStorage;
 use LetsCompose\Core\Storage\Exception\UnknownStorageResourceClassException;
 use LetsCompose\Core\Storage\FileSystem\Adapter\DirectoryStorageActionAdapter;
 use LetsCompose\Core\Storage\FileSystem\Adapter\FileStorageActionAdapter;
+use LetsCompose\Core\Storage\FileSystem\Enum\FileOpenModeEnum;
 use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
 use LetsCompose\Core\Storage\FileSystem\Resource\DirectoryInterface;
 use LetsCompose\Core\Storage\FileSystem\Resource\File;
@@ -25,6 +26,7 @@ use LetsCompose\Core\Storage\Exception\PathNotFoundException;
 use LetsCompose\Core\Storage\ResourceStorageInterface;
 use LetsCompose\Core\Tools\ExceptionHelper;
 use LetsCompose\Core\Tools\Storage\Path;
+use UnitEnum;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
@@ -45,10 +47,6 @@ class LocalStorage extends AbstractStorage implements LocalStorageInterface
         $this->setResourceAdapters($adapters);
     }
 
-    /**
-     * @throws UnknownStorageResourceClassException
-     * @throws ExceptionInterface
-     */
     public function initFile(string $path): FileInterface
     {
         $file = parent::initResource(File::class);
@@ -56,10 +54,6 @@ class LocalStorage extends AbstractStorage implements LocalStorageInterface
         return $file;
     }
 
-    /**
-     * @throws UnknownStorageResourceClassException
-     * @throws ExceptionInterface
-     */
     public function initDirectory(string $path): DirectoryInterface
     {
         $directory = parent::initResource(Directory::class);
@@ -67,29 +61,21 @@ class LocalStorage extends AbstractStorage implements LocalStorageInterface
         return $directory;
     }
 
-
-    /**
-     * @throws UnknownStorageResourceClassException
-     * @throws ExceptionInterface
-     */
     public function createDirectory(DirectoryInterface $directory): DirectoryInterface
     {
-        return $this->execute($directory::class, __FUNCTION__, $directory);
+        return $this->create($directory);
     }
 
-    /**
-     * @throws UnknownStorageResourceClassException
-     * @throws ExceptionInterface
-     */
-    public function open(ResourceInterface $resource, ?string $mode = null): ResourceInterface
+    public function create(ResourceInterface $resource): ResourceInterface
     {
         return $this->execute($resource::class, __FUNCTION__, $resource);
     }
 
-    /**
-     * @throws UnknownStorageResourceClassException
-     * @throws ExceptionInterface
-     */
+    public function open(ResourceInterface $resource, UnitEnum $mode = FileOpenModeEnum::READ): ResourceInterface
+    {
+        return $this->execute($resource::class, __FUNCTION__, $resource, $mode);
+    }
+
     public function read(ResourceInterface $resource, int $chunkSize = 1024): mixed
     {
         return $this->execute($resource::class, __FUNCTION__, $resource, $chunkSize);
@@ -127,7 +113,9 @@ class LocalStorage extends AbstractStorage implements LocalStorageInterface
 
     public function getFullPath(ResourceInterface $resource): string
     {
-        return $this->execute($resource::class, __FUNCTION__, $resource);
+        $path = sprintf('%s/%s', $this->getRootPath(), $resource->getPath());
+
+        return Path::normalize($path);
     }
 
     public function readLine(FileInterface $file): mixed

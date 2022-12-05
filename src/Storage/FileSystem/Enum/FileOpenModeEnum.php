@@ -20,17 +20,17 @@ use LetsCompose\Core\Tools\ExceptionHelper;
 
 enum FileOpenModeEnum
 {
-    case CREATE;
+    case WRITE;
     case READ;
-    case UPDATE;
+    case APPEND;
 
     public function mode(): string
     {
         return match($this)
         {
-            FileOpenModeEnum::CREATE => 'w',
-            FileOpenModeEnum::READ => 'r',
-            FileOpenModeEnum::UPDATE => 'a',
+            self::WRITE => 'w',
+            self::READ => 'r',
+            self::APPEND => 'a',
         };
     }
 

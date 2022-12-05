@@ -11,6 +11,7 @@
 namespace LetsCompose\Core\Storage;
 
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
+use UnitEnum;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
@@ -25,7 +26,9 @@ interface ResourceStorageInterface
 
     public const OPERATION_DELETE = 'delete';
 
-    public function open(ResourceInterface $resource, ?string $mode = null): ResourceInterface;
+    public function create(ResourceInterface $resource): ResourceInterface;
+
+    public function open(ResourceInterface $resource, UnitEnum $mode): ResourceInterface;
 
     public function read(ResourceInterface $resource): mixed;
 

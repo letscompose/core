@@ -14,8 +14,8 @@ use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\MustImplementException;
 use LetsCompose\Core\Storage\Adapter\AbstractCompositeAdapter;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\CloseAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\CreateAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\FlushAction;
-use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\GetFullPathAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\IsExistsAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\IsReadableAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\OpenAction;
@@ -37,13 +37,13 @@ class FileStorageActionAdapter extends AbstractCompositeAdapter
     public function __construct(StorageInterface $storage)
     {
         $actions = [
+            CreateAction::class,
             OpenAction::class,
             CloseAction::class,
             ReadAction::class,
             ReadLineAction::class,
             RemoveAction::class,
             FlushAction::class,
-            GetFullPathAction::class,
             IsExistsAction::class,
             IsReadableAction::class,
         ];

@@ -14,7 +14,7 @@ use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\MustImplementException;
 use LetsCompose\Core\Storage\Adapter\AbstractCompositeAdapter;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\CreateAction;
-use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\IsExistsAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\IsExistsAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
 use LetsCompose\Core\Storage\StorageInterface;
 
