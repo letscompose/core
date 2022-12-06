@@ -81,9 +81,9 @@ class LocalStorage extends AbstractStorage implements LocalStorageInterface
         return $this->execute($resource::class, __FUNCTION__, $resource, $chunkSize);
     }
 
-    public function write(ResourceInterface $resource, mixed $data): mixed
+    public function write(ResourceInterface $resource, mixed $data, int $length = null): mixed
     {
-        return $this->execute($resource::class, __FUNCTION__, $data);
+        return $this->execute($resource::class, __FUNCTION__, $data, $length);
     }
 
     public function close(ResourceInterface $resource): ResourceInterface

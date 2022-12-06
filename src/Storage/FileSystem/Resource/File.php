@@ -10,15 +10,17 @@
 
 namespace LetsCompose\Core\Storage\FileSystem\Resource;
 
+use BackedEnum;
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
-use LetsCompose\Core\Storage\Resource\AbstractResource;
+use LetsCompose\Core\Storage\FileSystem\Enum\FileOpenModeEnum;
 use LetsCompose\Core\Tools\ExceptionHelper;
+use UnitEnum;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class File extends AbstractResource implements FileInterface
+class File extends AbstractFileSystemResource implements FileInterface
 {
 
     protected ?string $mimeType = null;
@@ -44,6 +46,17 @@ class File extends AbstractResource implements FileInterface
 
         return $this;
     }
+
+    public function isStreamMode(UnitEnum|FileOpenModeEnum $mode): bool
+    {
+        if ($this->isOpen())
+        {
+            $metadata = stream_get_meta_data($this->getStream());
+            $mode->mode($mode);
+        }
+        return false;
+    }
+
 
     public function getExtension(): ?string
     {

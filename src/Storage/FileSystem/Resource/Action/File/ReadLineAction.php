@@ -13,13 +13,12 @@ namespace LetsCompose\Core\Storage\FileSystem\Resource\Action\File;
 use Generator;
 use LetsCompose\Core\Storage\Actions\AbstractAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
-use LetsCompose\Core\Storage\Resource\ResourceInterface;
 
 class ReadLineAction extends AbstractAction
 {
     protected const STORAGE_METHOD  = 'readLine';
 
-    protected function readLine(FileInterface|ResourceInterface $file): Generator
+    protected function readLine(FileInterface $file): Generator
     {
         $storage = $this->getStorage();
         $line = null;

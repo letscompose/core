@@ -28,7 +28,7 @@ abstract class AbstractResource implements ResourceInterface
     /**
      * @var Resource
      */
-    protected mixed $stream;
+    protected mixed $stream = null;
 
     protected string $storageClass;
 

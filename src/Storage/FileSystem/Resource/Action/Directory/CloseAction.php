@@ -12,14 +12,16 @@ namespace LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory;
 
 use LetsCompose\Core\Storage\Actions\AbstractAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\DirectoryInterface;
+use LetsCompose\Core\Storage\Resource\ResourceInterface;
 
-class IsExistsAction extends AbstractAction
+class CloseAction extends AbstractAction
 {
-    protected const STORAGE_METHOD  = 'isExists';
+    protected const STORAGE_METHOD  = 'close';
 
-    protected function isExists(DirectoryInterface $directory): bool
+    protected function close(DirectoryInterface $directory): DirectoryInterface
     {
-        $fullFilePath = $this->getStorage()->getFullPath($directory);
-        return file_exists($fullFilePath) && is_dir($fullFilePath);
+        closedir($directory->getStream());
+        $directory->setState(ResourceInterface::STATE_CLOSED_STREAM);
+        return $directory;
     }
 }

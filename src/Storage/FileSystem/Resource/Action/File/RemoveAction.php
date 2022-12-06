@@ -15,7 +15,6 @@ use LetsCompose\Core\Storage\Actions\AbstractAction;
 use LetsCompose\Core\Storage\Exception\FileNotFoundException;
 use LetsCompose\Core\Storage\Exception\UnableToRemoveFileException;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
-use LetsCompose\Core\Storage\Resource\ResourceInterface;
 use LetsCompose\Core\Tools\ExceptionHelper;
 
 class RemoveAction extends AbstractAction
@@ -25,7 +24,7 @@ class RemoveAction extends AbstractAction
     /**
      * @throws ExceptionInterface
      */
-    protected function remove(ResourceInterface $file): FileInterface
+    protected function remove(FileInterface $file): FileInterface
     {
         $storage = $this->getStorage();
 

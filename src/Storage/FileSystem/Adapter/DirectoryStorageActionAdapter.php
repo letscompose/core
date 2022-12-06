@@ -13,8 +13,13 @@ namespace LetsCompose\Core\Storage\FileSystem\Adapter;
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\MustImplementException;
 use LetsCompose\Core\Storage\Adapter\AbstractCompositeAdapter;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\CloseAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\CreateAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\IsExistsAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\IsReadableAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\IsWritableAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\OpenAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\ReadAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
 use LetsCompose\Core\Storage\StorageInterface;
 
@@ -31,7 +36,12 @@ class DirectoryStorageActionAdapter extends AbstractCompositeAdapter
     {
         $actions = [
             IsExistsAction::class,
+            IsWritableAction::class,
+            IsReadableAction::class,
             CreateAction::class,
+            ReadAction::class,
+            OpenAction::class,
+            CloseAction::class,
         ];
         $this->registerActions($actions);
 

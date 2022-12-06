@@ -18,21 +18,13 @@ use UnitEnum;
  */
 interface ResourceStorageInterface
 {
-    public const OPERATION_CREATE = 'create';
-
-    public const OPERATION_READ = 'read';
-
-    public const OPERATION_UPDATE = 'update';
-
-    public const OPERATION_DELETE = 'delete';
-
     public function create(ResourceInterface $resource): ResourceInterface;
 
     public function open(ResourceInterface $resource, UnitEnum $mode): ResourceInterface;
 
     public function read(ResourceInterface $resource): mixed;
 
-    public function write(ResourceInterface $resource, mixed $data): mixed;
+    public function write(ResourceInterface $resource, mixed $data, ?int $length = null): mixed;
 
     public function close(ResourceInterface $resource): ResourceInterface;
 

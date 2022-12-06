@@ -12,31 +12,30 @@ namespace LetsCompose\Core\Storage\FileSystem\Resource;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
+use LetsCompose\Core\Storage\Resource\AbstractResource;
 use LetsCompose\Core\Tools\ExceptionHelper;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class Directory extends AbstractFileSystemResource implements DirectoryInterface
+class AbstractFileSystemResource extends AbstractResource
 {
 
     /**
-     * @param mixed $stream
-     * @return $this
+     * @throws InvalidArgumentException
      * @throws ExceptionInterface
      */
-    public function setStream(mixed $stream): self
+    public function isOpen(): bool
     {
-        if (!is_resource($stream) && 'stream' !== get_resource_type($stream))
+        $stream = $this->getStream();
+        if (self::STATE_OPENED_STREAM === $this->getState())
         {
-            ExceptionHelper
-                ::create(new InvalidArgumentException('You try to assign closed or not valid stream resource to Directory object'))
-                ->throw();
+            if (is_resource($stream))
+            {
+                return true;
+            }
+            $this->setState(self::STATE_CLOSED_STREAM);
         }
-
-        $this->stream = $stream;
-        $this->setState(self::STATE_OPENED_STREAM);
-
-        return $this;
+        return false;
     }
 }

@@ -12,13 +12,12 @@ namespace LetsCompose\Core\Storage\FileSystem\Resource\Action\File;
 
 use LetsCompose\Core\Storage\Actions\AbstractAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
-use LetsCompose\Core\Storage\Resource\ResourceInterface;
 
 class CloseAction extends AbstractAction
 {
     protected const STORAGE_METHOD  = 'close';
 
-    protected function close(FileInterface|ResourceInterface $file): string|bool
+    protected function close(FileInterface $file): string|bool
     {
         $result = false;
         if ($file->isOpen())

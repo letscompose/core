@@ -11,20 +11,24 @@
 namespace LetsCompose\Core\Storage\FileSystem\Resource\Action\File;
 
 use LetsCompose\Core\Storage\Actions\AbstractAction;
+use LetsCompose\Core\Storage\FileSystem\Enum\FileOpenModeEnum;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
 
-class ReadAction extends AbstractAction
+class WriteAction extends AbstractAction
 {
-    protected const STORAGE_METHOD  = 'read';
+    protected const STORAGE_METHOD  = 'write';
 
-    protected function read(FileInterface $file, int $chunkSize = 1024): string|bool
+    protected function write(FileInterface $file, string $data, int $length = null): FileInterface
     {
         $storage = $this->getStorage();
-        if (!$file->isOpen())
+
+        if (false === $file->isOpen())
         {
-            $file = $storage->open($file);
+            $storage->open($file, FileOpenModeEnum::WRITE);
         }
-        $stream = $file->getStream();
-        return !feof($stream) ? fread($stream, $chunkSize) : false;
+
+        fwrite($file->getStream(), $data, $length);
+
+        return $file;
     }
 }
