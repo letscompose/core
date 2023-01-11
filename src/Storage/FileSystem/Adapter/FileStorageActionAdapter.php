@@ -13,6 +13,7 @@ namespace LetsCompose\Core\Storage\FileSystem\Adapter;
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\MustImplementException;
 use LetsCompose\Core\Storage\Adapter\AbstractCompositeAdapter;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\AppendAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\CloseAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\CreateAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\FlushAction;
@@ -22,6 +23,7 @@ use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\OpenAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\ReadAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\ReadLineAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\RemoveAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\WriteAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\File;
 use LetsCompose\Core\Storage\StorageInterface;
 
@@ -46,6 +48,8 @@ class FileStorageActionAdapter extends AbstractCompositeAdapter
             FlushAction::class,
             IsExistsAction::class,
             IsReadableAction::class,
+            WriteAction::class,
+            AppendAction::class
         ];
         $this->registerActions($actions);
 

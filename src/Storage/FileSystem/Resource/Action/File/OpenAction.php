@@ -25,10 +25,11 @@ class OpenAction extends AbstractAction
     protected function open(FileInterface $file, FileOpenModeEnum $mode = FileOpenModeEnum::READ): FileInterface
     {
         $storage = $this->getStorage();
+
         if (false === $storage->isExists($file))
         {
             ExceptionHelper::create(new FileNotFoundException())
-                ->message('Can\'t open file at path [%s]. File does not exist on storage [%s]', $file->getPath(), $file->getStorageClass())
+                ->message('Can\'t open file at path [%s]. File does not exist on storage [%s]', $storage->getFullPath($file), $file->getStorageClass())
                 ->throw()
             ;
         }
@@ -37,7 +38,7 @@ class OpenAction extends AbstractAction
             case FileOpenModeEnum::READ:
                 if (false === $storage->isReadable($file)) {
                     ExceptionHelper::create(new FileNotReadableException())
-                        ->message('Not readable file at path [%s] on storage [%s]', $file->getPath(), $file->getStorageClass())
+                        ->message('Not readable file at path [%s] on storage [%s]', $storage->getFullPath($file), $file->getStorageClass())
                         ->throw();
                 }
                 break;
@@ -45,7 +46,7 @@ class OpenAction extends AbstractAction
             case FileOpenModeEnum::APPEND:
                 if (false === $storage->isWritable($file)) {
                     ExceptionHelper::create(new FileNotWritableException())
-                        ->message('Not writable file at path [%s] on storage [%s]', $file->getPath(), $file->getStorageClass())
+                        ->message('Not writable file at path [%s] on storage [%s]', $storage->getFullPath($file), $file->getStorageClass())
                         ->throw();
                 }
                 break;

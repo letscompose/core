@@ -17,7 +17,7 @@ use LetsCompose\Core\Storage\ResourceStorageInterface;
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface LocalStorageInterface extends ResourceStorageInterface
+interface FileStorageInterface extends ResourceStorageInterface
 {
     public function initFile(string $path): FileInterface;
 

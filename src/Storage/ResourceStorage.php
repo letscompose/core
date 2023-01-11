@@ -8,11 +8,10 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem;
+namespace LetsCompose\Core\Storage;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
-use LetsCompose\Core\Storage\AbstractStorage;
 use LetsCompose\Core\Storage\Exception\UnknownStorageResourceClassException;
 use LetsCompose\Core\Storage\FileSystem\Adapter\DirectoryStorageActionAdapter;
 use LetsCompose\Core\Storage\FileSystem\Adapter\FileStorageActionAdapter;
@@ -23,7 +22,6 @@ use LetsCompose\Core\Storage\FileSystem\Resource\File;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
 use LetsCompose\Core\Storage\Exception\PathNotFoundException;
-use LetsCompose\Core\Storage\ResourceStorageInterface;
 use LetsCompose\Core\Tools\ExceptionHelper;
 use LetsCompose\Core\Tools\Storage\Path;
 use UnitEnum;
@@ -31,7 +29,7 @@ use UnitEnum;
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class LocalStorage extends AbstractStorage implements LocalStorageInterface
+class ResourceStorage extends AbstractResourceStorage
 {
     /**
      * @throws UnknownStorageResourceClassException
@@ -150,6 +148,4 @@ class LocalStorage extends AbstractStorage implements LocalStorageInterface
 
         return parent::setRootPath($realPath);
     }
-
-
 }

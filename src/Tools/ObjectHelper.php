@@ -41,7 +41,6 @@ class ObjectHelper
         return substr(strrchr($class, '\\'), 1);
     }
 
-
     private static function getClassNameSpace(string $class): string
     {
         $shortName = self::getClassShortName($class);

@@ -20,7 +20,7 @@ use LetsCompose\Core\Tools\ExceptionHelper;
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-abstract class AbstractStorage implements StorageInterface
+abstract class AbstractResourceStorage implements StorageInterface
 {
     /**
      * @var AdapterInterface[]
@@ -75,7 +75,7 @@ abstract class AbstractStorage implements StorageInterface
      * @throws UnknownStorageResourceClassException
      * @throws ExceptionInterface
      */
-    public function setResourceAdapters(array $resourceAdapters): AbstractStorage
+    public function setResourceAdapters(array $resourceAdapters): AbstractResourceStorage
     {
         $this->resourceAdapters = [];
         foreach ($resourceAdapters as $adapter)

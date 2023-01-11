@@ -25,10 +25,11 @@ class ReadLineAction extends AbstractAction
         while ($data = $storage->read($file))
         {
             $i = 0;
-            $length = strlen($data)-1;
+            $length = strlen($data);
             while ($i < $length)
             {
                 $line .= $data[$i++];
+
                 if ($line[-1] === PHP_EOL)
                 {
                     yield $line;
