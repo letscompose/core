@@ -35,31 +35,54 @@ class StringHelper
         self::PLACEHOLDER_TOKEN_PERCENT => '/(?<=%)[a-z_\-]+(?=%)/mui',
     ];
 
+    const STRING_SNAKE_TOKEN =  '_';
+    const STRING_KEBAB_TOKEN =  '-';
+
     private static array $placeHolderTokenParts = [];
 
-    public static function toLowerCamelCase(string $string): string
+    public static function snakeCaseToCamelCase(string $string): string
     {
-        return self::stringToCamelCase($string, true);
+        if (isset(self::$cache[$string]))
+        {
+            return self::$cache[$string];
+        }
+
+        $string = self::stringToPascalCase($string, self::STRING_SNAKE_TOKEN);
+
+        return self::$cache[$string] = lcfirst($string);
     }
 
-    public static function toCamelCase(string $string): string
+    public static function snakeCaseToPascalCase(string $string): string
     {
-        return self::stringToCamelCase($string);
+        return self::stringToPascalCase($string, self::STRING_SNAKE_TOKEN);
     }
 
-    public static function stringToCamelCase(string $string, bool $firstLower = false): string
+    public static function kebabCaseToCamelCase(string $string): string
     {
-        $signature = $string.$firstLower;
+        if (isset(self::$cache[$string]))
+        {
+            return self::$cache[$string];
+        }
+
+        $string = self::stringToPascalCase($string, self::STRING_KEBAB_TOKEN);
+
+        return self::$cache[$string] = lcfirst($string);
+    }
+
+    public static function kebabCaseToPascalCase(string $string): string
+    {
+        return self::stringToPascalCase($string, self::STRING_KEBAB_TOKEN);
+    }
+
+    public static function stringToPascalCase(string $string, string $token): string
+    {
+        $signature = $string.$token;
         if (isset(self::$cache[$signature]))
         {
             return self::$cache[$signature];
         }
 
-        $string = str_replace('_', '', ucwords($string, '_'));
-
-        if ($firstLower) {
-            $string = lcfirst($string);
-        }
+        $string = str_replace($token, '', ucwords($string, $token));
 
         return self::$cache[$signature] = $string;
     }

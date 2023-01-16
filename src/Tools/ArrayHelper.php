@@ -15,14 +15,31 @@ use LetsCompose\Core\Exception\InvalidArgumentException;
 
 class ArrayHelper
 {
-
     private static array $cache = [];
 
     /**
      * @throws InvalidArgumentException
      * @throws ExceptionInterface
      */
-    public static function keysToLowerCamelCase(array $params): array
+    public static function snakeKeysToCamelCase(array $params): array
+    {
+        return self::keysToCamelCase($params);
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws ExceptionInterface
+     */
+    public static function kebabKeysToCamelCase(array $params): array
+    {
+        return self::keysToCamelCase($params, false);
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws ExceptionInterface
+     */
+    public static function keysToCamelCase(array $params, $snakeCase = true): array
     {
         if (empty($params)) {
             ExceptionHelper::create(new InvalidArgumentException())
@@ -30,14 +47,20 @@ class ArrayHelper
                 ->throw();
         }
 
-        $signature = sha1(json_encode($params));
+        $signature = sha1(json_encode($params) . $snakeCase);
         if (isset(self::$cache[$signature]))
         {
             return self::$cache[$signature];
         }
 
         $keys = implode('|>~|.520f0fb,<|',array_keys($params));
-        $keys = StringHelper::toLowerCamelCase($keys);
+        if ($snakeCase)
+        {
+            $keys = StringHelper::snakeCaseToCamelCase($keys);
+        } else
+        {
+            $keys = StringHelper::kebabCaseToCamelCase($keys);
+        }
         $keys = explode('|>~|.520f0fb,<|', $keys);
         $result = array_combine($keys, $params);
 
