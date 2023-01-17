@@ -12,7 +12,11 @@ namespace LetsCompose\Core\Tools\System;
 
 class SystemGroupInfo implements SystemGroupInfoInterface
 {
-    private string $name;
+    public const UNRESOLVED_GROUP_NAME = 'unresolved';
+
+    private bool $resolved = false;
+
+    private string $name = self::UNRESOLVED_GROUP_NAME;
     private int $groupId;
 
     public function getName(): string
@@ -37,4 +41,21 @@ class SystemGroupInfo implements SystemGroupInfoInterface
         return $this;
     }
 
+    /**
+     * @return bool
+     */
+    public function isResolved(): bool
+    {
+        return $this->resolved;
+    }
+
+    /**
+     * @param bool $resolved
+     * @return SystemGroupInfo
+     */
+    public function setResolved(bool $resolved): SystemGroupInfo
+    {
+        $this->resolved = $resolved;
+        return $this;
+    }
 }

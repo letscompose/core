@@ -15,5 +15,5 @@ interface SystemUserInfoInterface
     public function getName(): string;
     public function getUserId(): int;
     public function getGroup(): SystemGroupInfoInterface;
-    public function getHomePath(): string;
+    public function getHomePath(): ?string;
 }

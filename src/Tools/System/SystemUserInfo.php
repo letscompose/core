@@ -12,12 +12,16 @@ namespace LetsCompose\Core\Tools\System;
 
 class SystemUserInfo implements SystemUserInfoInterface
 {
-    private string $name;
+    public const UNRESOLVED_USER_NAME = 'unresolved';
+
+    private string $name = self::UNRESOLVED_USER_NAME;
     private int $userId;
 
     private SystemGroupInfoInterface $group;
 
-    private string $homePath;
+    private ?string $homePath = null;
+
+    private bool $resolved = false;
 
     public function getName(): string
     {
@@ -53,17 +57,38 @@ class SystemUserInfo implements SystemUserInfoInterface
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getHomePath(): string
+    public function getHomePath(): ?string
     {
         return $this->homePath;
     }
 
-    public function setHomePath(string $homePath): SystemUserInfo
+    /**
+     * @param string|null $homePath
+     * @return SystemUserInfo
+     */
+    public function setHomePath(?string $homePath): SystemUserInfo
     {
         $this->homePath = $homePath;
         return $this;
     }
 
+    /**
+     * @return bool
+     */
+    public function isResolved(): bool
+    {
+        return $this->resolved;
+    }
+
+    /**
+     * @param bool $resolved
+     * @return SystemUserInfo
+     */
+    public function setResolved(bool $resolved): SystemUserInfo
+    {
+        $this->resolved = $resolved;
+        return $this;
+    }
 }
