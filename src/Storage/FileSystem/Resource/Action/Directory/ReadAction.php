@@ -17,7 +17,7 @@ use LetsCompose\Core\Storage\Actions\AbstractAction;
 use LetsCompose\Core\Storage\Exception\UnsupportedResourceException;
 use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
 use LetsCompose\Core\Tools\ExceptionHelper;
-use LetsCompose\Core\Tools\Storage\Path;
+use LetsCompose\Core\Tools\Storage\PathHelper;
 
 class ReadAction extends AbstractAction
 {
@@ -43,7 +43,7 @@ class ReadAction extends AbstractAction
             {
                 continue;
             }
-            $fullResourcePath = Path::normalize(sprintf('%s/%s', $storageRootPath, $path));
+            $fullResourcePath = PathHelper::normalize(sprintf('%s/%s', $storageRootPath, $path));
             if (is_dir($fullResourcePath))
             {
                 $resource = $storage->initDirectory($path);

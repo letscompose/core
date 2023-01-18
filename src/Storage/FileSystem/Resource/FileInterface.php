@@ -11,6 +11,7 @@
 namespace LetsCompose\Core\Storage\FileSystem\Resource;
 
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
+use LetsCompose\Core\Tools\Storage\FileInfoInterface;
 use UnitEnum;
 
 /**
@@ -26,9 +27,8 @@ interface FileInterface extends ResourceInterface
 
     public function getMimeType(): ?string;
 
-    public function setSize(int $size): FileInterface;
-
-    public function getSize(): int;
-
     public function isStreamMode(UnitEnum $mode): bool;
+
+    public function getFileInfo(): ?FileInfoInterface;
+
 }

@@ -23,7 +23,7 @@ use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
 use LetsCompose\Core\Storage\Exception\PathNotFoundException;
 use LetsCompose\Core\Tools\ExceptionHelper;
-use LetsCompose\Core\Tools\Storage\Path;
+use LetsCompose\Core\Tools\Storage\PathHelper;
 use UnitEnum;
 
 /**
@@ -113,7 +113,7 @@ class ResourceStorage extends AbstractResourceStorage
     {
         $path = sprintf('%s/%s', $this->getRootPath(), $resource->getPath());
 
-        return Path::normalize($path);
+        return PathHelper::normalize($path);
     }
 
     public function readLine(FileInterface $file): mixed
@@ -129,7 +129,7 @@ class ResourceStorage extends AbstractResourceStorage
 
     public function setRootPath(string $path): ResourceStorageInterface
     {
-        if (false === Path::isAbsolute($path))
+        if (false === PathHelper::isAbsolute($path))
         {
             ExceptionHelper::create(new InvalidArgumentException())
                 ->message('Invalid storage root path [%s]. Path must beginning with "/"', $path)

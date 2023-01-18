@@ -12,14 +12,8 @@ namespace LetsCompose\Core\Tools\Data;
 
 class DataPropertyAccessor
 {
-    /**
-     * @var int
-     */
     private static int $iterationCount = 0;
 
-    /**
-     * @var array
-     */
     private static array $cache = [];
 
     private const OBJECT_METHOD_PREFIX_GET = 'get';
@@ -33,15 +27,10 @@ class DataPropertyAccessor
 
     /**
      * get property of array or object at path, where path is dot delimited string
-     *
-     * @param $target
-     * @param $path
-     *
-     * @return array|mixed
      */
-    public static function getPropertyAtPath($target, $path)
+    public static function getPropertyAtPath(array|object $target, string $path)
     {
-        if (empty(trim($path))) {
+        if (empty($path)) {
             throw new \InvalidArgumentException('parameter $path must be not empty string');
         }
         if ((!is_array($target) && !is_object($target)) || empty($target)) {
@@ -94,13 +83,7 @@ class DataPropertyAccessor
         return $target;
     }
 
-    /**
-     * @param object|array $target
-     * @param string $path
-     * @param $default
-     * @return mixed
-     */
-    private static function getValue(object|array $target, string $path, $default = null): mixed
+    private static function getValue(object|array $target, string $path): mixed
     {
         if (is_object($target)) {
             $target = self::objectToArray($target);

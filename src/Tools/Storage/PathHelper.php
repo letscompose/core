@@ -13,7 +13,7 @@ namespace LetsCompose\Core\Tools\Storage;
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class Path
+class PathHelper
 {
     /**
      * @param string $path

@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Tools\Storage;
+namespace LetsCompose\Core\Tools\Storage\Resource;
 
 use DateTimeInterface;
 use LetsCompose\Core\Tools\System\SystemGroupInfoInterface;
@@ -17,12 +17,6 @@ use LetsCompose\Core\Tools\System\SystemUserInfoInterface;
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface FileInfoInterface
+interface DirectoryInfoInterface extends ResourceInfoInterface
 {
-    public function getOwner(): SystemUserInfoInterface;
-    public function getGroup(): SystemGroupInfoInterface;
-    public function getSize(): int;
-    public function getAccessedAt(): DateTimeInterface;
-    public function getUpdatedAt(): DateTimeInterface;
-    public function getCreatedAt(): DateTimeInterface;
 }
