@@ -47,4 +47,8 @@ interface ResourceInterface
     public function getState(): string;
 
     public function isOpen(): bool;
+
+//    public function getInfo(): ?ResourceInfoInterface;
+//
+//    public function setInfo(?ResourceInfoInterface $fileInfo): self;
 }

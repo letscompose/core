@@ -10,14 +10,10 @@
 
 namespace LetsCompose\Core\Storage\FileSystem\Resource;
 
-use LetsCompose\Core\Storage\Resource\ResourceInterface;
-
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-interface DirectoryInterface extends ResourceInterface
+interface DirectoryInfoInterface extends FileSystemResourceInfoInterface
 {
-//    public function getInfo(): ?DirectoryInfoInterface;
-//
-//    public function setInfo(?DirectoryInfoInterface $info): self;
+
 }

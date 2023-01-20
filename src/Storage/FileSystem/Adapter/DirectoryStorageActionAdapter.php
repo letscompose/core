@@ -20,6 +20,7 @@ use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\IsReadableActi
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\IsWritableAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\OpenAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\ReadAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\GetInfoAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
 use LetsCompose\Core\Storage\StorageInterface;
 
@@ -42,6 +43,7 @@ class DirectoryStorageActionAdapter extends AbstractCompositeAdapter
             ReadAction::class,
             OpenAction::class,
             CloseAction::class,
+            GetInfoAction::class,
         ];
         $this->registerActions($actions);
 

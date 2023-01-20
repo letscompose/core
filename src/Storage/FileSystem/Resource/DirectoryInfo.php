@@ -16,18 +16,7 @@ use LetsCompose\Core\Interface\UserRefInterface;
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class FileInfo extends AbstractFileSystemResourceInfo implements FileInfoInterface
+class DirectoryInfo extends AbstractFileSystemResourceInfo implements DirectoryInfoInterface
 {
-    private int $size = 0;
 
-    public function getSize(): int
-    {
-        return $this->size;
-    }
-
-    public function setSize(int $size): FileInfo
-    {
-        $this->size = $size;
-        return $this;
-    }
 }

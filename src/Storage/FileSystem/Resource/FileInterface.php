@@ -28,7 +28,7 @@ interface FileInterface extends ResourceInterface
 
     public function isStreamMode(UnitEnum $mode): bool;
 
-    public function getFileInfo(): ?FileInfoInterface;
+    public function getInfo(): ?FileInfoInterface;
 
-    public function setFileInfo(?FileInfoInterface $fileInfo): self;
+    public function setInfo(?FileInfoInterface $info): self;
 }

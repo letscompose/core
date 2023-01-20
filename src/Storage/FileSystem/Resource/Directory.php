@@ -19,6 +19,7 @@ use LetsCompose\Core\Tools\ExceptionHelper;
  */
 class Directory extends AbstractFileSystemResource implements DirectoryInterface
 {
+    private ?DirectoryInfoInterface $info = null;
 
     /**
      * @param mixed $stream
@@ -39,4 +40,25 @@ class Directory extends AbstractFileSystemResource implements DirectoryInterface
 
         return $this;
     }
+
+    /**
+     * @return DirectoryInfo|null
+     */
+    public function getInfo(): ?DirectoryInfoInterface
+    {
+        return $this->info;
+    }
+
+    /**
+     * @param DirectoryInfo|null $info
+     * @return Directory
+     */
+    public function setInfo(?DirectoryInfoInterface $info): self
+    {
+        $this->info = $info;
+        return $this;
+    }
+
+
+
 }
