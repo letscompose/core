@@ -10,6 +10,7 @@
 
 namespace LetsCompose\Core\Storage;
 
+use LetsCompose\Core\Storage\Resource\ResourceInfoInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
 use UnitEnum;
 
@@ -45,4 +46,6 @@ interface ResourceStorageInterface
     public function isResourceSupported(string $resourceClass): bool;
 
     public function initResource(string $resourceClass): ResourceInterface;
+
+    public function getInfo(ResourceInterface $resource): ResourceInfoInterface;
 }

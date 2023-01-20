@@ -20,6 +20,7 @@ use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
 use LetsCompose\Core\Storage\FileSystem\Resource\DirectoryInterface;
 use LetsCompose\Core\Storage\FileSystem\Resource\File;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
+use LetsCompose\Core\Storage\Resource\ResourceInfoInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
 use LetsCompose\Core\Storage\Exception\PathNotFoundException;
 use LetsCompose\Core\Tools\ExceptionHelper;
@@ -116,6 +117,11 @@ class ResourceStorage extends AbstractResourceStorage
         return PathHelper::normalize($path);
     }
 
+    public function getInfo(ResourceInterface $resource): ResourceInfoInterface
+    {
+        return $this->execute($resource::class, __FUNCTION__, $resource);
+    }
+
     public function readLine(FileInterface $file): mixed
     {
         return $this->execute($file::class, __FUNCTION__, $file);
@@ -125,7 +131,6 @@ class ResourceStorage extends AbstractResourceStorage
     {
         return $this->execute($file::class, __FUNCTION__, $file);
     }
-
 
     public function setRootPath(string $path): ResourceStorageInterface
     {

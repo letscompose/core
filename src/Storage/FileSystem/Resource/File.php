@@ -14,7 +14,6 @@ use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
 use LetsCompose\Core\Storage\FileSystem\Enum\FileOpenModeEnum;
 use LetsCompose\Core\Tools\ExceptionHelper;
-use LetsCompose\Core\Tools\Storage\FileInfoInterface;
 use UnitEnum;
 
 /**
@@ -73,7 +72,7 @@ class File extends AbstractFileSystemResource implements FileInterface
         return pathinfo($this->getPath(), PATHINFO_BASENAME);
     }
 
-    public function setMimeType(?string $mimeType): File
+    public function setMimeType(?string $mimeType): self
     {
         $this->mimeType = $mimeType;
         return $this;
@@ -96,7 +95,7 @@ class File extends AbstractFileSystemResource implements FileInterface
      * @param FileInfoInterface|null $fileInfo
      * @return File
      */
-    public function setFileInfo(?FileInfoInterface $fileInfo): File
+    public function setFileInfo(?FileInfoInterface $fileInfo): self
     {
         $this->fileInfo = $fileInfo;
         return $this;
