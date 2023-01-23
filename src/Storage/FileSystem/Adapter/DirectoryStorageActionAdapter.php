@@ -36,13 +36,13 @@ class DirectoryStorageActionAdapter extends AbstractCompositeAdapter
     public function __construct(StorageInterface $storage)
     {
         $actions = [
+            CreateAction::class,
+            OpenAction::class,
+            CloseAction::class,
+            ReadAction::class,
             IsExistsAction::class,
             IsWritableAction::class,
             IsReadableAction::class,
-            CreateAction::class,
-            ReadAction::class,
-            OpenAction::class,
-            CloseAction::class,
             GetInfoAction::class,
         ];
         $this->registerActions($actions);

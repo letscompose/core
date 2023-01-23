@@ -20,6 +20,7 @@ use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\FlushAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\GetInfoAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\IsExistsAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\IsReadableAction;
+use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\IsWritableAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\OpenAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\ReadAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\File\ReadLineAction;
@@ -46,12 +47,13 @@ class FileStorageActionAdapter extends AbstractCompositeAdapter
             ReadAction::class,
             ReadLineAction::class,
             RemoveAction::class,
-            FlushAction::class,
             IsExistsAction::class,
             IsReadableAction::class,
+            IsWritableAction::class,
+            GetInfoAction::class,
+            FlushAction::class,
             WriteAction::class,
             AppendAction::class,
-            GetInfoAction::class,
         ];
         $this->registerActions($actions);
 
