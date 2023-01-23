@@ -32,17 +32,26 @@ abstract class AbstractCompositeAdapter extends AbstractAdapter implements Compo
      */
     private array $actionInstanceList = [];
 
+    /**
+     * @throws MustImplementException
+     * @throws ExceptionInterface
+     */
     public function __construct(StorageInterface $storage)
     {
+        $actions = $this->getActionsClassList();
+        $this->registerActions($actions);
+
         parent::__construct($storage);
     }
 
 
     /**
-     * @throws MustImplementException
+     * @param array<static> $actionsClassList
+     * @return $this
      * @throws ExceptionInterface
+     * @throws MustImplementException
      */
-    public function registerActions(array $actionsClassList)
+    public function registerActions(array $actionsClassList): self
     {
         foreach ($actionsClassList as $actionsClass)
         {
@@ -53,8 +62,12 @@ abstract class AbstractCompositeAdapter extends AbstractAdapter implements Compo
                     ->throw()
                     ;
             }
+            /**
+             *  @var ActionInterface $actionsClass
+             */
             $this->actions[($actionsClass)::storageMethod()] = $actionsClass;
         }
+        return $this;
     }
 
     public function hasAction(string $actionName): bool

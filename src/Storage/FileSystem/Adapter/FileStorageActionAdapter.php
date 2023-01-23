@@ -34,13 +34,9 @@ use LetsCompose\Core\Storage\StorageInterface;
  */
 class FileStorageActionAdapter extends AbstractCompositeAdapter
 {
-    /**
-     * @throws MustImplementException
-     * @throws ExceptionInterface
-     */
-    public function __construct(StorageInterface $storage)
+    public function getActionsClassList(): array
     {
-        $actions = [
+        return [
             CreateAction::class,
             OpenAction::class,
             CloseAction::class,
@@ -55,10 +51,8 @@ class FileStorageActionAdapter extends AbstractCompositeAdapter
             WriteAction::class,
             AppendAction::class,
         ];
-        $this->registerActions($actions);
-
-        parent::__construct($storage);
     }
+
 
     public function getSupportedResource(): string
     {

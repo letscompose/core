@@ -10,13 +10,21 @@
 
 namespace LetsCompose\Core\Storage\Adapter;
 
-use LetsCompose\Core\Storage\Resource\ResourceInterface;
-use LetsCompose\Core\Storage\ResourceStorageInterface;
+use LetsCompose\Core\Storage\Actions\ActionInterface;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
 interface CompositeAdapterInterface extends AdapterInterface
 {
+    /**
+     * @return static[]
+     */
+    public function getActionsClassList(): array;
 
+    public function registerActions(array $actionsClassList): self;
+
+    public function hasAction(string $actionName): bool;
+
+    public function getAction(string $actionName): ActionInterface;
 }

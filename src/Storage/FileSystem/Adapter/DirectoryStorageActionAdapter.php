@@ -10,8 +10,6 @@
 
 namespace LetsCompose\Core\Storage\FileSystem\Adapter;
 
-use LetsCompose\Core\Exception\ExceptionInterface;
-use LetsCompose\Core\Exception\MustImplementException;
 use LetsCompose\Core\Storage\Adapter\AbstractCompositeAdapter;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\CloseAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\CreateAction;
@@ -22,7 +20,6 @@ use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\OpenAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\ReadAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\GetInfoAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
-use LetsCompose\Core\Storage\StorageInterface;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
@@ -30,12 +27,11 @@ use LetsCompose\Core\Storage\StorageInterface;
 class DirectoryStorageActionAdapter extends AbstractCompositeAdapter
 {
     /**
-     * @throws MustImplementException
-     * @throws ExceptionInterface
+     * @inheritDoc
      */
-    public function __construct(StorageInterface $storage)
+    public function getActionsClassList(): array
     {
-        $actions = [
+        return [
             CreateAction::class,
             OpenAction::class,
             CloseAction::class,
@@ -45,10 +41,8 @@ class DirectoryStorageActionAdapter extends AbstractCompositeAdapter
             IsReadableAction::class,
             GetInfoAction::class,
         ];
-        $this->registerActions($actions);
-
-        parent::__construct($storage);
     }
+
 
     public function getSupportedResource(): string
     {
