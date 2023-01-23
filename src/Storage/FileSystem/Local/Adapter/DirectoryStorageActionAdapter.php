@@ -8,17 +8,17 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem\Adapter;
+namespace LetsCompose\Core\Storage\FileSystem\Local\Adapter;
 
 use LetsCompose\Core\Storage\Adapter\AbstractCompositeAdapter;
-use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\CloseAction;
-use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\CreateAction;
-use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\IsExistsAction;
-use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\IsReadableAction;
-use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\IsWritableAction;
-use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\OpenAction;
-use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\ReadAction;
-use LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory\GetInfoAction;
+use LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\Directory\CloseAction;
+use LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\Directory\CreateAction;
+use LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\Directory\IsExistsAction;
+use LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\Directory\IsReadableAction;
+use LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\Directory\IsWritableAction;
+use LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\Directory\OpenAction;
+use LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\Directory\ReadAction;
+use LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\Directory\GetInfoAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
 
 /**

@@ -8,18 +8,18 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory;
+namespace LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\Directory;
 
 use LetsCompose\Core\Storage\Actions\AbstractAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\DirectoryInterface;
 
-class IsExistsAction extends AbstractAction
+class IsWritableAction extends AbstractAction
 {
-    protected const STORAGE_METHOD  = 'isExists';
+    protected const STORAGE_METHOD  = 'isWritable';
 
-    protected function isExists(DirectoryInterface $directory): bool
+    protected function isWritable(DirectoryInterface $directory): bool
     {
-        $fullFilePath = $this->getStorage()->getFullPath($directory);
-        return file_exists($fullFilePath) && is_dir($fullFilePath);
+        $fullPath = $this->getStorage()->getFullPath($directory);
+        return is_dir($fullPath) && is_writable($fullPath);
     }
 }

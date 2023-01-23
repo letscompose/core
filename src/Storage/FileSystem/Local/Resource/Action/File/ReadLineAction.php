@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem\Resource\Action\File;
+namespace LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\File;
 
 use Generator;
 use LetsCompose\Core\Storage\Actions\AbstractAction;

@@ -8,18 +8,18 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory;
+namespace LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\Directory;
 
 use LetsCompose\Core\Storage\Actions\AbstractAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\DirectoryInterface;
 
-class IsWritableAction extends AbstractAction
+class IsReadableAction extends AbstractAction
 {
-    protected const STORAGE_METHOD  = 'isWritable';
+    protected const STORAGE_METHOD  = 'isReadable';
 
-    protected function isWritable(DirectoryInterface $directory): bool
+    protected function isReadable(DirectoryInterface $directory): bool
     {
         $fullPath = $this->getStorage()->getFullPath($directory);
-        return is_dir($fullPath) && is_writable($fullPath);
+        return is_dir($fullPath) && is_readable($fullPath);
     }
 }

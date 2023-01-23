@@ -8,18 +8,18 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem\Resource\Action\File;
+namespace LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\File;
 
 use LetsCompose\Core\Storage\Actions\AbstractAction;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
 
-class IsReadableAction extends AbstractAction
+class IsWritableAction extends AbstractAction
 {
-    protected const STORAGE_METHOD  = 'isReadable';
+    protected const STORAGE_METHOD  = 'isWritable';
 
-    protected function isReadable(FileInterface $resource): bool
+    protected function isWritable(FileInterface $resource): bool
     {
         $fullFilePath = $this->getStorage()->getFullPath($resource);
-        return is_readable($fullFilePath);
+        return file_exists($fullFilePath) && is_writable($fullFilePath);
     }
 }

@@ -11,9 +11,9 @@
 namespace LetsCompose\Core\Storage\FileSystem;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
-use LetsCompose\Core\Storage\Exception\UnknownStorageResourceClassException;
-use LetsCompose\Core\Storage\FileSystem\Adapter\DirectoryStorageActionAdapter;
-use LetsCompose\Core\Storage\FileSystem\Adapter\FileStorageActionAdapter;
+use LetsCompose\Core\Exception\MustImplementException;
+use LetsCompose\Core\Storage\FileSystem\Local\Adapter\DirectoryStorageActionAdapter;
+use LetsCompose\Core\Storage\FileSystem\Local\Adapter\FileStorageActionAdapter;
 use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
 use LetsCompose\Core\Storage\FileSystem\Resource\DirectoryInterface;
 use LetsCompose\Core\Storage\FileSystem\Resource\File;
@@ -26,18 +26,17 @@ use LetsCompose\Core\Storage\ResourceStorage;
  */
 class FileStorage extends ResourceStorage implements FileStorageInterface
 {
+
     /**
-     * @throws UnknownStorageResourceClassException
+     * @throws MustImplementException
      * @throws ExceptionInterface
      */
-    public function __construct(string $rootPath)
+    public function getResourceAdapters(): array
     {
-        $this->setRootPath($rootPath);
-        $adapters = [
+        return [
             new FileStorageActionAdapter($this),
             new DirectoryStorageActionAdapter($this),
         ];
-        $this->setResourceAdapters($adapters);
     }
 
     public function initFile(string $path): FileInterface

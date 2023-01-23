@@ -13,12 +13,7 @@ namespace LetsCompose\Core\Storage;
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
 use LetsCompose\Core\Storage\Exception\UnknownStorageResourceClassException;
-use LetsCompose\Core\Storage\FileSystem\Adapter\DirectoryStorageActionAdapter;
-use LetsCompose\Core\Storage\FileSystem\Adapter\FileStorageActionAdapter;
 use LetsCompose\Core\Storage\FileSystem\Enum\FileOpenModeEnum;
-use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
-use LetsCompose\Core\Storage\FileSystem\Resource\DirectoryInterface;
-use LetsCompose\Core\Storage\FileSystem\Resource\File;
 use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInfoInterface;
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
@@ -39,30 +34,10 @@ class ResourceStorage extends AbstractResourceStorage
     public function __construct(string $rootPath)
     {
         $this->setRootPath($rootPath);
-        $adapters = [
-            new FileStorageActionAdapter($this),
-            new DirectoryStorageActionAdapter($this),
-        ];
+
+        $adapters = $this->getResourceAdapters();
+
         $this->setResourceAdapters($adapters);
-    }
-
-    public function initFile(string $path): FileInterface
-    {
-        $file = parent::initResource(File::class);
-        $file->setPath($path);
-        return $file;
-    }
-
-    public function initDirectory(string $path): DirectoryInterface
-    {
-        $directory = parent::initResource(Directory::class);
-        $directory->setPath($path);
-        return $directory;
-    }
-
-    public function createDirectory(DirectoryInterface $directory): DirectoryInterface
-    {
-        return $this->create($directory);
     }
 
     public function create(ResourceInterface $resource): ResourceInterface

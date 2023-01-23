@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem\Resource\Action\Directory;
+namespace LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\Directory;
 
 use LetsCompose\Core\Storage\Actions\AbstractAction;
 use LetsCompose\Core\Storage\Exception\DirectoryNotFoundException;

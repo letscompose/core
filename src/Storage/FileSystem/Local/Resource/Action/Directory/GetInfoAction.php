@@ -8,14 +8,14 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Storage\FileSystem\Resource\Action\File;
+namespace LetsCompose\Core\Storage\FileSystem\Local\Resource\Action\Directory;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Object\User;
 use LetsCompose\Core\Storage\Actions\AbstractAction;
-use LetsCompose\Core\Storage\FileSystem\Resource\FileInfo;
-use LetsCompose\Core\Storage\FileSystem\Resource\FileInfoInterface;
-use LetsCompose\Core\Storage\FileSystem\Resource\FileInterface;
+use LetsCompose\Core\Storage\FileSystem\Resource\DirectoryInfo;
+use LetsCompose\Core\Storage\FileSystem\Resource\DirectoryInfoInterface;
+use LetsCompose\Core\Storage\FileSystem\Resource\DirectoryInterface;
 use LetsCompose\Core\Tools\Storage\ResourceInfoHelper;
 
 class GetInfoAction extends AbstractAction
@@ -25,10 +25,10 @@ class GetInfoAction extends AbstractAction
     /**
      * @throws ExceptionInterface
      */
-    protected function getInfo(FileInterface $file): FileInfoInterface
+    protected function getInfo(DirectoryInterface $directory): DirectoryInfoInterface
     {
-        $filePath = $this->getStorage()->getFullPath($file);
-        $resourceInfo = ResourceInfoHelper::getResourceInfo($filePath);
+        $directoryPath = $this->getStorage()->getFullPath($directory);
+        $resourceInfo = ResourceInfoHelper::getResourceInfo($directoryPath);
 
         $ownerId = $resourceInfo->getOwner()->getUserId();
 
@@ -39,14 +39,14 @@ class GetInfoAction extends AbstractAction
         $accessedAt = $resourceInfo->getAccessedAt() ;
 
 
-        $fileInfo = new FileInfo();
-        $fileInfo->setOwner($owner);
-        $fileInfo->setCreatedAt($createdAt);
-        $fileInfo->setUpdatedAt($updatedAt);
-        $fileInfo->setAccessedAt($accessedAt);
+        $resourceInfo = new DirectoryInfo();
+        $resourceInfo->setOwner($owner);
+        $resourceInfo->setCreatedAt($createdAt);
+        $resourceInfo->setUpdatedAt($updatedAt);
+        $resourceInfo->setAccessedAt($accessedAt);
 
-        $file->setInfo($fileInfo);
+        $directory->setInfo($resourceInfo);
 
-        return $fileInfo;
+        return $resourceInfo;
     }
 }
