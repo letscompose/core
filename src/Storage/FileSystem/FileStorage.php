@@ -12,6 +12,7 @@ namespace LetsCompose\Core\Storage\FileSystem;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\MustImplementException;
+use LetsCompose\Core\Storage\Exception\UnknownStorageResourceClassException;
 use LetsCompose\Core\Storage\FileSystem\Local\Adapter\DirectoryStorageActionAdapter;
 use LetsCompose\Core\Storage\FileSystem\Local\Adapter\FileStorageActionAdapter;
 use LetsCompose\Core\Storage\FileSystem\Resource\Directory;
@@ -39,6 +40,10 @@ class FileStorage extends ResourceStorage implements FileStorageInterface
         ];
     }
 
+    /**
+     * @throws UnknownStorageResourceClassException
+     * @throws ExceptionInterface
+     */
     public function initFile(string $path): FileInterface
     {
         $file = parent::initResource(File::class);
@@ -46,6 +51,10 @@ class FileStorage extends ResourceStorage implements FileStorageInterface
         return $file;
     }
 
+    /**
+     * @throws UnknownStorageResourceClassException
+     * @throws ExceptionInterface
+     */
     public function initDirectory(string $path): DirectoryInterface
     {
         $directory = parent::initResource(Directory::class);
@@ -58,11 +67,19 @@ class FileStorage extends ResourceStorage implements FileStorageInterface
         return $this->create($directory);
     }
 
+    /**
+     * @throws UnknownStorageResourceClassException
+     * @throws ExceptionInterface
+     */
     public function create(ResourceInterface $resource): ResourceInterface
     {
         return $this->execute($resource::class, __FUNCTION__, $resource);
     }
 
+    /**
+     * @throws UnknownStorageResourceClassException
+     * @throws ExceptionInterface
+     */
     public function flush(FileInterface $file): bool
     {
         return $this->execute($file::class, __FUNCTION__, $file);
