@@ -8,8 +8,11 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Interface;
+namespace LetsCompose\Core\Object\Tools;
 
-interface UniquePropertyListInterface extends PropertyListInterface
+use LetsCompose\Core\Interface\UniquePropertyInterface;
+
+class UniqueProperty extends Property implements UniquePropertyInterface
 {
+
 }

@@ -10,17 +10,13 @@
 
 namespace LetsCompose\Core\Object\Tools;
 
-use LetsCompose\Core\Exception\ExceptionInterface;
-use LetsCompose\Core\Exception\NotExistsException;
 use LetsCompose\Core\Interface\PropertyInterface;
-use LetsCompose\Core\Interface\UniquePropertyListInterface;
-use LetsCompose\Core\Tools\ExceptionHelper;
 
 class Property implements PropertyInterface
 {
-    private string $name;
+    protected string $name;
 
-    private mixed $value;
+    protected mixed $value;
 
     /**
      * @return string

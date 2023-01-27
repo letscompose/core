@@ -15,7 +15,6 @@ use LetsCompose\Core\Object\Tools\PropertyList;
 interface UserRefInterface
 {
     public function getRef(): string|int|null;
-
     public function getProperties(): PropertyList;
     public function setProperties(PropertyList $properties): self;
 }

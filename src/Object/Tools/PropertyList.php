@@ -11,19 +11,26 @@
 namespace LetsCompose\Core\Object\Tools;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
+use LetsCompose\Core\Exception\MustImplementException;
 use LetsCompose\Core\Exception\NotExistsException;
 use LetsCompose\Core\Exception\NotUniqueException;
 use LetsCompose\Core\Interface\PropertyInterface;
 use LetsCompose\Core\Interface\PropertyListInterface;
 use LetsCompose\Core\Interface\UniquePropertyInterface;
 use LetsCompose\Core\Tools\ExceptionHelper;
+use LetsCompose\Core\Tools\ObjectHelper;
+use ReturnTypeWillChange;
 
-class PropertyList implements PropertyListInterface
+class PropertyList implements PropertyListInterface, \Iterator, \Countable
 {
     /**
      * @var PropertyInterface[]
      */
-    private array $properties = [];
+    protected array $properties = [];
+
+    protected const DEFAULT_PROPERTY_CLASS = Property::class;
+
+    protected int $position;
 
     /**
      * @param string $name
@@ -78,20 +85,48 @@ class PropertyList implements PropertyListInterface
         return false;
     }
 
-
-    public function add(string $name, string $value): self
+    /**
+     * @throws ExceptionInterface
+     * @throws MustImplementException
+     */
+    protected function createPropertyInstance(string|PropertyInterface $class): PropertyInterface
     {
-        $propertyClass = Property::class;
-        if (class_exists($name))
+        if ($class instanceof PropertyInterface)
         {
-            $propertyClass = $name;
+            return $class;
         }
 
+        $propertyClass = static::DEFAULT_PROPERTY_CLASS;
+        if (class_exists($class)) {
+            $propertyClass = $class;
+        }
 
-        $property = (new $propertyClass())
-            ->setName($name)
-            ->setValue($value)
-        ;
+        if (false === ObjectHelper::hasInterface(PropertyInterface::class, $propertyClass))
+        {
+            ExceptionHelper::create(new MustImplementException())
+                ->message('Property [%s] of [%s] must implement interface [%s]', $propertyClass, ObjectHelper::getClassShortName(get_class($this)), PropertyInterface::class)
+                ->throw();
+        }
+
+        return new $propertyClass();
+    }
+
+    protected function checkPropertyInstance(PropertyInterface $property): PropertyInterface
+    {
+        return $property;
+    }
+
+
+    /**
+     * @throws NotUniqueException
+     * @throws MustImplementException
+     * @throws ExceptionInterface
+     */
+    public function add(string $name, string $value): self
+    {
+        $property = $this->createPropertyInstance($name);
+        $property = $this->checkPropertyInstance($property);
+
 
         if ($property instanceof UniquePropertyInterface)
         {
@@ -99,6 +134,11 @@ class PropertyList implements PropertyListInterface
                 $this->throwNotUniqueException($name);
             }
         }
+
+        $property
+            ->setName($name)
+            ->setValue($value)
+        ;
 
         $this->properties[] = $property;
 
@@ -165,4 +205,44 @@ class PropertyList implements PropertyListInterface
         ;
     }
 
+    public static function createFromArray(array $properties): PropertyListInterface
+    {
+        $propertyListClass = get_called_class();
+        /**
+         * @var PropertyListInterface $propertyList
+         */
+        $propertyList = new $propertyListClass();
+        foreach ($properties as $name => $value) {
+            $propertyList->add($name, $value);
+        }
+        return $propertyList;
+    }
+
+    // implement \Iterator
+    public function rewind(): void {
+        $this->position = 0;
+    }
+
+    #[ReturnTypeWillChange]
+    public function current() {
+        return $this->properties[$this->position];
+    }
+
+    public function key(): int {
+        return $this->position;
+    }
+
+    public function next(): void {
+        ++$this->position;
+    }
+
+    public function valid(): bool {
+        return array_key_exists($this->position, $this->properties);
+    }
+
+    // implement \Countable
+    public function count(): int
+    {
+        return count($this->properties);
+    }
 }

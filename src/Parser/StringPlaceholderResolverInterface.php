@@ -8,8 +8,12 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Interface;
+namespace LetsCompose\Core\Parser;
 
-interface UniquePropertyListInterface extends PropertyListInterface
+interface StringPlaceholderResolverInterface
 {
+    public function resolvePlaceholders(string $content): string;
+
+    public function setPlaceholdersNameValueList(?array $nameValueList): self;
+
 }

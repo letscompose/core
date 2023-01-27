@@ -8,8 +8,9 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Interface;
+namespace LetsCompose\Core\Parser;
 
-interface UniquePropertyListInterface extends PropertyListInterface
+interface StringParserInterface
 {
+    public function parse(string $content, ?array $contentPlaceholderParameters = []): array;
 }

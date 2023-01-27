@@ -17,28 +17,8 @@ class StringHelper
 {
     public static array $cache = [];
 
-    public const  PLACEHOLDER_TOKEN_BRACKETS = '{.}';
-
-    public const PLACEHOLDER_TOKEN_DOUBLE_BRACKETS = '{{.}}';
-
-    public const PLACEHOLDER_TOKEN_PERCENT = '%.%';
-
-    private const PLACEHOLDER_TOKEN_MAP = [
-        self::PLACEHOLDER_TOKEN_BRACKETS,
-        self::PLACEHOLDER_TOKEN_DOUBLE_BRACKETS,
-        self::PLACEHOLDER_TOKEN_PERCENT,
-    ];
-
-    private const PLACEHOLDER_TOKEN_REGEX_MAP = [
-        self::PLACEHOLDER_TOKEN_BRACKETS => '/(?<={)[a-z_\-]+(?=})/mui',
-        self::PLACEHOLDER_TOKEN_DOUBLE_BRACKETS => '/(?<={{)[a-z_\-]+(?=}})/mui',
-        self::PLACEHOLDER_TOKEN_PERCENT => '/(?<=%)[a-z_\-]+(?=%)/mui',
-    ];
-
     const STRING_SNAKE_TOKEN =  '_';
     const STRING_KEBAB_TOKEN =  '-';
-
-    private static array $placeHolderTokenParts = [];
 
     public static function snakeCaseToCamelCase(string $string): string
     {
@@ -86,73 +66,6 @@ class StringHelper
 
         return self::$cache[$signature] = $string;
     }
-
-    /**
-     * @throws ExceptionInterface
-     */
-    public static function fillPlaceHolders(string $string, array $placeHolders, string $token = self::PLACEHOLDER_TOKEN_BRACKETS): string
-    {
-        if (false === in_array($token, self::PLACEHOLDER_TOKEN_MAP))
-        {
-            ExceptionHelper::create(new InvalidArgumentException())
-                ->message('Unknown placeholder token format, you can use only theses [%s]', implode(',',self::PLACEHOLDER_TOKEN_MAP))
-                ->throw()
-            ;
-        }
-
-        /**
-         * if here no placeholder replacements, return initial string
-         */
-        if (!$placeHolders) {
-            return $string;
-        }
-
-        /**
-         * ensure what string have placeholders to fill
-         */
-        $stringPlaceHolders = self::getStringPlaceHolders($string, self::PLACEHOLDER_TOKEN_REGEX_MAP[$token]);
-        if (!$stringPlaceHolders) {
-            return $string;
-        }
-
-        /**
-         * check if we have any match between string placeholders and placeholder replacements
-         */
-        $stringPlaceHolders = array_flip($stringPlaceHolders);
-        $placeHolders = array_intersect_key($placeHolders, $stringPlaceHolders);
-        if (!$placeHolders) {
-            return $string;
-        }
-
-        if (false === isset(self::$placeHolderTokenParts[$token]))
-        {
-            self::$placeHolderTokenParts[$token] = explode('.', $token);
-        }
-
-        [$tokenLeftPart, $tokenRightPart] = self::$placeHolderTokenParts[$token];
-        /**
-         * prepare placeholder replacements and check her types
-         */
-        $replacements = [];
-        foreach ($placeHolders as $key => $value) {
-            if (is_string($value) || is_int($value) || is_float($value))  {
-                $replacements[$tokenLeftPart. $key . $tokenRightPart] = $value;
-            } else {
-                throw new \InvalidArgumentException(sprintf('not supported place holder value, for key [{%s}] in string ["%s"]', $key, $string));
-            }
-        }
-
-        /**
-         * finally replace placeholders
-         */
-        return \strtr($string, $replacements);
-    }
-
-    private static function getStringPlaceHolders(string $string, string $pattern): array {
-        preg_match_all($pattern, $string, $stringPlaceHolders);
-        return $stringPlaceHolders ? $stringPlaceHolders[0] : [];
-    }
-
 
     /**
      * convert camelCase to snake_case
