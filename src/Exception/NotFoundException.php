@@ -8,9 +8,13 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\Parser;
+namespace LetsCompose\Core\Exception;
 
-interface StringParserInterface
+
+/**
+ * @author Igor ZLOBINE <izlobine@gmail.com>
+ */
+class NotFoundException extends Exception
 {
-    public function parse(string $content): array;
+
 }

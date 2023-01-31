@@ -17,7 +17,7 @@ use LetsCompose\Core\Tools\Storage\PathHelper;
 
 class YamlFileLoader extends AbstractFileLoader
 {
-    private const SUPPORTED_FILE_TYPES = [
+    public const SUPPORTED_FILE_TYPES = [
         'yaml',
         'yml'
     ];
