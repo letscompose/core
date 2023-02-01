@@ -16,9 +16,9 @@ interface SourceImportConfigInterface
 
     public function setSource(string $source): self;
 
-    public function hasLoader(): bool;
+    public function hasLoaderConfig(): bool;
 
-    public function getLoader(): ?string;
+    public function getSourceLoaderConfig(): ?SourceLoaderConfigInterface;
 
-    public function setLoader(?string $loader): self;
+    public function setSourceLoaderConfig(?SourceLoaderConfigInterface $loaderConfig): self;
 }

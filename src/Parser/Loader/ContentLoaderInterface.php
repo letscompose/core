@@ -14,6 +14,8 @@ use LetsCompose\Core\Parser\Config\SourceImportConfigInterface;
 
 interface ContentLoaderInterface
 {
-    public function load(SourceImportConfigInterface $config): array;
-    public function supports(SourceImportConfigInterface $config): bool;
+    public function load(string $source): array;
+    public function supports(string $source): bool;
+    public function setConfig(array $config): self;
+    public function getConfig(): array;
 }

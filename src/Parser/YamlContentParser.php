@@ -17,6 +17,7 @@ use LetsCompose\Core\Exception\NotFoundException;
 use LetsCompose\Core\FileLoader\FileLoaderInterface;
 use LetsCompose\Core\Parser\Config\SourceImportConfig;
 use LetsCompose\Core\Parser\Config\SourceImportConfigInterface;
+use LetsCompose\Core\Parser\Config\SourceLoaderConfig;
 use LetsCompose\Core\Parser\Loader\ContentLoaderInterface;
 use LetsCompose\Core\Parser\Loader\YamlContentLoader;
 use LetsCompose\Core\Tools\ExceptionHelper;
@@ -74,9 +75,7 @@ class YamlContentParser implements StringParserInterface
     {
         $content = $this->parseContent($content);
         $content = json_encode($content);
-
         $content = $this->resolveContentPlaceholders($content);
-
         return json_decode($content, true);
     }
 
@@ -124,6 +123,9 @@ class YamlContentParser implements StringParserInterface
         // process import section
         $content = $this->processImports($behaviorSection, $content);
 
+        // process parameters section
+        $this->processParameters($behaviorSection);
+
         return $content;
     }
 
@@ -140,10 +142,6 @@ class YamlContentParser implements StringParserInterface
     }
 
 
-    /**
-     * @throws InvalidArgumentException
-     * @throws ExceptionInterface
-     */
     protected function resolveContentPlaceholders(string $content): string
     {
         foreach ($this->placeholderResolvers as $resolver)
@@ -161,7 +159,8 @@ class YamlContentParser implements StringParserInterface
             return;
         }
 
-        $this->parameters = array_replace($this->parameters, $parametersSection);
+        $parameters = array_replace($parametersSection, $this->getContentPlaceholderParameters());
+        $this->setContentPlaceholderParameters($parameters);
     }
 
 
@@ -218,9 +217,12 @@ class YamlContentParser implements StringParserInterface
      */
     protected function importSource(SourceImportConfigInterface $sourceImportConfig): array
     {
-        if ($sourceImportConfig->hasLoader())
+        $configData = [];
+        if ($sourceImportConfig->hasLoaderConfig())
         {
-            $loaderClass = $sourceImportConfig->getLoader();
+            $loaderConfig = $sourceImportConfig->getSourceLoaderConfig();
+            $loaderClass = $loaderConfig->getClass();
+            $configData = $loaderConfig->getConfig();
             if (!$this->hasContentLoader($loaderClass))
             {
                 $loaderInstance = new $loaderClass();
@@ -236,9 +238,10 @@ class YamlContentParser implements StringParserInterface
 
         foreach ($this->contentLoaders as $loader)
         {
-            if ($loader->supports($sourceImportConfig))
+            if ($loader->supports($sourceImportConfig->getSource()))
             {
-                return $loader->load($sourceImportConfig);
+                $loader->setConfig($configData);
+                return $loader->load($sourceImportConfig->getSource());
             }
         }
 
@@ -264,7 +267,7 @@ class YamlContentParser implements StringParserInterface
         }
 
         $source = $importConfig['source'] ?? false;
-        $sourceLoader = $importConfig['loader'] ?? null;
+        $sourceLoaderClassOrConfig = $importConfig['loader'] ?? null;
 
         if (!$source)
         {
@@ -274,9 +277,45 @@ class YamlContentParser implements StringParserInterface
             ;
         }
         $sourceConfig->setSource($source);
-        $sourceLoader->setSource($source);
 
-        return $sourceConfig;
+        if (!$sourceLoaderClassOrConfig)
+        {
+            return $sourceConfig;
+        }
+
+        $sourceLoaderConfig = new SourceLoaderConfig();
+        if (is_string($sourceLoaderClassOrConfig))
+        {
+            $sourceLoaderClassConfig = $importConfig['config'] ?? [];
+            $sourceLoaderConfig->setClass($sourceLoaderClassOrConfig);
+            $sourceLoaderConfig->setConfig($sourceLoaderClassConfig);
+            $sourceConfig->setSourceLoaderConfig($sourceLoaderConfig);
+            return $sourceConfig;
+        }
+
+        if (is_array($sourceLoaderClassOrConfig))
+        {
+            $class = $sourceLoaderClassOrConfig['class'] ?? false;
+            $config = $sourceLoaderClassOrConfig['config'] ?? [];
+
+            if (!is_string($class) || !$class)
+            {
+                ExceptionHelper::create(new InvalidArgumentException())
+                    ->message('Invalid import config, loader class must be an valid object class')
+                    ->throw()
+                ;
+            }
+
+            $sourceLoaderConfig->setClass($class);
+            $sourceLoaderConfig->setConfig($config);
+            $sourceConfig->setSourceLoaderConfig($sourceLoaderConfig);
+            return $sourceConfig;
+        }
+
+        ExceptionHelper::create(new InvalidArgumentException())
+            ->message('Invalid import config, [loader] key must be an string or valid import config object')
+            ->throw()
+        ;
     }
 
     /**
@@ -297,7 +336,7 @@ class YamlContentParser implements StringParserInterface
 
     protected function hasContentLoader(string $contentLoaderClass): bool
     {
-        return isset($this->contentLoaders[$contentLoader::class]);
+        return isset($this->contentLoaders[$contentLoaderClass]);
     }
 
     /**

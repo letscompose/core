@@ -26,24 +26,34 @@ class YamlContentLoader implements ContentLoaderInterface
     /**
      * @throws ExceptionInterface
      */
-    public function load(SourceImportConfigInterface $config): array
+    public function load(string $source): array
     {
-        if (!$this->supports($config)) {
+        if (!$this->supports($source)) {
             ExceptionHelper::create(new InvalidArgumentException())
                 ->message(
                     'This loader can\'t be use for this source [%s]',
-                    $config->getSource()
+                    $source
                 )
                 ->throw();
         }
 
-        return $this->parser->parseFile($config->getSource());
+        return $this->parser->parseFile($source);
     }
 
-    public function supports(SourceImportConfigInterface $config): bool
+    public function supports(string $source): bool
     {
-        $path = $config->getSource();
-        $extension = pathinfo($path, PATHINFO_EXTENSION);
+        $extension = pathinfo($source, PATHINFO_EXTENSION);
         return \in_array($extension, YamlFileLoader::SUPPORTED_FILE_TYPES, true);
+    }
+
+    public function setConfig(array $config): self
+    {
+        // TODO: Implement setConfig() method.
+        return $this;
+    }
+
+    public function getConfig(): array
+    {
+        // TODO: Implement getConfig() method.
     }
 }

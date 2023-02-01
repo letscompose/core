@@ -14,7 +14,7 @@ class SourceImportConfig implements SourceImportConfigInterface
 {
     private string $source;
 
-    private ?string $loader = null;
+    private ?SourceLoaderConfigInterface $loader = null;
 
     public function getSource(): string
     {
@@ -27,26 +27,19 @@ class SourceImportConfig implements SourceImportConfigInterface
         return $this;
     }
 
-    public function hasLoader(): bool
+    public function hasLoaderConfig(): bool
     {
-        return !empty($this->loader);
+        return $this->loader instanceof SourceLoaderConfigInterface;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getLoader(): ?string
+    public function getSourceLoaderConfig(): ?SourceLoaderConfigInterface
     {
         return $this->loader;
     }
 
-    /**
-     * @param string|null $loader
-     * @return SourceImportConfig
-     */
-    public function setLoader(?string $loader): SourceImportConfig
+    public function setSourceLoaderConfig(?SourceLoaderConfigInterface $loaderConfig): self
     {
-        $this->loader = $loader;
+        $this->loader = $loaderConfig;
         return $this;
     }
 }
