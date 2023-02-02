@@ -47,23 +47,22 @@ class ArrayHelper
                 ->throw();
         }
 
-        $signature = sha1(json_encode($params) . $snakeCase);
-        if (isset(self::$cache[$signature]))
+        $keys = array_keys($params);
+        $signature = implode('/', $keys) . $snakeCase;
+        if (!isset(self::$cache[$signature]))
         {
-            return self::$cache[$signature];
+            $keys = implode('|>~|.520f0fb,<|',$keys);
+            if ($snakeCase)
+            {
+                $keys = StringHelper::snakeCaseToCamelCase($keys);
+            } else
+            {
+                $keys = StringHelper::kebabCaseToCamelCase($keys);
+            }
+            $keys = explode('|>~|.520f0fb,<|', $keys);
+            self::$cache[$signature] = $keys;
         }
 
-        $keys = implode('|>~|.520f0fb,<|',array_keys($params));
-        if ($snakeCase)
-        {
-            $keys = StringHelper::snakeCaseToCamelCase($keys);
-        } else
-        {
-            $keys = StringHelper::kebabCaseToCamelCase($keys);
-        }
-        $keys = explode('|>~|.520f0fb,<|', $keys);
-        $result = array_combine($keys, $params);
-
-        return self::$cache[$signature] = $result;
+        return array_combine(self::$cache[$signature], $params);
     }
 }

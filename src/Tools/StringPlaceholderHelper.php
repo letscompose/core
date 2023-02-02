@@ -15,8 +15,6 @@ use LetsCompose\Core\Exception\InvalidArgumentException;
 
 class StringPlaceholderHelper
 {
-    public static array $cache = [];
-
     public const  PLACEHOLDER_TOKEN_BRACKETS = '{.}';
 
     public const PLACEHOLDER_TOKEN_DOUBLE_BRACKETS = '{{.}}';
