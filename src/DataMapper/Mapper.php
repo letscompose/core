@@ -21,8 +21,21 @@ use function is_string;
 class Mapper implements MapperInterface
 {
     protected const MAPPING_CONFIG_KEY = 'mapping-config';
-    protected const MAPPING_STRUCTURE_KEY = 'mapping';
-    protected const MAPPING_STRUCTURE_TEMPLATE_KEY = 'mapping-template';
+    protected const MAPPING_STRUCTURE_KEY = 'schema';
+    protected const MAPPING_STRUCTURE_OPTIONS_KEY = 'options';
+    protected const MAPPING_STRUCTURE_TEMPLATE_KEY = 'template';
+    protected array $defaultMappingOptions = [];
+
+    protected const DEFAULT_MAPPING_OPTIONS = [
+        'Object' => false,
+        'Collection' => false,
+        'MappedKey'=> null,
+        'MappingTemplate'=>null,
+        'StrictPropertyPath' => true,
+        'StripEmptyKeys' => true,
+        'InputDataTransformers' => [],
+        'OutputDataTransformers' => []
+    ];
 
     /**
      * @throws ExceptionInterface
@@ -44,7 +57,13 @@ class Mapper implements MapperInterface
         $checkConfigStructure(self::MAPPING_CONFIG_KEY, $mappingConfig);
         $checkConfigStructure(self::MAPPING_STRUCTURE_KEY, $mappingConfig[static::MAPPING_CONFIG_KEY]);
 
-       $this->mappingConfig = $mappingConfig[static::MAPPING_CONFIG_KEY];
+        $mappingConfig = $mappingConfig[static::MAPPING_CONFIG_KEY];
+        $mappingOptions = $mappingConfig[static::MAPPING_STRUCTURE_OPTIONS_KEY] ?? [];
+
+        $this->mappingConfig = $mappingConfig;
+
+        $this->defaultMappingOptions = array_replace_recursive(static::DEFAULT_MAPPING_OPTIONS, $mappingOptions);
+
     }
 
     /**
@@ -93,6 +112,7 @@ class Mapper implements MapperInterface
         $options = $this->getConfigOptions($config);
         $mapping = $config['Mapping'] ?? [];
 
+
         if (empty($mapping))
         {
             ExceptionHelper::create(new InvalidArgumentException())
@@ -109,17 +129,25 @@ class Mapper implements MapperInterface
         {
             foreach ($data as $item)
             {
-                $rs = $this->processItem($mapping, $item, $options);
-                $result[] = $this->transform($rs, $options);
+                $result[] = $this->applyMapping($mapping, $options, $item);
             }
         }
         else
         {
-            $rs = $this->processItem($mapping, $data, $options);
-            $result = $this->transform($rs, $options);
+            $result = $this->applyMapping($mapping, $options, $data);
         }
 
         return $result;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws ExceptionInterface
+     */
+    protected function applyMapping(array $mapping, array $options, array $data): array|object
+    {
+        $rs = $this->mapData($mapping, $data, $options);
+        return $this->transform($rs, $options);
     }
 
 
@@ -149,7 +177,7 @@ class Mapper implements MapperInterface
      * @throws InvalidArgumentException
      * @throws ExceptionInterface
      */
-    protected function processItem(array $mappingConfig, array $data, array $options): array {
+    protected function mapData(array $mappingConfig, array $data, array $options): array {
             $result = [];
             if (empty($data)) {
                 return $result;
@@ -177,7 +205,6 @@ class Mapper implements MapperInterface
             return $result;
     }
 
-
     /**
      * @throws InvalidArgumentException
      * @throws ExceptionInterface
@@ -189,18 +216,9 @@ class Mapper implements MapperInterface
 
     protected function getConfigOptions($config): array
     {
-        $options = [
-            'Object' => false,
-            'Collection' => false,
-            'MappedKey'=> null,
-            'MappingTemplate'=>null,
-            'StrictPropertyPath' => true,
-            'StripEmptyKeys' => true
-        ];
         if (false === array_key_exists('Options', $config)) {
-            return $options;
+            return $this->defaultMappingOptions;
         }
-        return array_replace($options, $config['Options']);
+        return array_replace_recursive($this->defaultMappingOptions, $config['Options']);
     }
-
 }
