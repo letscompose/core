@@ -10,6 +10,10 @@
 
 namespace LetsCompose\Core\Tools\Data;
 
+use LetsCompose\Core\Exception\ExceptionInterface;
+use LetsCompose\Core\Exception\InvalidArgumentException;
+use LetsCompose\Core\Tools\ExceptionHelper;
+
 class DataPropertyAccessor
 {
     private static int $iterationCount = 0;
@@ -27,17 +31,32 @@ class DataPropertyAccessor
 
     /**
      * get property of array or object at path, where path is dot delimited string
+     * @throws ExceptionInterface
+     * @throws InvalidArgumentException
      */
-    public static function getPropertyAtPath(array|object $target, string $path)
+    public static function getPropertyAtPath(string $path, array|object $target): mixed
     {
-        if (empty($path)) {
-            throw new \InvalidArgumentException('parameter $path must be not empty string');
-        }
-        if ((!is_array($target) && !is_object($target)) || empty($target)) {
-            throw new \InvalidArgumentException('parameter $target must be not empty array or object');
+        if (!$path)
+        {
+            ExceptionHelper::create(new InvalidArgumentException())
+                ->message('parameter $path must be not empty string')
+                ->throw();
         }
 
-        if (false === array_key_exists($path, self::$cache)) {
+        if (is_object($target))
+        {
+            $target = self::objectToArray($target);
+        }
+
+        if (!$target)
+        {
+            ExceptionHelper::create(new InvalidArgumentException())
+                ->message('parameter $target must be not empty array or object')
+                ->throw();
+        }
+
+        if (false === array_key_exists($path, self::$cache))
+        {
             $parts = explode('.', $path);
             $nullSafe = [];
             $cleanedPath = [];
@@ -75,27 +94,41 @@ class DataPropertyAccessor
                 {
                     return null;
                 }
-            } catch (\InvalidArgumentException $exception) {
-                throw new \InvalidArgumentException(sprintf('not readable data property [%s] at path [%s]. %s', $part, $path, $exception->getMessage()));
+            } catch (InvalidArgumentException $exception) {
+                ExceptionHelper::create(new InvalidArgumentException())
+                    ->message('not readable data property [%s] at path [%s]. %s', $part, $path, $exception->getMessage())
+                    ->throw();
             }
         }
 
         return $target;
     }
 
+    /**
+     * @throws ExceptionInterface
+     * @throws InvalidArgumentException
+     */
     private static function getValue(object|array $target, string $path): mixed
     {
-        if (is_object($target)) {
+        if (is_object($target))
+        {
             $target = self::objectToArray($target);
         }
 
-        if (!is_array($target)) {
-            throw new \InvalidArgumentException('Target not an array');
+        if (!is_array($target))
+        {
+            ExceptionHelper::create(new InvalidArgumentException())
+                ->message('$target not an array')
+                ->throw();
         }
 
-        if (!array_key_exists($path, $target)) {
-            throw new \InvalidArgumentException(sprintf('Data property at path [%s] doest not exist', $path));
+        if (!array_key_exists($path, $target))
+        {
+            ExceptionHelper::create(new InvalidArgumentException())
+                ->message('Data property at path [%s] doest not exist', $path)
+                ->throw();
         }
+
         return $target[$path];
     }
 
