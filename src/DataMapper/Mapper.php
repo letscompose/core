@@ -15,6 +15,7 @@ use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
 use LetsCompose\Core\Exception\MustImplementException;
 use LetsCompose\Core\Exception\NotExistsException;
+use LetsCompose\Core\Exception\NotSupportedException;
 use LetsCompose\Core\Exception\NotUniqueException;
 use LetsCompose\Core\Tools\Data\DataPropertyAccessor;
 use LetsCompose\Core\Tools\ExceptionHelper;
@@ -29,6 +30,9 @@ class Mapper implements MapperInterface
     protected const MAPPING_STRUCTURE_OPTIONS_KEY = 'options';
     protected const MAPPING_STRUCTURE_OPTIONS_EXTEND_KEY = 'options-extend';
     protected const MAPPING_STRUCTURE_TEMPLATE_KEY = 'template';
+    protected const OPTIONS_GROUP_INPUT = 'InputOptions';
+    protected const OPTIONS_GROUP_OUTPUT = 'OutputOptions';
+
     protected array $defaultMappingOptions = [];
     protected const DEFAULT_MAPPING_OPTIONS = [
         'Object' => false,
@@ -158,13 +162,22 @@ class Mapper implements MapperInterface
      */
     protected function applyMapping(array $mappingConfig, array $mappingOptions, array $data): array|object
     {
-        $result = $this->applyOptions($mappingOptions, $data);
+        $result = $this->applyOptions($mappingOptions, static::OPTIONS_GROUP_INPUT, $data);
         $result = $this->mapData($mappingConfig, $mappingOptions, $result);
+        $result = $this->applyOptions($mappingOptions, static::OPTIONS_GROUP_OUTPUT, $result);
         return $this->applyTransform($result, $mappingOptions);
     }
 
-    protected function applyOptions(array $mappingOptions, array $data): array
+    protected function applyOptions(array $mappingOptions, string $optionsGroup, array $data): array
     {
+        $optionsExtend = $this->optionsExtend[$optionsGroup] ?? [];
+        if (empty($optionsExtend))
+        {
+            return $data;
+        }
+
+        $mappingOptions = array_intersect_key($mappingOptions, $optionsExtend);
+
         foreach ($mappingOptions as $name => $value)
         {
             if (false === $value || null === $value)
@@ -262,10 +275,72 @@ class Mapper implements MapperInterface
      */
     public function extendOptions(array $config): self
     {
-        foreach ($config as $name => $class)
+        $registerOptions = function (string $group, array $optionsConfig): void
         {
-            $this->registerOptionHandler($name, $class);
-        }
+            $optionsConfig = $optionsConfig[$group] ?? false;
+            if (!is_array($optionsConfig))
+            {
+                return;
+            }
+
+            $configList = [];
+            $defaults  = [
+                'class' => null,
+                'name' => null,
+                'group' => $group,
+                'priority' => null
+            ];
+            $defaultPriority = 0;
+
+            foreach ($optionsConfig as $name => $optionConfig)
+            {
+                if (false === is_array($optionConfig) && false === is_string($optionConfig))
+                {
+                    ExceptionHelper::create(new NotSupportedException())
+                        ->message('Not supported option config, option config must be an option class name or array with required [class] key')
+                        ->throw();
+                }
+                $config = [
+                    'name' => $name
+                ];
+
+                if (is_string($optionConfig))
+                {
+                    $config['class'] = $optionConfig;
+                }
+                elseif (is_array($optionConfig))
+                {
+                    $class = $optionConfig['class']  ?? null;
+                    if (empty($class))
+                    {
+                        ExceptionHelper::create(new NotSupportedException())
+                            ->message('Not supported option config, option config must be an option class name or array with required [class] key')
+                            ->throw();
+                    }
+                    $config['class'] = $class;
+                    $config['priority'] = $optionConfig['priority']  ?? null;
+                }
+
+                $config = array_replace($defaults, $config);
+                if (false === is_int($config['priority']))
+                {
+                    $config['priority'] = $defaultPriority;
+                    $defaultPriority++;
+                }
+                $configList[] = $config;
+            }
+
+            usort($configList, fn (array $a, array $b) => ($a['priority'] <=> $b['priority']));
+
+            foreach ($configList as $config)
+            {
+                $this->registerOptionHandler($config['name'], $config['group'], $config['class']);
+            }
+        };
+
+        $registerOptions(static::OPTIONS_GROUP_INPUT, $config);
+        $registerOptions(static::OPTIONS_GROUP_OUTPUT, $config);
+
         return $this;
     }
 
@@ -274,9 +349,9 @@ class Mapper implements MapperInterface
      * @throws MustImplementException
      * @throws ExceptionInterface
      */
-    public function registerOptionHandler(string $name, string $class): self
+    public function registerOptionHandler(string $name, string $group, string $class, int $priority = 1000): self
     {
-        if (isset($this->optionsExtend[$name]) || isset(static::DEFAULT_MAPPING_OPTIONS[$name]))
+        if (isset($this->optionsExtend[$group][$name]) || isset(static::DEFAULT_MAPPING_OPTIONS[$name]))
         {
             ExceptionHelper::create(new NotUniqueException())
                 ->message('You try to define already defined Mapping option [%s]', $name)
@@ -291,8 +366,7 @@ class Mapper implements MapperInterface
                 ->throw();
         }
         $option->setName($name);
-        $this->optionsExtend[$name] = $option;
-
+        $this->optionsExtend[$group][$name] = $option;
         return $this;
     }
 
@@ -318,7 +392,10 @@ class Mapper implements MapperInterface
      */
     protected function exceptionOnUnsupportedOption(array $options): void
     {
-        $knownOptions = static::DEFAULT_MAPPING_OPTIONS + $this->optionsExtend;
+
+        $inputOptions = $this->optionsExtend[static::OPTIONS_GROUP_INPUT] ?? [];
+        $outputOptions = $this->optionsExtend[static::OPTIONS_GROUP_OUTPUT] ?? [];
+        $knownOptions = static::DEFAULT_MAPPING_OPTIONS +  $inputOptions + $outputOptions;
         $unsupportedOptions = array_diff_key($options, $knownOptions);
         if ($unsupportedOptions)
         {
