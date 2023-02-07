@@ -10,8 +10,12 @@
 
 namespace LetsCompose\Core\DataMapper;
 
+use LetsCompose\Core\DataMapper\Options\OptionInterface;
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
+use LetsCompose\Core\Exception\MustImplementException;
+use LetsCompose\Core\Exception\NotExistsException;
+use LetsCompose\Core\Exception\NotUniqueException;
 use LetsCompose\Core\Tools\Data\DataPropertyAccessor;
 use LetsCompose\Core\Tools\ExceptionHelper;
 use function is_array;
@@ -23,19 +27,21 @@ class Mapper implements MapperInterface
     protected const MAPPING_CONFIG_KEY = 'mapping-config';
     protected const MAPPING_STRUCTURE_KEY = 'schema';
     protected const MAPPING_STRUCTURE_OPTIONS_KEY = 'options';
+    protected const MAPPING_STRUCTURE_OPTIONS_EXTEND_KEY = 'options-extend';
     protected const MAPPING_STRUCTURE_TEMPLATE_KEY = 'template';
     protected array $defaultMappingOptions = [];
-
     protected const DEFAULT_MAPPING_OPTIONS = [
         'Object' => false,
         'Collection' => false,
         'MappedKey'=> null,
         'MappingTemplate'=>null,
         'StrictPropertyPath' => true,
-        'StripEmptyKeys' => true,
-        'InputDataTransformers' => [],
-        'OutputDataTransformers' => []
     ];
+
+    /**
+     * @var OptionInterface[]
+     */
+    protected array $optionsExtend = [];
 
     /**
      * @throws ExceptionInterface
@@ -63,6 +69,12 @@ class Mapper implements MapperInterface
         $this->mappingConfig = $mappingConfig;
 
         $this->defaultMappingOptions = array_replace_recursive(static::DEFAULT_MAPPING_OPTIONS, $mappingOptions);
+        $optionsExtendConfig = $mappingConfig[static::MAPPING_STRUCTURE_OPTIONS_EXTEND_KEY] ?? [];
+
+        if ($optionsExtendConfig)
+        {
+            $this->extendOptions($optionsExtendConfig);
+        }
 
     }
 
@@ -109,32 +121,32 @@ class Mapper implements MapperInterface
         }
 
         $result = [];
-        $options = $this->getConfigOptions($config);
-        $mapping = $config['Mapping'] ?? [];
+        $mappingOptions = $this->getConfigOptions($config);
+        $mappingConfig = $config['Mapping'] ?? [];
+        $this->exceptionOnUnsupportedOption($mappingOptions);
 
-
-        if (empty($mapping))
+        if (empty($mappingConfig))
         {
             ExceptionHelper::create(new InvalidArgumentException())
                 ->message('You must define an valid Mapping config')
                 ->throw();
         }
 
-        if (is_string($options['MappedKey']) && !empty($data))
+        if (is_string($mappingOptions['MappedKey']) && !empty($data))
         {
-            $data = $this->getPropertyAtPath($options['MappedKey'], $data);
+            $data = $this->getPropertyAtPath($mappingOptions['MappedKey'], $data);
         }
 
-        if (true === $options['Collection'])
+        if (true === $mappingOptions['Collection'])
         {
             foreach ($data as $item)
             {
-                $result[] = $this->applyMapping($mapping, $options, $item);
+                $result[] = $this->applyMapping($mappingConfig, $mappingOptions,$item);
             }
         }
         else
         {
-            $result = $this->applyMapping($mapping, $options, $data);
+            $result = $this->applyMapping($mappingConfig, $mappingOptions, $data);
         }
 
         return $result;
@@ -144,14 +156,35 @@ class Mapper implements MapperInterface
      * @throws InvalidArgumentException
      * @throws ExceptionInterface
      */
-    protected function applyMapping(array $mapping, array $options, array $data): array|object
+    protected function applyMapping(array $mappingConfig, array $mappingOptions, array $data): array|object
     {
-        $rs = $this->mapData($mapping, $data, $options);
-        return $this->transform($rs, $options);
+        $result = $this->applyOptions($mappingOptions, $data);
+        $result = $this->mapData($mappingConfig, $mappingOptions, $result);
+        return $this->applyTransform($result, $mappingOptions);
     }
 
+    protected function applyOptions(array $mappingOptions, array $data): array
+    {
+        foreach ($mappingOptions as $name => $value)
+        {
+            if (false === $value || null === $value)
+            {
+                continue;
+            }
+            $option = $this->optionsExtend[$name] ?? false;
+            if ($option)
+            {
+                $option->setConfig($value);
+                if ($option->supports($name))
+                {
+                    $data = $option->process($data);
+                }
+            }
+        }
+        return $data;
+    }
 
-    protected function transform(array $data, array $options): array|object
+    protected function applyTransform(array $data, array $options): array|object
     {
         if (empty($options['Object']))
         {
@@ -177,7 +210,7 @@ class Mapper implements MapperInterface
      * @throws InvalidArgumentException
      * @throws ExceptionInterface
      */
-    protected function mapData(array $mappingConfig, array $data, array $options): array {
+    protected function mapData(array $mappingConfig, array $options, array $data): array {
             $result = [];
             if (empty($data)) {
                 return $result;
@@ -220,5 +253,83 @@ class Mapper implements MapperInterface
             return $this->defaultMappingOptions;
         }
         return array_replace_recursive($this->defaultMappingOptions, $config['Options']);
+    }
+
+    /**
+     * @throws NotUniqueException
+     * @throws MustImplementException
+     * @throws ExceptionInterface
+     */
+    public function extendOptions(array $config): self
+    {
+        foreach ($config as $name => $class)
+        {
+            $this->registerOptionHandler($name, $class);
+        }
+        return $this;
+    }
+
+    /**
+     * @throws NotUniqueException
+     * @throws MustImplementException
+     * @throws ExceptionInterface
+     */
+    public function registerOptionHandler(string $name, string $class): self
+    {
+        if (isset($this->optionsExtend[$name]) || isset(static::DEFAULT_MAPPING_OPTIONS[$name]))
+        {
+            ExceptionHelper::create(new NotUniqueException())
+                ->message('You try to define already defined Mapping option [%s]', $name)
+                ->throw();
+        }
+
+        $option = new $class;
+        if (!$option instanceof OptionInterface)
+        {
+            ExceptionHelper::create(new InvalidArgumentException())
+                ->message('You must define an valid Mapping config')
+                ->throw();
+        }
+        $option->setName($name);
+        $this->optionsExtend[$name] = $option;
+
+        return $this;
+    }
+
+    /**
+     * @throws NotExistsException
+     * @throws ExceptionInterface
+     */
+    protected function getOptionHandler(string $name): OptionInterface
+    {
+        $option = $this->optionsExtend[$name] ?? false;
+        if (!$option)
+        {
+            ExceptionHelper::create(new NotUniqueException())
+                ->message('You try to get not defined Mapping option [%s]', $name)
+                ->throw();
+        }
+        return $option;
+    }
+
+    /**
+     * @throws ExceptionInterface
+     * @throws NotExistsException
+     */
+    protected function exceptionOnUnsupportedOption(array $options): void
+    {
+        $knownOptions = static::DEFAULT_MAPPING_OPTIONS + $this->optionsExtend;
+        $unsupportedOptions = array_diff_key($options, $knownOptions);
+        if ($unsupportedOptions)
+        {
+            ExceptionHelper::create(new NotExistsException())
+                ->message(
+                    'You try to use not  unknown mapper option(s) [%s], you must use one of theses [%s]',
+                    implode(',', array_keys($unsupportedOptions)),
+                    implode(',', array_keys($knownOptions))
+                )
+                ->throw()
+            ;
+        }
     }
 }

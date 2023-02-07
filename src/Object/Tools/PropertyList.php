@@ -122,7 +122,7 @@ class PropertyList implements PropertyListInterface, \Iterator, \Countable
      * @throws MustImplementException
      * @throws ExceptionInterface
      */
-    public function add(string $name, string $value): self
+    public function add(string $name, mixed $value): self
     {
         $property = $this->createPropertyInstance($name);
         $property = $this->checkPropertyInstance($property);

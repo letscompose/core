@@ -19,7 +19,7 @@ interface PropertyListInterface
      */
     public function get(string $name): array;
     public function has(string $name): bool;
-    public function add(string $name, string $value): self;
+    public function add(string $name, mixed $value): self;
     public function remove(PropertyInterface $property): bool;
     public function clear(): self;
     public static function createFromArray(array $properties): self;
