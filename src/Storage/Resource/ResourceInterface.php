@@ -15,111 +15,40 @@ namespace LetsCompose\Core\Storage\Resource;
  */
 interface ResourceInterface
 {
-    /**
-     * @var string
-     */
-    const TYPE_FILE = 'file';
-
-    /**
-     * @var string
-     */
-    const TYPE_DIRECTORY = 'directory';
-
-    /**
-     * @var string
-     */
     const STATE_OPENED_STREAM = 'stream-opened';
 
-    /**
-     * @var string
-     */
     const STATE_CLOSED_STREAM = 'stream-closed';
 
-    /**
-     * @var string[]
-     */
     const STATE_MAP = [
         self::STATE_OPENED_STREAM,
         self::STATE_CLOSED_STREAM,
     ];
 
-    /**
-     * @var string[]
-     */
-    const TYPE_MAP = [
-        self::TYPE_FILE,
-        self::TYPE_DIRECTORY,
-    ];
+    public function setStorageClass(string $class): self;
 
-    /**
-     * @param string $class
-     * @return ResourceInterface
-     */
-    public function setStorageClass(string $class): ResourceInterface;
-
-    /**
-     * @return string
-     */
     public function getStorageClass(): string;
 
-    /**
-     * @param string $name
-     * @return ResourceInterface
-     */
-    public function setName(string $name): ResourceInterface;
+    public function getResourceClass(): string;
 
-    /**
-     * @return string
-     */
+    public function setName(string $name): self;
+
     public function getName(): string;
 
-    /**
-     * @param string $path
-     * @return ResourceInterface
-     */
-    public function setPath(string $path): ResourceInterface;
+    public function setPath(string $path): self;
 
-    /**
-     * @return string
-     */
     public function getPath(): string;
 
-    /**
-     * @param mixed $stream
-     * @return ResourceInterface
-     */
-    public function setStream(mixed $stream): ResourceInterface;
+    public function setStream(mixed $stream): self;
 
-    /**
-     * @return mixed
-     */
     public function getStream(): mixed;
 
+    public function setState(string $state): self;
 
-    /**
-     * @param string $type
-     * @return ResourceInterface
-     */
-    public function setType(string $type): ResourceInterface;
-
-    /**
-     * @return string
-     */
-    public function getType(): string;
-
-    /**
-     * @param string $state
-     * @return ResourceInterface
-     */
-    public function setState(string $state): ResourceInterface;
-
-    /**
-     * @return string
-     */
     public function getState(): string;
 
-    /**
-     * @return bool
-     */
     public function isOpen(): bool;
+
+//    public function getInfo(): ?ResourceInfoInterface;
+//
+//    public function setInfo(?ResourceInfoInterface $fileInfo): self;
 }

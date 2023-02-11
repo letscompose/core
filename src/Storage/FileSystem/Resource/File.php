@@ -12,33 +12,23 @@ namespace LetsCompose\Core\Storage\FileSystem\Resource;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
-use LetsCompose\Core\Storage\Resource\AbstractResource;
+use LetsCompose\Core\Storage\FileSystem\Enum\FileOpenModeEnum;
+use LetsCompose\Core\Storage\Resource\ResourceInfoInterface;
 use LetsCompose\Core\Tools\ExceptionHelper;
+use UnitEnum;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class File extends AbstractResource implements FileInterface
+class File extends AbstractFileSystemResource implements FileInterface
 {
-    /**
-     * @var string
-     */
-    protected string $type = self::TYPE_FILE;
 
-    /**
-     * @var ?string
-     */
     protected ?string $mimeType = null;
 
-    /**
-     * @var int
-     */
-    protected int $size = 0;
-
+    protected ?FileInfoInterface $info = null;
 
     /**
-     * @param mixed $stream
-     * @return $this
+     * @throws InvalidArgumentException
      * @throws ExceptionInterface
      */
     public function setStream(mixed $stream): self
@@ -57,48 +47,54 @@ class File extends AbstractResource implements FileInterface
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
+    public function isStreamMode(UnitEnum|FileOpenModeEnum $mode): bool
+    {
+        if ($this->isOpen())
+        {
+            $metadata = stream_get_meta_data($this->getStream());
+            $mode->mode($mode);
+        }
+        return false;
+    }
+
+
     public function getExtension(): ?string
     {
         return pathinfo($this->getPath(), PATHINFO_EXTENSION);
     }
 
-    /**
-     * @param string|null $mimeType
-     * @return File
-     */
-    public function setMimeType(?string $mimeType): File
+    public function getDirectoryPath(): string
+    {
+        return pathinfo($this->getPath(), PATHINFO_DIRNAME);
+    }
+
+    public function getName(): string
+    {
+        return pathinfo($this->getPath(), PATHINFO_BASENAME);
+    }
+
+    public function setMimeType(?string $mimeType): self
     {
         $this->mimeType = $mimeType;
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     public function getMimeType(): ?string
     {
         return $this->mimeType;
     }
 
     /**
-     * @param int $size
-     * @return File
+     * @return FileInfoInterface|null
      */
-    public function setSize(int $size): File
+    public function getInfo(): ?FileInfoInterface
     {
-        $this->size = $size;
+        return $this->info;
+    }
+
+    public function setInfo(?FileInfoInterface $info): self
+    {
+        $this->info = $info;
         return $this;
     }
-
-    /**
-     * @return int
-     */
-    public function getSize(): int
-    {
-        return $this->size;
-    }
-
 }

@@ -17,9 +17,7 @@ use LetsCompose\Core\Storage\Resource\ResourceInterface;
  */
 interface DirectoryInterface extends ResourceInterface
 {
-    /**
-     * @param DirectoryInterface $directory
-     * @return FileInterface[]
-     */
-    public function list(DirectoryInterface $directory): array;
+//    public function getInfo(): ?DirectoryInfoInterface;
+//
+//    public function setInfo(?DirectoryInfoInterface $info): self;
 }

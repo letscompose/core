@@ -11,36 +11,24 @@
 namespace LetsCompose\Core\Storage\FileSystem\Resource;
 
 use LetsCompose\Core\Storage\Resource\ResourceInterface;
+use UnitEnum;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
 interface FileInterface extends ResourceInterface
 {
-    /**
-     * @return string|null
-     */
     public function getExtension(): ?string;
 
-    /**
-     * @param string $mimeType
-     * @return FileInterface
-     */
+    public function getDirectoryPath(): string;
+
     public function setMimeType(string $mimeType): FileInterface;
 
-    /**
-     * @return string|null
-     */
     public function getMimeType(): ?string;
 
-    /**
-     * @param int $size
-     * @return FileInterface
-     */
-    public function setSize(int $size): FileInterface;
+    public function isStreamMode(UnitEnum $mode): bool;
 
-    /**
-     * @return int
-     */
-    public function getSize(): int;
+    public function getInfo(): ?FileInfoInterface;
+
+    public function setInfo(?FileInfoInterface $info): self;
 }

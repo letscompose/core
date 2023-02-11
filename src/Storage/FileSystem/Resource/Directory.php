@@ -12,28 +12,14 @@ namespace LetsCompose\Core\Storage\FileSystem\Resource;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
-use LetsCompose\Core\Storage\Resource\AbstractResource;
 use LetsCompose\Core\Tools\ExceptionHelper;
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class Directory extends AbstractResource implements DirectoryInterface
+class Directory extends AbstractFileSystemResource implements DirectoryInterface
 {
-    /**
-     * @var string
-     */
-    protected string $type = self::TYPE_DIRECTORY;
-
-    /**
-     * @var string
-     */
-    protected string $state = self::STATE_CLOSED_STREAM;
-
-    /**
-     * @var mixed
-     */
-    protected mixed $stream;
+    private ?DirectoryInfoInterface $info = null;
 
     /**
      * @param mixed $stream
@@ -54,4 +40,25 @@ class Directory extends AbstractResource implements DirectoryInterface
 
         return $this;
     }
+
+    /**
+     * @return DirectoryInfo|null
+     */
+    public function getInfo(): ?DirectoryInfoInterface
+    {
+        return $this->info;
+    }
+
+    /**
+     * @param DirectoryInfo|null $info
+     * @return Directory
+     */
+    public function setInfo(?DirectoryInfoInterface $info): self
+    {
+        $this->info = $info;
+        return $this;
+    }
+
+
+
 }

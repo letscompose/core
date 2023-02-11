@@ -19,103 +19,48 @@ use LetsCompose\Core\Tools\ExceptionHelper;
  */
 abstract class AbstractResource implements ResourceInterface
 {
-
-    /**
-     * @var string
-     */
     protected string $name;
 
-    /**
-     * @var string
-     */
     protected string $path;
 
-    /**
-     * @var string
-     */
-    protected string $type;
-
-    /**
-     * @var string
-     */
     protected string $state = self::STATE_CLOSED_STREAM;
 
     /**
-     * @var mixed
+     * @var Resource
      */
-    protected mixed $stream;
+    protected mixed $stream = null;
 
-    /**
-     * @var string
-     */
     protected string $storageClass;
 
-    /**
-     * @param string $name
-     * @return $this
-     */
+    public function getResourceClass(): string
+    {
+        return $this::class;
+    }
+
     public function setName(string $name): self
     {
         $this->name = $name;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $path
-     * @return $this
-     */
     public function setPath(string $path): self
     {
         $this->path = $path;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getPath(): string
     {
         return $this->path;
     }
 
     /**
-     * @param string $type
-     * @return ResourceInterface
-     * @throws ExceptionInterface
-     */
-    public function setType(string $type): ResourceInterface
-    {
-        if (false === \in_array($type, self::TYPE_MAP))
-        {
-            ExceptionHelper
-                ::create(new InvalidArgumentException())
-                ->message('Unknown resource type, type can be only one of theses [%s]', implode(',', self::TYPE_MAP))
-                ->throw();
-        }
-        $this->type = $type;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    /**
-     * @param string $state
-     * @return $this
-     * @throws ExceptionInterface
+     * @throws InvalidArgumentException|ExceptionInterface
      */
     public function setState(string $state): self
     {
@@ -130,52 +75,34 @@ abstract class AbstractResource implements ResourceInterface
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getState(): string
     {
         return $this->state;
     }
 
-    /**
-     * @param mixed $stream
-     * @return $this
-     */
     public function setStream(mixed $stream): self
     {
         $this->stream = $stream;
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
     public function getStream(): mixed
     {
         return $this->stream;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function isOpen(): bool
     {
         return self::STATE_OPENED_STREAM === $this->getState();
     }
 
-    /**
-     * @return string
-     */
     public function getStorageClass(): string
     {
         return $this->storageClass;
     }
 
     /**
-     * @param string $class
-     * @return $this
-     * @throws ExceptionInterface
+     * @throws InvalidArgumentException|ExceptionInterface
      */
     public function setStorageClass(string $class): self
     {
