@@ -42,7 +42,6 @@ class KeysToCamelCaseOption implements OptionInterface
      */
     public function process(array $data): array
     {
-        dump('je suis', $data);
         return ArrayHelper::keysToCamelCase($data);
     }
 

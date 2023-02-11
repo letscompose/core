@@ -25,21 +25,24 @@ use function is_string;
 
 class Mapper implements MapperInterface
 {
-    protected const MAPPING_CONFIG_KEY = 'mapping-config';
-    protected const MAPPING_STRUCTURE_KEY = 'schema';
-    protected const MAPPING_STRUCTURE_OPTIONS_KEY = 'options';
-    protected const MAPPING_STRUCTURE_OPTIONS_EXTEND_KEY = 'options-extend';
-    protected const MAPPING_STRUCTURE_TEMPLATE_KEY = 'template';
-    protected const OPTIONS_GROUP_INPUT = 'InputOptions';
-    protected const OPTIONS_GROUP_OUTPUT = 'OutputOptions';
+    protected const CONFIG_KEY = 'mapping-config';
+    protected const CONFIG_KEY_MAPPING = 'mapping-schema';
+    protected const CONFIG_KEY_DEFAULT_OPTIONS = 'default-options';
+    protected const CONFIG_KEY_OPTIONS_EXTEND = 'options-extend';
+    protected const CONFIG_KEY_MAPPING_TEMPLATE = 'mapping-schema-template';
+    protected const CONFIG_KEY_INPUT_OPTIONS = 'InputOptions';
+    protected const CONFIG_KEY_OUTPUT_OPTIONS = 'OutputOptions';
 
     protected array $defaultMappingOptions = [];
     protected const DEFAULT_MAPPING_OPTIONS = [
-        'Object' => false,
-        'Collection' => false,
-        'MappedKey'=> null,
-        'MappingTemplate'=>null,
-        'StrictPropertyPath' => true,
+        self::CONFIG_KEY_INPUT_OPTIONS => [
+            'Collection' => false,
+            'MappedKey'=> null,
+            'StrictPropertyPath' => true,
+        ],
+        self::CONFIG_KEY_OUTPUT_OPTIONS => [
+            'Object' => false,
+        ],
     ];
 
     /**
@@ -64,16 +67,16 @@ class Mapper implements MapperInterface
             }
         };
 
-        $checkConfigStructure(self::MAPPING_CONFIG_KEY, $mappingConfig);
-        $checkConfigStructure(self::MAPPING_STRUCTURE_KEY, $mappingConfig[static::MAPPING_CONFIG_KEY]);
+        $checkConfigStructure(self::CONFIG_KEY, $mappingConfig);
+        $checkConfigStructure(self::CONFIG_KEY_MAPPING, $mappingConfig[static::CONFIG_KEY]);
 
-        $mappingConfig = $mappingConfig[static::MAPPING_CONFIG_KEY];
-        $mappingOptions = $mappingConfig[static::MAPPING_STRUCTURE_OPTIONS_KEY] ?? [];
+        $mappingConfig = $mappingConfig[static::CONFIG_KEY];
+        $mappingOptions = $mappingConfig[static::CONFIG_KEY_DEFAULT_OPTIONS] ?? [];
 
         $this->mappingConfig = $mappingConfig;
 
         $this->defaultMappingOptions = array_replace_recursive(static::DEFAULT_MAPPING_OPTIONS, $mappingOptions);
-        $optionsExtendConfig = $mappingConfig[static::MAPPING_STRUCTURE_OPTIONS_EXTEND_KEY] ?? [];
+        $optionsExtendConfig = $mappingConfig[static::CONFIG_KEY_OPTIONS_EXTEND] ?? [];
 
         if ($optionsExtendConfig)
         {
@@ -97,7 +100,7 @@ class Mapper implements MapperInterface
      */
     public function map(string $configPath, object|array $data): object|array
     {
-        $config = $this->getPropertyAtPath($configPath, $this->mappingConfig[static::MAPPING_STRUCTURE_KEY]);
+        $config = $this->getPropertyAtPath($configPath, $this->mappingConfig[static::CONFIG_KEY_MAPPING]);
         if (empty($config))
         {
             ExceptionHelper::create(new InvalidArgumentException())
@@ -116,19 +119,23 @@ class Mapper implements MapperInterface
     protected function process(array $config, array|object $data): array|object
     {
 
-        $mappingTemplatePath = $config['Options']['MappingTemplate'] ?? false;
+        $mappingTemplatePath = $config['MappingTemplate'] ?? false;
         if ($mappingTemplatePath)
         {
-            unset($config['Options']['MappingTemplate']);
-            $mappingTemplate = $this->getPropertyAtPath($mappingTemplatePath, $this->mappingConfig[static::MAPPING_STRUCTURE_TEMPLATE_KEY]);
+            unset($config['MappingTemplate']);
+            $mappingTemplate = $this->getPropertyAtPath($mappingTemplatePath, $this->mappingConfig[static::CONFIG_KEY_MAPPING_TEMPLATE]);
             $config = array_replace_recursive($mappingTemplate, $config);
         }
 
         $result = [];
-        $mappingOptions = $this->getConfigOptions($config);
-        $mappingConfig = $config['Mapping'] ?? [];
-        $this->exceptionOnUnsupportedOption($mappingOptions);
+        $inputOptions = $this->getConfigOptions($config, static::CONFIG_KEY_INPUT_OPTIONS);
+        $this->exceptionOnUnsupportedOption($inputOptions, static::CONFIG_KEY_INPUT_OPTIONS);
 
+        $outputOptions = $this->getConfigOptions($config, static::CONFIG_KEY_OUTPUT_OPTIONS);
+        $this->exceptionOnUnsupportedOption($outputOptions, static::CONFIG_KEY_OUTPUT_OPTIONS);
+
+
+        $mappingConfig = $config['Mapping'] ?? [];
         if (empty($mappingConfig))
         {
             ExceptionHelper::create(new InvalidArgumentException())
@@ -136,21 +143,21 @@ class Mapper implements MapperInterface
                 ->throw();
         }
 
-        if (is_string($mappingOptions['MappedKey']) && !empty($data))
+        if (is_string($inputOptions['MappedKey']) && !empty($data))
         {
-            $data = $this->getPropertyAtPath($mappingOptions['MappedKey'], $data);
+            $data = $this->getPropertyAtPath($inputOptions['MappedKey'], $data);
         }
 
-        if (true === $mappingOptions['Collection'])
+        if (true === $inputOptions['Collection'])
         {
             foreach ($data as $item)
             {
-                $result[] = $this->applyMapping($mappingConfig, $mappingOptions,$item);
+                $result[] = $this->applyMapping($mappingConfig, $inputOptions, $outputOptions, $item);
             }
         }
         else
         {
-            $result = $this->applyMapping($mappingConfig, $mappingOptions, $data);
+            $result = $this->applyMapping($mappingConfig, $inputOptions, $outputOptions, $data);
         }
 
         return $result;
@@ -160,12 +167,15 @@ class Mapper implements MapperInterface
      * @throws InvalidArgumentException
      * @throws ExceptionInterface
      */
-    protected function applyMapping(array $mappingConfig, array $mappingOptions, array $data): array|object
+    protected function applyMapping(array $mappingConfig, array $inputOptions, array $outputOptions, array $data): array|object
     {
-        $result = $this->applyOptions($mappingOptions, static::OPTIONS_GROUP_INPUT, $data);
-        $result = $this->mapData($mappingConfig, $mappingOptions, $result);
-        $result = $this->applyOptions($mappingOptions, static::OPTIONS_GROUP_OUTPUT, $result);
-        return $this->applyTransform($result, $mappingOptions);
+        if (false === is_array(current($mappingConfig)))
+        {
+            $data = $this->applyOptions($inputOptions, static::CONFIG_KEY_INPUT_OPTIONS, $data);
+        }
+        $data = $this->mapData($mappingConfig, $inputOptions, $data);
+        $data = $this->applyOptions($outputOptions, static::CONFIG_KEY_OUTPUT_OPTIONS, $data);
+        return $this->applyTransform($data, $inputOptions);
     }
 
     protected function applyOptions(array $mappingOptions, string $optionsGroup, array $data): array
@@ -184,7 +194,7 @@ class Mapper implements MapperInterface
             {
                 continue;
             }
-            $option = $this->optionsExtend[$name] ?? false;
+            $option = $optionsExtend[$name] ?? false;
             if ($option)
             {
                 $option->setConfig($value);
@@ -260,12 +270,10 @@ class Mapper implements MapperInterface
         return DataPropertyAccessor::getPropertyAtPath($configPath, $data);
     }
 
-    protected function getConfigOptions($config): array
+    protected function getConfigOptions(array $config, string $configKey): array
     {
-        if (false === array_key_exists('Options', $config)) {
-            return $this->defaultMappingOptions;
-        }
-        return array_replace_recursive($this->defaultMappingOptions, $config['Options']);
+        $options = $config[$configKey] ?? [];
+        return array_replace_recursive($this->defaultMappingOptions[$configKey], $options);
     }
 
     /**
@@ -338,8 +346,8 @@ class Mapper implements MapperInterface
             }
         };
 
-        $registerOptions(static::OPTIONS_GROUP_INPUT, $config);
-        $registerOptions(static::OPTIONS_GROUP_OUTPUT, $config);
+        $registerOptions(static::CONFIG_KEY_INPUT_OPTIONS, $config);
+        $registerOptions(static::CONFIG_KEY_OUTPUT_OPTIONS, $config);
 
         return $this;
     }
@@ -390,19 +398,18 @@ class Mapper implements MapperInterface
      * @throws ExceptionInterface
      * @throws NotExistsException
      */
-    protected function exceptionOnUnsupportedOption(array $options): void
+    protected function exceptionOnUnsupportedOption(array $options, string $optionsConfigKey): void
     {
-
-        $inputOptions = $this->optionsExtend[static::OPTIONS_GROUP_INPUT] ?? [];
-        $outputOptions = $this->optionsExtend[static::OPTIONS_GROUP_OUTPUT] ?? [];
-        $knownOptions = static::DEFAULT_MAPPING_OPTIONS +  $inputOptions + $outputOptions;
+        $optionsExtend = $this->optionsExtend[$optionsConfigKey] ?? [];
+        $knownOptions = static::DEFAULT_MAPPING_OPTIONS[$optionsConfigKey] +  $optionsExtend;
         $unsupportedOptions = array_diff_key($options, $knownOptions);
         if ($unsupportedOptions)
         {
             ExceptionHelper::create(new NotExistsException())
                 ->message(
-                    'You try to use not  unknown mapper option(s) [%s], you must use one of theses [%s]',
+                    'You try to use unknown mapper option(s) [%s] in [%s] config section. You can use only theses [%s] options',
                     implode(',', array_keys($unsupportedOptions)),
+                    $optionsConfigKey,
                     implode(',', array_keys($knownOptions))
                 )
                 ->throw()
