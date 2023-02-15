@@ -13,27 +13,31 @@ use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
 use LetsCompose\Core\HttpClient\Config\Action\ActionConfigInterface;
 use LetsCompose\Core\HttpClient\Config\Request\RequestConfig;
+use LetsCompose\Core\HttpClient\Config\Request\RequestConfigInterface;
+use LetsCompose\Core\HttpClient\Config\Response\ResponseConfig;
+use LetsCompose\Core\HttpClient\Config\Response\ResponseConfigInterface;
 use LetsCompose\Core\Tools\ArrayHelper;
 use LetsCompose\Core\Tools\Data\Hydrator;
-use LetsCompose\Core\Tools\ExceptionHelper;
 
 class ConfigLoader implements ConfigLoaderInterface
 {
     protected const CONFIG_KEY = 'http_client';
-    protected const CONFIG_KEY_DEFAULT_REQUEST_OPTIONS = 'default_request_options';
-    protected const CONFIG_KEY_RESPONSE_DEFAULTS = 'response_defaults';
-    protected const CONFIG_KEY_EXCEPTION_DEFAULTS = 'exception_defaults';
+    protected const CONFIG_KEY_DEFAULT_REQUEST_OPTIONS = 'default_request_config';
+    protected const CONFIG_KEY_DEFAULT_RESPONSE_OPTIONS = 'default_response_config';
+    protected const CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG = 'default_response_exception_config';
     protected const CONFIG_KEY_ACTIONS = 'actions';
     protected const CONFIG_KEY_ACTION_REQUEST = 'request';
+    protected const CONFIG_KEY_ACTION_RESPONSE = 'response';
+    protected const CONFIG_KEY_ACTION_RESPONSE_EXCEPTION = 'response_exception';
 
     /**
      * @throws ExceptionInterface
      */
-    public function load(array $content): ConfigInterface
+    public function load(array $config): ConfigInterface
     {
         $clientConfig = new ClientConfig();
 
-        $config = $this->getConfig($content, static::CONFIG_KEY);
+        $config = $this->getConfig($config, static::CONFIG_KEY);
         $actions = $this->loadActions($config);
 
         return $clientConfig;
@@ -48,56 +52,86 @@ class ConfigLoader implements ConfigLoaderInterface
     protected function loadActions(array $clientConfig): array
     {
         $config = $this->getConfig($clientConfig, static::CONFIG_KEY_ACTIONS);
-        $actions = $this->prepareActionsConfig($config);
+        $actions = $this->getActionsList($config);
 
         foreach ($actions as $path => $action)
         {
-            $requestConfig = $action[static::CONFIG_KEY_ACTION_REQUEST];
-            $defaultRequestOptions = $clientConfig[static::CONFIG_KEY_DEFAULT_REQUEST_OPTIONS];
-            $forAllDefaults = $defaultRequestOptions['for_all'] ?? [];
-            $byMethodDefaults = $defaultRequestOptions['by_method'] ?? [];
-            $defaults = [];
+            $requestConfig = $this->createRequestConfig
+            (
+                $action[static::CONFIG_KEY_ACTION_REQUEST],
+                $clientConfig[static::CONFIG_KEY_DEFAULT_REQUEST_OPTIONS]
+            );
 
-            $requestMethod = $requestConfig[RequestConfig::CONFIG_KEY_METHOD];
-            foreach ($byMethodDefaults as $methodDefaults)
-            {
-                $applyFor = $methodDefaults['apply_for'] ?? [];
-                if (empty($applyFor))
-                {
-                    throw (new InvalidArgumentException())
-                    ->setMessage(
-                        'Invalid [%s/by-method] config. You must define [apply-for] config key and provide valid request method option(s) (POST, GET, etc.)',
-                        static::CONFIG_KEY_DEFAULT_REQUEST_OPTIONS
-                    );
-                }
-                if (in_array($requestMethod, $applyFor))
-                {
-                    $useDefaults = $methodDefaults['use_defaults'] ?? true;
-                    $defaults = $methodDefaults;
-                    if ($useDefaults)
-                    {
-                        $defaults = array_replace_recursive($forAllDefaults, $methodDefaults);
-                    }
-                }
-            }
+            $responseConfig = $this->createResponseConfig
+            (
+                $action[static::CONFIG_KEY_ACTION_RESPONSE] ?? [],
+                $clientConfig[static::CONFIG_KEY_DEFAULT_RESPONSE_OPTIONS] ?? []
+            );
 
-            $useDefaults = $requestConfig[RequestConfig::CONFIG_KEY_USE_DEFAULTS] ?? false;
-            if ($useDefaults)
-            {
-                $requestConfig = array_replace_recursive($defaults, $requestConfig);
-            }
+            dump($responseConfig);
 
-            $requestConfig = ArrayHelper::keysToCamelCase($requestConfig);
-            $requestConfig = Hydrator::hydrate(RequestConfig::class, $requestConfig);
-            dump($requestConfig);
         }
 
         return [];
     }
 
-    protected function prepareActionsConfig(array $config): array
+    protected function createResponseConfig(array $config, array $defaultConfig): ResponseConfigInterface
     {
-        $requestKey = 'request';
+        if (!empty($defaultConfig))
+        {
+            if ($config[ConfigInterface::CONFIG_KEY_USE_DEFAULTS] ?? true)
+            {
+                $config = array_replace_recursive($defaultConfig, $config);
+            }
+        }
+
+        return $this->createConfigObject(ResponseConfig::class, $config);
+    }
+
+    /**
+     * @throws ExceptionInterface
+     */
+    protected function createRequestConfig(array $config, array $defaultConfig): RequestConfigInterface
+    {
+        $forAllDefaults = $defaultConfig['for_all'] ?? [];
+        $byMethodDefaults = $defaultConfig['by_method'] ?? [];
+        $defaults = [];
+
+        $requestMethod = $config[RequestConfig::CONFIG_KEY_METHOD];
+        foreach ($byMethodDefaults as $methodDefaults)
+        {
+            $applyFor = $methodDefaults['apply_for'] ?? [];
+            if (empty($applyFor))
+            {
+                throw (new InvalidArgumentException())
+                    ->setMessage(
+                        'Invalid [%s/by-method] config. You must define [apply-for] config key and provide valid request method option(s) (POST, GET, etc.)',
+                        static::CONFIG_KEY_DEFAULT_REQUEST_OPTIONS
+                    );
+            }
+            if (in_array($requestMethod, $applyFor))
+            {
+                $useDefaults = $methodDefaults['use_defaults'] ?? true;
+                $defaults = $methodDefaults;
+                if ($useDefaults)
+                {
+                    $defaults = array_replace_recursive($forAllDefaults, $methodDefaults);
+                }
+            }
+        }
+
+        $useDefaults = $config[ConfigInterface::CONFIG_KEY_USE_DEFAULTS] ?? true;
+        if ($useDefaults)
+        {
+            $config = array_replace_recursive($defaults, $config);
+        }
+
+        return $this->createConfigObject(RequestConfig::class, $config);
+    }
+
+
+    protected function getActionsList(array $config): array
+    {
         $result = [];
         $path = [];
 
@@ -105,13 +139,15 @@ class ConfigLoader implements ConfigLoaderInterface
             if (false === is_array($config))
             {
                 throw (new InvalidArgumentException())
-                    ->setMessage('Invalid action request config at path [%s], config must be an valid array', $path);
+                    ->setMessage('Invalid action request config at path [%s], config must be an valid array', $path)
+                ;
             }
 
             if (count(RequestConfig::CONFIG_REQUIRED_KEYS) !== count(array_intersect(RequestConfig::CONFIG_REQUIRED_KEYS, array_keys($config))))
             {
                 throw (new InvalidArgumentException())
-                    ->setMessage('Invalid action request config at path [%s], you must define all of theses keys [%s]', $path, implode('; ',RequestConfig::CONFIG_REQUIRED_KEYS));
+                    ->setMessage('Invalid action request config at path [%s], you must define all of theses keys [%s]', $path, implode('; ',RequestConfig::CONFIG_REQUIRED_KEYS))
+                ;
             }
 
             //TODO validate method and URI Keys
@@ -146,24 +182,33 @@ class ConfigLoader implements ConfigLoaderInterface
      * @throws ExceptionInterface
      * @throws InvalidArgumentException
      */
-    public function getConfig(array $content, string $configKey): array
+    protected function getConfig(array $content, string $configKey): array
     {
         if (false === array_key_exists($configKey, $content))
         {
-            ExceptionHelper::create(new InvalidArgumentException())
-                ->message('Invalid config, config key [%s] does not exist',$configKey)
-                ->throw();
+            throw (new InvalidArgumentException())
+                ->setMessage('Invalid config, config key [%s] does not exist',$configKey)
+            ;
         }
 
         $config = $content[$configKey] ?? [];
         if (empty($config))
         {
-            ExceptionHelper::create(new InvalidArgumentException())
-                ->message('Config defined by [%s] is empty', $configKey)
-                ->throw();
+            throw (new InvalidArgumentException())
+                ->setMessage('Config defined by [%s] is empty', $configKey)
+            ;
         }
 
         return $config;
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws ExceptionInterface
+     */
+    protected function createConfigObject(string $class, array $config): ConfigInterface
+    {
+        $config = ArrayHelper::keysToCamelCase($config);
+        return Hydrator::hydrate($class, $config);
+    }
 }

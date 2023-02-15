@@ -11,4 +11,5 @@ namespace LetsCompose\Core\HttpClient\Config;
 
 interface ConfigInterface
 {
+    const CONFIG_KEY_USE_DEFAULTS = 'use_defaults';
 }

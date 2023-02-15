@@ -13,7 +13,6 @@ class RequestConfig implements RequestConfigInterface
 {
     const CONFIG_KEY_METHOD = 'method';
     const CONFIG_KEY_URI = 'uri';
-    const CONFIG_KEY_USE_DEFAULTS = 'use_defaults';
     const CONFIG_KEY_HEADERS = 'headers';
     const CONFIG_KEY_QUERY_PARAMS = 'query_params';
 

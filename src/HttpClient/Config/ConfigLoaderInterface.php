@@ -11,5 +11,5 @@ namespace LetsCompose\Core\HttpClient\Config;
 
 interface ConfigLoaderInterface
 {
-    public function load(array $content): ConfigInterface;
+    public function load(array $config): ConfigInterface;
 }

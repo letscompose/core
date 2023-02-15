@@ -11,6 +11,18 @@ namespace LetsCompose\Core\HttpClient\Config\Response;
 
 use LetsCompose\Core\HttpClient\Config\ConfigInterface;
 
-interface ResponseConfigInterface extends ConfigInterface
+class ResponseConfig implements ResponseConfigInterface
 {
+    private ?array $headers = null;
+
+    public function getHeaders(): ?array
+    {
+        return $this->headers;
+    }
+
+    public function setHeaders(?array $headers): ResponseConfig
+    {
+        $this->headers = $headers;
+        return $this;
+    }
 }
