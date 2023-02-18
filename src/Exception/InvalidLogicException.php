@@ -7,10 +7,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace LetsCompose\Core\HttpClient\Config\Action;
 
-use LetsCompose\Core\HttpClient\Config\ConfigInterface;
+namespace LetsCompose\Core\Exception;
 
-interface ExceptionConfigInterface extends ConfigInterface
+
+/**
+ * @author Igor ZLOBINE <izlobine@gmail.com>
+ */
+class InvalidLogicException extends Exception
 {
+
 }

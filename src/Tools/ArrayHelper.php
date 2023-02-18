@@ -42,9 +42,7 @@ class ArrayHelper
     public static function keysToCamelCase(array $params, $snakeCase = true): array
     {
         if (empty($params)) {
-            ExceptionHelper::create(new InvalidArgumentException())
-                ->message('can\'t apply function to empty array')
-                ->throw();
+            return $params;
         }
 
         $keys = array_keys($params);

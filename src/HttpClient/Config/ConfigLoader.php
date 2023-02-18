@@ -11,13 +11,19 @@ namespace LetsCompose\Core\HttpClient\Config;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
+use LetsCompose\Core\Exception\InvalidLogicException;
+use LetsCompose\Core\Exception\NotExistsException;
+use LetsCompose\Core\HttpClient\Config\Action\ActionConfig;
 use LetsCompose\Core\HttpClient\Config\Action\ActionConfigInterface;
+use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfig;
+use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfigList;
 use LetsCompose\Core\HttpClient\Config\Request\RequestConfig;
 use LetsCompose\Core\HttpClient\Config\Request\RequestConfigInterface;
 use LetsCompose\Core\HttpClient\Config\Response\ResponseConfig;
 use LetsCompose\Core\HttpClient\Config\Response\ResponseConfigInterface;
 use LetsCompose\Core\Tools\ArrayHelper;
 use LetsCompose\Core\Tools\Data\Hydrator;
+use LetsCompose\Core\Tools\ObjectHelper;
 
 class ConfigLoader implements ConfigLoaderInterface
 {
@@ -25,6 +31,7 @@ class ConfigLoader implements ConfigLoaderInterface
     protected const CONFIG_KEY_DEFAULT_REQUEST_OPTIONS = 'default_request_config';
     protected const CONFIG_KEY_DEFAULT_RESPONSE_OPTIONS = 'default_response_config';
     protected const CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG = 'default_response_exception_config';
+    protected const CONFIG_KEY_OPTIONS_EXTEND = 'options-extend';
     protected const CONFIG_KEY_ACTIONS = 'actions';
     protected const CONFIG_KEY_ACTION_REQUEST = 'request';
     protected const CONFIG_KEY_ACTION_RESPONSE = 'response';
@@ -38,10 +45,65 @@ class ConfigLoader implements ConfigLoaderInterface
         $clientConfig = new ClientConfig();
 
         $config = $this->getConfig($config, static::CONFIG_KEY);
+        $this->validate($config);
+
+        $options = $this->extendOptions($config[static::CONFIG_KEY_OPTIONS_EXTEND] ?? []);
+
+        die;
+
         $actions = $this->loadActions($config);
 
         return $clientConfig;
 
+    }
+
+    protected function extendOptions(array $config)
+    {
+        $getOptionsConfig = function (array $optionsConfig, array &$path = []) use (&$getOptionsConfig): array
+        {
+            $defaults  = [
+                'class' => null,
+                'name' => null,
+                'config' => [],
+                'priority' => null
+            ];
+
+            $configList = [];
+
+            foreach ($optionsConfig as $option => $config)
+            {
+                if (is_string($config))
+                {
+                    $config = ['class' => $config] ;
+                }
+                $hasConfig = array_intersect_key($config, $defaults);
+                if (!$hasConfig)
+                {
+                    $path[] = $option;
+                    $configList = array_merge($configList, $getOptionsConfig($config, $path));
+                    $path = [];
+                } else {
+                    $key = $path[0] ?? $option;
+                    $config['class'] = $config['class'] ?? $option;
+                    $configList[$key][] = array_replace($defaults, $config);
+                }
+
+            }
+
+            return $configList;
+        };
+
+        $result = $getOptionsConfig($config);
+
+        dump($result);
+    }
+
+    /**
+     * @throws ExceptionInterface
+     */
+    protected function validate(array $config): void
+    {
+        $this->validateExceptionConfig(static::CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG, $config[static::CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG] ?? []);
     }
 
     /**
@@ -53,13 +115,14 @@ class ConfigLoader implements ConfigLoaderInterface
     {
         $config = $this->getConfig($clientConfig, static::CONFIG_KEY_ACTIONS);
         $actions = $this->getActionsList($config);
+        $actionObjects = [];
 
         foreach ($actions as $path => $action)
         {
             $requestConfig = $this->createRequestConfig
             (
                 $action[static::CONFIG_KEY_ACTION_REQUEST],
-                $clientConfig[static::CONFIG_KEY_DEFAULT_REQUEST_OPTIONS]
+                $clientConfig[static::CONFIG_KEY_DEFAULT_REQUEST_OPTIONS] ?? []
             );
 
             $responseConfig = $this->createResponseConfig
@@ -68,13 +131,115 @@ class ConfigLoader implements ConfigLoaderInterface
                 $clientConfig[static::CONFIG_KEY_DEFAULT_RESPONSE_OPTIONS] ?? []
             );
 
-            dump($responseConfig);
+            $responseExceptionConfig = $this->createResponseExceptionConfig
+            (
+                $path,
+                $action[static::CONFIG_KEY_ACTION_RESPONSE_EXCEPTION] ?? [],
+                $clientConfig[static::CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG] ?? []
+            );
 
+            $actionObjects[] = (new ActionConfig())
+                ->setRequestConfig($requestConfig)
+                ->setResponseConfig($responseConfig)
+                ->setResponseExceptionConfig($responseExceptionConfig)
+            ;
         }
 
-        return [];
+        return $actionObjects;
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws ExceptionInterface
+     */
+    protected function createResponseExceptionConfig(string $path, array $config, array $defaultConfig): ExceptionConfigList
+    {
+
+        $this->validateExceptionConfig($path, $config);
+
+        if (!empty($defaultConfig))
+        {
+            if ($config[ConfigInterface::CONFIG_KEY_USE_DEFAULTS] ?? true)
+            {
+                $config = array_replace_recursive($defaultConfig, $config);
+            }
+        }
+
+        $exceptionConfigList = new ExceptionConfigList();
+        $configList = $config['exceptions'] ?? [];
+        foreach ($configList as $key => $exceptionConfig)
+        {
+            $exceptionConfig['class'] = $exceptionConfig['class'] ?? $key;
+            $exceptionConfig['message_prefix'] = $config['message_prefix'];
+
+            /**
+             * @var ExceptionConfig $exceptionConfig
+             */
+            $exceptionConfig = $this->createConfigObject(ExceptionConfig::class, $exceptionConfig);
+            try {
+                $exceptionConfigList->addExceptionConfig($exceptionConfig);
+            } catch (\Exception $e)
+            {
+                throw (new InvalidLogicException())
+                    ->setMessage('Invalid response exception config section [%s]. %s', $path, $e->getMessage())
+                ;
+            }
+        }
+
+        return $exceptionConfigList;
+    }
+
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws NotExistsException
+     * @throws ExceptionInterface
+     */
+    protected function validateExceptionConfig(string $path, array $config): void
+    {
+        $configList = $config['exceptions'] ?? [];
+        foreach ($configList as $key => $exceptionConfig)
+        {
+            $class = $exceptionConfig['class'] ?? $key;
+            if (empty($class))
+            {
+                throw (new InvalidArgumentException())
+                    ->setMessage(
+                        'Invalid response exception config section [%s]. Exception config must define an valid exception class by [class] key or key of configuration block',
+                        $path
+                    )
+                ;
+            }
+
+            if (false === class_exists($class))
+            {
+                throw (new NotExistsException())
+                    ->setMessage(
+                        'Invalid response exception config section [%s]. Class [%s] doest not exists',
+                        $path,
+                        $class
+                    )
+                ;
+            }
+
+            if (false === ObjectHelper::hasParent($class, \Exception::class))
+            {
+                throw (new InvalidArgumentException())
+                    ->setMessage(
+                        'Invalid response exception config section [%s]. Your exception class [%s] must extends [%s]',
+                        $path,
+                        $class,
+                        \Exception::class
+                    )
+                ;
+            }
+        }
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws ExceptionInterface
+     */
     protected function createResponseConfig(array $config, array $defaultConfig): ResponseConfigInterface
     {
         if (!empty($defaultConfig))

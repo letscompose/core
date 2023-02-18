@@ -101,7 +101,7 @@ class PropertyList implements PropertyListInterface, \Iterator, \Countable
             $propertyClass = $class;
         }
 
-        if (false === ObjectHelper::hasInterface(PropertyInterface::class, $propertyClass))
+        if (false === ObjectHelper::hasInterface($propertyClass, PropertyInterface::class))
         {
             ExceptionHelper::create(new MustImplementException())
                 ->message('Property [%s] of [%s] must implement interface [%s]', $propertyClass, ObjectHelper::getClassShortName(get_class($this)), PropertyInterface::class)

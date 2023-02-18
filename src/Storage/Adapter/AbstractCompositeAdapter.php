@@ -55,7 +55,7 @@ abstract class AbstractCompositeAdapter extends AbstractAdapter implements Compo
     {
         foreach ($actionsClassList as $actionsClass)
         {
-            if (false === ObjectHelper::hasInterface(ActionInterface::class, $actionsClass))
+            if (false === ObjectHelper::hasInterface($actionsClass, ActionInterface::class))
             {
                 ExceptionHelper::create(new MustImplementException())
                     ->message('Action [%s] must implement an interface [%s]', $actionsClass, ActionInterface::class)
