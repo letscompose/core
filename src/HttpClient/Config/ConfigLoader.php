@@ -12,15 +12,20 @@ namespace LetsCompose\Core\HttpClient\Config;
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
 use LetsCompose\Core\Exception\InvalidLogicException;
+use LetsCompose\Core\Exception\MustImplementException;
 use LetsCompose\Core\Exception\NotExistsException;
 use LetsCompose\Core\HttpClient\Config\Action\ActionConfig;
 use LetsCompose\Core\HttpClient\Config\Action\ActionConfigInterface;
+use LetsCompose\Core\HttpClient\Config\Option\OptionConfig;
+use LetsCompose\Core\HttpClient\Config\Option\OptionLoaderConfig;
 use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfig;
 use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfigList;
 use LetsCompose\Core\HttpClient\Config\Request\RequestConfig;
 use LetsCompose\Core\HttpClient\Config\Request\RequestConfigInterface;
 use LetsCompose\Core\HttpClient\Config\Response\ResponseConfig;
 use LetsCompose\Core\HttpClient\Config\Response\ResponseConfigInterface;
+use LetsCompose\Core\HttpClient\Option\OptionInterface;
+use LetsCompose\Core\HttpClient\Option\OptionLoaderInterface;
 use LetsCompose\Core\Tools\ArrayHelper;
 use LetsCompose\Core\Tools\Data\Hydrator;
 use LetsCompose\Core\Tools\ObjectHelper;
@@ -65,7 +70,7 @@ class ConfigLoader implements ConfigLoaderInterface
                 'class' => null,
                 'name' => null,
                 'config' => [],
-                'priority' => null
+                'priority' => null,
             ];
 
             $configList = [];
@@ -84,8 +89,14 @@ class ConfigLoader implements ConfigLoaderInterface
                     $path = [];
                 } else {
                     $key = $path[0] ?? $option;
+                    $config['name'] = $key;
                     $config['class'] = $config['class'] ?? $option;
-                    $configList[$key][] = array_replace($defaults, $config);
+                    $config = array_replace($defaults, $config);
+                    if (false === empty($config['loader'] ?? [] ))
+                    {
+                        $config  = array_replace($config, $getOptionsConfig(['loader' => $config['loader']]));
+                    }
+                    $configList[$key][] = $config;
                 }
 
             }
@@ -93,9 +104,87 @@ class ConfigLoader implements ConfigLoaderInterface
             return $configList;
         };
 
-        $result = $getOptionsConfig($config);
 
-        dump($result);
+        $validateObjectConfig = function (string $option, string $interface, array $config): array
+        {
+            if (empty($config))
+            {
+                throw (new InvalidArgumentException())
+                    ->setMessage('empty [%s] HttpClient option config', $option)
+                ;
+            }
+
+            if (1 < count($config))
+            {
+                throw (new InvalidArgumentException())
+                    ->setMessage('HttpClient option [%s] can be defined only by one config', $option)
+                ;
+            }
+
+            $config = current($config);
+            $class = $config['class'] ?? '';
+            if (empty($class))
+            {
+                throw (new InvalidArgumentException())
+                    ->setMessage('HttpClient option [%s] config must define an valid [class] key', $option)
+                ;
+            }
+
+            if (false === class_exists($class))
+            {
+                throw (new NotExistsException())
+                    ->setMessage(
+                        'HttpClient option [%s] class [%s] doest not exist',
+                        $option,
+                        $class
+                    )
+                ;
+            }
+
+            if (false === ObjectHelper::hasInterface($class, $interface))
+            {
+                throw (new MustImplementException())
+                    ->setMessage(
+                        'HttpClient option [%s] class [%s] must implement interface [%s]',
+                        $option,
+                        $class,
+                        $interface
+                    )
+                ;
+            }
+
+            return $config;
+        };
+
+
+        /**
+         * @throws InvalidArgumentException
+         * @throws ExceptionInterface
+         */
+        $processOptionsConfig = function (array $optionsConfig) use ($validateObjectConfig): array
+        {
+            $result = [];
+            foreach ($optionsConfig as $option => $config)
+            {
+                $config = $validateObjectConfig($option, OptionInterface::class, $config);
+                $option = $this->createConfigObject(OptionConfig::class, $config);
+                $config = $config['loader'] ?? [];
+                if (!empty($config))
+                {
+                    $config = $validateObjectConfig($option->getName().'/loader', OptionLoaderInterface::class, $config);
+                    $loader = $this->createConfigObject(OptionLoaderConfig::class, $config);
+                    $option->setLoaderConfig($loader);
+                }
+                $result[] = $option;
+            }
+            return $result;
+        };
+
+        $result = $getOptionsConfig($config);
+        if ($result)
+        {
+            $result = $processOptionsConfig($result);
+        }
     }
 
     /**

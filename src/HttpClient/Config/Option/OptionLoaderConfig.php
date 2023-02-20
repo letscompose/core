@@ -7,10 +7,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace LetsCompose\Core\HttpClient\Config;
+namespace LetsCompose\Core\HttpClient\Config\Option;
 
-class ClientConfig implements ConfigInterface
+use LetsCompose\Core\HttpClient\Config\ConfigInterface;
+
+class OptionLoaderConfig extends AbstractObjectConfig implements OptionLoaderConfigInterface
 {
-
 
 }
