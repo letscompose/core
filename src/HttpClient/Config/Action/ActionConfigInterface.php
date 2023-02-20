@@ -10,7 +10,13 @@
 namespace LetsCompose\Core\HttpClient\Config\Action;
 
 use LetsCompose\Core\HttpClient\Config\ConfigInterface;
+use LetsCompose\Core\HttpClient\Config\Request\RequestConfigInterface;
+use LetsCompose\Core\HttpClient\Config\Response\ResponseConfig;
+use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfigList;
 
 interface ActionConfigInterface extends ConfigInterface
 {
+    public function getRequestConfig(): RequestConfigInterface;
+    public function getResponseConfig(): ?ResponseConfig;
+    public function getResponseExceptionConfig(): ?ExceptionConfigList;
 }

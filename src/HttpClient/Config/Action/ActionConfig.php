@@ -15,11 +15,23 @@ use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfigList;
 
 class ActionConfig implements ActionConfigInterface
 {
+    private string $path;
+
     private RequestConfigInterface $requestConfig;
 
     private ?ResponseConfigInterface $responseConfig;
 
     private ?ExceptionConfigList $responseExceptionConfig;
+
+    public function getPath(): string
+    {
+        return $this->path;
+    }
+    public function setPath(string $path): ActionConfig
+    {
+        $this->path = $path;
+        return $this;
+    }
 
     public function getRequestConfig(): RequestConfigInterface
     {

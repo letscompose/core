@@ -53,10 +53,12 @@ class ConfigLoader implements ConfigLoaderInterface
         $this->validate($config);
 
         $options = $this->extendOptions($config[static::CONFIG_KEY_OPTIONS_EXTEND] ?? []);
-
-        die;
-
         $actions = $this->loadActions($config);
+
+        $clientConfig->setOptions($options);
+        $clientConfig->setActions($actions);
+
+        dump($clientConfig);
 
         return $clientConfig;
 
@@ -175,7 +177,7 @@ class ConfigLoader implements ConfigLoaderInterface
                     $loader = $this->createConfigObject(OptionLoaderConfig::class, $config);
                     $option->setLoaderConfig($loader);
                 }
-                $result[] = $option;
+                $result[$option->getName()] = $option;
             }
             return $result;
         };
@@ -185,6 +187,7 @@ class ConfigLoader implements ConfigLoaderInterface
         {
             $result = $processOptionsConfig($result);
         }
+        return $result;
     }
 
     /**
@@ -227,7 +230,8 @@ class ConfigLoader implements ConfigLoaderInterface
                 $clientConfig[static::CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG] ?? []
             );
 
-            $actionObjects[] = (new ActionConfig())
+            $actionObjects[$path] = (new ActionConfig())
+                ->setPath($path)
                 ->setRequestConfig($requestConfig)
                 ->setResponseConfig($responseConfig)
                 ->setResponseExceptionConfig($responseExceptionConfig)
