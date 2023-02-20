@@ -14,6 +14,7 @@ use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
 use LetsCompose\Core\HttpClient\Config\Request\RequestConfigInterface;
 use LetsCompose\Core\Tools\Storage\PathHelper;
+use LetsCompose\Core\Tools\StringHelper;
 use LetsCompose\Core\Tools\StringPlaceholderHelper;
 
 class Request implements RequestInterface
@@ -86,7 +87,7 @@ class Request implements RequestInterface
      * @param array $placeholders
      * @return Request
      */
-    public function setPlaceholders(array $placeholders): Request
+    public function setPlaceholders(array $placeholders): self
     {
         $this->placeholders = $placeholders;
         return $this;
@@ -97,16 +98,22 @@ class Request implements RequestInterface
      */
     public function getQueryParams(): array
     {
-        return $this->queryParams;
+        return array_replace($this->config->getQueryParams(), $this->queryParams);
     }
 
     /**
      * @param array $queryParams
      * @return Request
      */
-    public function setQueryParams(array $queryParams): Request
+    public function setQueryParams(array $queryParams): self
     {
         $this->queryParams = $queryParams;
+        return $this;
+    }
+
+    public function addQueryParams($queryParams): self
+    {
+        $this->queryParams = array_replace($this->queryParams, $queryParams);
         return $this;
     }
 
@@ -115,16 +122,22 @@ class Request implements RequestInterface
      */
     public function getHeaders(): array
     {
-        return $this->headers;
+        return array_replace($this->config->getHeaders(), $this->headers);
     }
 
     /**
      * @param array $headers
      * @return Request
      */
-    public function setHeaders(array $headers): Request
+    public function setHeaders(array $headers): self
     {
         $this->headers = $headers;
+        return $this;
+    }
+
+    public function addHeaders(array $headers): self
+    {
+        $this->headers = array_replace($this->headers, $headers);
         return $this;
     }
 
@@ -140,12 +153,9 @@ class Request implements RequestInterface
      * @param array $data
      * @return Request
      */
-    public function setData(array $data): Request
+    public function setData(array $data): self
     {
         $this->data = $data;
         return $this;
     }
-
-
-
 }

@@ -18,12 +18,12 @@ use LetsCompose\Core\HttpClient\Config\Action\ActionConfig;
 use LetsCompose\Core\HttpClient\Config\Action\ActionConfigInterface;
 use LetsCompose\Core\HttpClient\Config\Option\OptionConfig;
 use LetsCompose\Core\HttpClient\Config\Option\OptionLoaderConfig;
+use LetsCompose\Core\HttpClient\Config\Response\ResponseConfigInterface;
 use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfig;
 use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfigList;
 use LetsCompose\Core\HttpClient\Config\Request\RequestConfig;
 use LetsCompose\Core\HttpClient\Config\Request\RequestConfigInterface;
 use LetsCompose\Core\HttpClient\Config\Response\ResponseConfig;
-use LetsCompose\Core\HttpClient\Config\Response\ResponseConfigInterface;
 use LetsCompose\Core\HttpClient\Option\OptionInterface;
 use LetsCompose\Core\HttpClient\Option\OptionLoaderInterface;
 use LetsCompose\Core\Tools\ArrayHelper;
@@ -57,8 +57,6 @@ class ConfigLoader implements ConfigLoaderInterface
 
         $clientConfig->setOptions($options);
         $clientConfig->setActions($actions);
-
-        dump($clientConfig);
 
         return $clientConfig;
 
@@ -213,12 +211,14 @@ class ConfigLoader implements ConfigLoaderInterface
         {
             $requestConfig = $this->createRequestConfig
             (
+                $path,
                 $action[static::CONFIG_KEY_ACTION_REQUEST],
                 $clientConfig[static::CONFIG_KEY_DEFAULT_REQUEST_OPTIONS] ?? []
             );
 
             $responseConfig = $this->createResponseConfig
             (
+                $path,
                 $action[static::CONFIG_KEY_ACTION_RESPONSE] ?? [],
                 $clientConfig[static::CONFIG_KEY_DEFAULT_RESPONSE_OPTIONS] ?? []
             );
@@ -333,7 +333,7 @@ class ConfigLoader implements ConfigLoaderInterface
      * @throws InvalidArgumentException
      * @throws ExceptionInterface
      */
-    protected function createResponseConfig(array $config, array $defaultConfig): ResponseConfigInterface
+    protected function createResponseConfig(string $path, array $config, array $defaultConfig): ResponseConfigInterface
     {
         if (!empty($defaultConfig))
         {
@@ -343,13 +343,14 @@ class ConfigLoader implements ConfigLoaderInterface
             }
         }
 
+        $config['path'] = $path;
         return $this->createConfigObject(ResponseConfig::class, $config);
     }
 
     /**
      * @throws ExceptionInterface
      */
-    protected function createRequestConfig(array $config, array $defaultConfig): RequestConfigInterface
+    protected function createRequestConfig(string $path, array $config, array $defaultConfig): RequestConfigInterface
     {
         $forAllDefaults = $defaultConfig['for_all'] ?? [];
         $byMethodDefaults = $defaultConfig['by_method'] ?? [];
@@ -384,6 +385,7 @@ class ConfigLoader implements ConfigLoaderInterface
             $config = array_replace_recursive($defaults, $config);
         }
 
+        $config['path'] = $path;
         return $this->createConfigObject(RequestConfig::class, $config);
     }
 

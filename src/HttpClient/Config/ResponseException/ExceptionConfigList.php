@@ -13,7 +13,7 @@ use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidLogicException;
 use LetsCompose\Core\Exception\NotUniqueException;
 
-class ExceptionConfigList
+class ExceptionConfigList implements ExceptionConfigListInterface
 {
     /**
      * @var ?ExceptionConfigInterface[]

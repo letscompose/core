@@ -27,7 +27,7 @@ class ActionConfig implements ActionConfigInterface
     {
         return $this->path;
     }
-    public function setPath(string $path): ActionConfig
+    public function setPath(string $path): self
     {
         $this->path = $path;
         return $this;
@@ -38,7 +38,7 @@ class ActionConfig implements ActionConfigInterface
         return $this->requestConfig;
     }
 
-    public function setRequestConfig(RequestConfigInterface $requestConfig): ActionConfig
+    public function setRequestConfig(RequestConfigInterface $requestConfig): self
     {
         $this->requestConfig = $requestConfig;
         return $this;
@@ -49,7 +49,7 @@ class ActionConfig implements ActionConfigInterface
         return $this->responseConfig;
     }
 
-    public function setResponseConfig(?ResponseConfigInterface $responseConfig): ActionConfig
+    public function setResponseConfig(?ResponseConfigInterface $responseConfig): self
     {
         $this->responseConfig = $responseConfig;
         return $this;
@@ -60,7 +60,7 @@ class ActionConfig implements ActionConfigInterface
         return $this->responseExceptionConfig;
     }
 
-    public function setResponseExceptionConfig(?ExceptionConfigList $responseExceptionConfig): ActionConfig
+    public function setResponseExceptionConfig(?ExceptionConfigList $responseExceptionConfig): self
     {
         $this->responseExceptionConfig = $responseExceptionConfig;
         return $this;

@@ -14,10 +14,17 @@ use LetsCompose\Core\Exception\NotExistsException;
 use LetsCompose\Core\HttpClient\Config\ClientConfigInterface;
 use LetsCompose\Core\HttpClient\Request\Request;
 use LetsCompose\Core\HttpClient\Request\RequestInterface;
+use LetsCompose\Core\HttpClient\Response\ResponseInterface;
+use LetsCompose\Core\HttpClient\Transport\TransportInterface;
 
 class HttpClient implements HttpClientInterface
 {
     private ClientConfigInterface $config;
+
+    public function __construct(private readonly TransportInterface $transport)
+    {
+    }
+
 
     public function loadConfig(string $configFile): self
     {
@@ -43,5 +50,27 @@ class HttpClient implements HttpClientInterface
         return new Request($this->config->getAction($requestPath)->getRequestConfig());
     }
 
+    public function send(RequestInterface $request): ResponseInterface
+    {
+        $this->applyRequestOptions($request);
+
+        $response = $this->transport
+            ->setResponseConfig()
+            ->setResponseExceptionConfig()
+            ->send($request);
+
+        $response = $this->applyResponseOptions($response);
+        return $response;
+    }
+
+    protected function applyRequestOptions(RequestInterface $request): RequestInterface
+    {
+
+    }
+
+    protected function applyResponseOptions(ResponseInterface $response): ResponseInterface
+    {
+
+    }
 
 }
