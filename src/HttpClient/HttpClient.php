@@ -12,10 +12,13 @@ namespace LetsCompose\Core\HttpClient;
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\NotExistsException;
 use LetsCompose\Core\HttpClient\Config\ClientConfigInterface;
+use LetsCompose\Core\HttpClient\Config\Response\ResponseConfigInterface;
+use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfigListInterface;
 use LetsCompose\Core\HttpClient\Request\Request;
 use LetsCompose\Core\HttpClient\Request\RequestInterface;
 use LetsCompose\Core\HttpClient\Response\ResponseInterface;
 use LetsCompose\Core\HttpClient\Transport\TransportInterface;
+use LetsCompose\Core\HttpClient\Transport\TransportResponseInterface;
 
 class HttpClient implements HttpClientInterface
 {
@@ -50,12 +53,26 @@ class HttpClient implements HttpClientInterface
         return new Request($this->config->getAction($requestPath)->getRequestConfig());
     }
 
+    /**
+     * @throws \Exception
+     */
     public function send(RequestInterface $request): ResponseInterface
     {
         $actionConfig = $this->config->getAction($request->getPath());
         $request = $this->applyRequestOptions($request);
 
-        $response = $this->transport->send($request);
+        try
+        {
+            $transportResponse = $this->transport->send($request);
+        }
+        catch (\Exception $exception)
+        {
+            throw $this->createException($exception, $actionConfig->getResponseExceptionConfig());
+        }
+
+        $response = $this->createResponse($transportResponse, $actionConfig->getResponseConfig());
+
+
 
         $response = $this->applyResponseOptions($response);
         return $response;
@@ -69,6 +86,16 @@ class HttpClient implements HttpClientInterface
     protected function applyResponseOptions(ResponseInterface $response): ResponseInterface
     {
         return $response;
+    }
+
+    protected function createResponse(TransportResponseInterface $transportResponse, ResponseConfigInterface $responseConfig): ResponseInterface
+    {
+
+    }
+
+    protected function createException(\Exception $e, ExceptionConfigListInterface $responseExceptionConfig): \Exception
+    {
+
     }
 
 }

@@ -10,9 +10,13 @@
 namespace LetsCompose\Core\HttpClient\Transport;
 
 use LetsCompose\Core\HttpClient\Request\RequestInterface;
+use Psr\Http\Client\ClientInterface;
 
 class Transport implements TransportInterface
 {
+
+    private ClientInterface $client;
+
     public function send(RequestInterface $request): TransportResponseInterface
     {
         return new TransportResponse([],[]);
