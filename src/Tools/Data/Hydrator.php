@@ -22,11 +22,6 @@ class Hydrator
 
     public static function hydrate(object|string $object, array $params, bool $putIntoCache = false): object
     {
-        if (true === empty($params))
-        {
-            return $object;
-        }
-
         /**
          * if object is a string, is must be instanced
          * we don't want put into cache a new instance for many raisons
@@ -36,6 +31,11 @@ class Hydrator
         {
             $object = new $object();
             $putIntoCache = false;
+        }
+
+        if (true === empty($params))
+        {
+            return $object;
         }
 
         if ($putIntoCache)

@@ -17,14 +17,40 @@ use ReflectionException;
  */
 class ObjectHelper
 {
-    public static function hasInterface(string $interface, string $class): bool
+    public static function hasInterface(string $class, string $interface): bool
     {
-        $classInterfaces = class_implements($class, $interface);
-        if (false === $classInterfaces)
+        try
+        {
+            // throw ErrorException, severity: E_WARNING if $class doest not exist
+            $classInterfaces = class_implements($class);
+            if (false === $classInterfaces)
+            {
+                return false;
+            }
+            return \in_array($interface, $classInterfaces);
+        }
+        catch (\Throwable $e)
         {
             return false;
         }
-        return \in_array($interface, $classInterfaces);
+    }
+
+    public static function hasParent(string $class, string $parent): bool
+    {
+        try
+        {
+            // throw ErrorException, severity: E_WARNING if $class doest not exist
+            $classParents = class_parents($class);
+            if (false === $classParents)
+            {
+                return false;
+            }
+            return \in_array($parent, $classParents);
+        }
+        catch (\Throwable $e)
+        {
+            return false;
+        }
     }
 
     /**
