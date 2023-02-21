@@ -27,7 +27,7 @@ class Request implements RequestInterface
 
     private array $headers = [];
 
-    private array $data;
+    private array $data = [];
 
     public function __construct(private readonly RequestConfigInterface $config)
     {
@@ -45,6 +45,11 @@ class Request implements RequestInterface
     public function getPath(): string
     {
         return $this->config->getPath();
+    }
+
+    public function getMethod(): string
+    {
+        return $this->config->getMethod();
     }
 
     /**

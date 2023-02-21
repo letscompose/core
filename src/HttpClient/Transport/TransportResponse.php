@@ -14,12 +14,12 @@ class TransportResponse implements TransportResponseInterface
     public function __construct
     (
         private readonly ?array $headers,
-        private readonly ?array $data,
+        private readonly mixed $data,
     )
     {
     }
 
-    public function getData(): ?array
+    public function getData(): mixed
     {
         return $this->data;
     }

@@ -50,9 +50,6 @@ class RequestConfig implements RequestConfigInterface
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getMethod(): string
     {
         return $this->method;
@@ -69,7 +66,7 @@ class RequestConfig implements RequestConfigInterface
         return $this->uriPrefix;
     }
 
-    public function setUriPrefix(?string $uriPrefix): RequestConfig
+    public function setUriPrefix(?string $uriPrefix): self
     {
         $this->uriPrefix = $uriPrefix;
         return $this;
@@ -86,54 +83,36 @@ class RequestConfig implements RequestConfigInterface
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getHeaders(): ?array
+
+    public function getHeaders(): array
     {
-        return $this->headers;
+        return (array)$this->headers;
     }
 
-    /**
-     * @param array|null $headers
-     * @return RequestConfig
-     */
-    public function setHeaders(?array $headers): RequestConfig
+
+    public function setHeaders(?array $headers): self
     {
         $this->headers = $headers;
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getQueryParams(): ?array
+    public function getQueryParams(): array
     {
-        return $this->queryParams;
+        return (array)$this->queryParams;
     }
 
-    /**
-     * @param array|null $queryParams
-     * @return RequestConfig
-     */
-    public function setQueryParams(?array $queryParams): RequestConfig
+
+    public function setQueryParams(?array $queryParams): self
     {
         $this->queryParams = $queryParams;
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function isUseDefaults(): bool
     {
         return $this->useDefaults;
     }
 
-    /**
-     * @param bool $useDefaults
-     * @return RequestConfig
-     */
     public function setUseDefaults(bool $useDefaults): self
     {
         $this->useDefaults = $useDefaults;

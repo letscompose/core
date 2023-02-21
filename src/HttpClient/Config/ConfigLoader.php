@@ -354,7 +354,7 @@ class ConfigLoader implements ConfigLoaderInterface
     {
         $forAllDefaults = $defaultConfig['for_all'] ?? [];
         $byMethodDefaults = $defaultConfig['by_method'] ?? [];
-        $defaults = [];
+        $defaults = $forAllDefaults;
 
         $requestMethod = $config[RequestConfig::CONFIG_KEY_METHOD];
         foreach ($byMethodDefaults as $methodDefaults)

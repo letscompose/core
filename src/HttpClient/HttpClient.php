@@ -67,12 +67,15 @@ class HttpClient implements HttpClientInterface
         }
         catch (\Exception $exception)
         {
+            dump($exception->getCode());
+            throw $exception;
             throw $this->createException($exception, $actionConfig->getResponseExceptionConfig());
         }
 
+        // TODO check exception conditions. HttpClient must not throw an error exception on 400 - 500 http code range
+
+
         $response = $this->createResponse($transportResponse, $actionConfig->getResponseConfig());
-
-
 
         $response = $this->applyResponseOptions($response);
         return $response;
@@ -95,7 +98,7 @@ class HttpClient implements HttpClientInterface
 
     protected function createException(\Exception $e, ExceptionConfigListInterface $responseExceptionConfig): \Exception
     {
-
+        return new \Exception();
     }
 
 }
