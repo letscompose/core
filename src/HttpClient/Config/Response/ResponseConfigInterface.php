@@ -13,4 +13,6 @@ use LetsCompose\Core\HttpClient\Config\ConfigInterface;
 
 interface ResponseConfigInterface extends ConfigInterface
 {
+    public function getPath(): string;
+    public function setPath(string $path): self;
 }

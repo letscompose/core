@@ -13,7 +13,19 @@ use LetsCompose\Core\HttpClient\Config\ConfigInterface;
 
 class ResponseConfig implements ResponseConfigInterface
 {
+    private string $path;
+
     private ?array $headers = null;
+
+    public function getPath(): string
+    {
+        return $this->path;
+    }
+    public function setPath(string $path): self
+    {
+        $this->path = $path;
+        return $this;
+    }
 
     public function getHeaders(): ?array
     {

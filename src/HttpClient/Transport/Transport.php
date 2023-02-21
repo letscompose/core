@@ -9,32 +9,12 @@
  */
 namespace LetsCompose\Core\HttpClient\Transport;
 
-use LetsCompose\Core\HttpClient\Config\Action\ActionsConfig;
-use LetsCompose\Core\HttpClient\Config\Response\ResponseConfigInterface;
-use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfigListInterface;
 use LetsCompose\Core\HttpClient\Request\RequestInterface;
-use LetsCompose\Core\HttpClient\Response\Response;
-use LetsCompose\Core\HttpClient\Response\ResponseInterface;
 
 class Transport implements TransportInterface
 {
-    private ResponseConfigInterface $responseConfig;
-    private ExceptionConfigListInterface $exceptionConfigList;
-    public function send(RequestInterface $request): ResponseInterface
+    public function send(RequestInterface $request): TransportResponseInterface
     {
-        return new Response();
+        return new TransportResponse([],[]);
     }
-
-    public function setResponseConfig(ActionsConfig $responseConfig): self
-    {
-        $this->responseConfig = $responseConfig;
-        return $this;
-    }
-
-    public function setResponseExceptionConfig(ExceptionConfigListInterface $exceptionConfigList): TransportInterface
-    {
-        $this->exceptionConfigList = $exceptionConfigList;
-        return $this;
-    }
-
 }

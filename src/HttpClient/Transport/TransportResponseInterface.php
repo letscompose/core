@@ -10,8 +10,11 @@
 namespace LetsCompose\Core\HttpClient\Transport;
 
 use LetsCompose\Core\HttpClient\Request\RequestInterface;
+use LetsCompose\Core\HttpClient\Response\ResponseInterface;
 
-interface TransportInterface
+interface TransportResponseInterface
 {
-    public function send(RequestInterface $request): TransportResponseInterface;
+    public function getData(): ?array;
+
+    public function getHeaders(): ?array;
 }

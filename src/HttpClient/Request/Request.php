@@ -42,6 +42,11 @@ class Request implements RequestInterface
         return $this->uuid;
     }
 
+    public function getPath(): string
+    {
+        return $this->config->getPath();
+    }
+
     /**
      * @return string
      * @throws ExceptionInterface

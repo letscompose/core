@@ -27,6 +27,8 @@ class RequestConfig implements RequestConfigInterface
         self::CONFIG_KEY_QUERY_PARAMS,
     ];
 
+    private string $path;
+
     private string $method;
 
     private ?string $uriPrefix = null;
@@ -37,6 +39,16 @@ class RequestConfig implements RequestConfigInterface
     private ?array $queryParams = null;
 
     private bool $useDefaults = true;
+
+    public function getPath(): string
+    {
+        return $this->path;
+    }
+    public function setPath(string $path): self
+    {
+        $this->path = $path;
+        return $this;
+    }
 
     /**
      * @return string

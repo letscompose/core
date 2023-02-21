@@ -52,12 +52,10 @@ class HttpClient implements HttpClientInterface
 
     public function send(RequestInterface $request): ResponseInterface
     {
-        $this->applyRequestOptions($request);
+        $actionConfig = $this->config->getAction($request->getPath());
+        $request = $this->applyRequestOptions($request);
 
-        $response = $this->transport
-            ->setResponseConfig()
-            ->setResponseExceptionConfig()
-            ->send($request);
+        $response = $this->transport->send($request);
 
         $response = $this->applyResponseOptions($response);
         return $response;
@@ -65,12 +63,12 @@ class HttpClient implements HttpClientInterface
 
     protected function applyRequestOptions(RequestInterface $request): RequestInterface
     {
-
+        return $request;
     }
 
     protected function applyResponseOptions(ResponseInterface $response): ResponseInterface
     {
-
+        return $response;
     }
 
 }

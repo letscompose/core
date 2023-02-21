@@ -14,6 +14,8 @@ interface RequestInterface
 {
     public function getUuid(): string;
 
+    public function getPath(): string;
+
     public function getUri(): string;
 
     public function getPlaceholders(): array;
