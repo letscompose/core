@@ -420,16 +420,17 @@ class ConfigLoader implements ConfigLoaderInterface
                 if (array_key_exists(static::CONFIG_KEY_ACTION_REQUEST,$item))
                 {
                     $requestConfig = $item[static::CONFIG_KEY_ACTION_REQUEST];
-                    $path[] = $key;
-                    $stringPath = implode('.', $path);
+                    $actionConfigPath = array_merge($path, [$key]);
+
+                    $stringPath = implode('.', $actionConfigPath);
                     $validateRequestConfig($stringPath, $requestConfig);
                     $result[$stringPath] = $item;
-                    $path = [];
                 } else {
                     $path[] = $key;
                     $processActionsConfig($item);
                 }
             }
+            array_pop($path);
         };
 
         $processActionsConfig($config);
