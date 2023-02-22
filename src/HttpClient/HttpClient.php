@@ -67,8 +67,6 @@ class HttpClient implements HttpClientInterface
         }
         catch (\Exception $exception)
         {
-            dump($exception->getCode());
-            throw $exception;
             throw $this->createException($exception, $actionConfig->getResponseExceptionConfig());
         }
 
