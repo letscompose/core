@@ -14,7 +14,9 @@ use LetsCompose\Core\HttpClient\Response\ResponseInterface;
 
 interface TransportResponseInterface
 {
-    public function getData(): mixed;
+    public function getStatusCode(): int;
+
+    public function getContent(): mixed;
 
     public function getHeaders(): ?array;
 }

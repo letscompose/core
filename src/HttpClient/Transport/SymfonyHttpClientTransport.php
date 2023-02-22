@@ -19,7 +19,7 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-class Transport implements TransportInterface
+class SymfonyHttpClientTransport implements TransportInterface
 {
     public function __construct(private readonly HttpClientInterface $client)
     {
@@ -53,12 +53,10 @@ class Transport implements TransportInterface
         }
 
         $response = $this->client->request($request->getMethod(), $request->getUri(), $data);
+        $responseStatusCode = $response->getStatusCode();
         $responseHeaders = $this->getResponseHeaders($response);
         $responseData = $this->getResponseData($response);
-
-        dump($responseData);
-
-        return new TransportResponse($responseHeaders, $responseData);
+        return new TransportResponse($responseStatusCode, $responseHeaders, $responseData);
     }
 
     /**
@@ -69,7 +67,7 @@ class Transport implements TransportInterface
      */
     protected function getResponseHeaders(ResponseInterface $response): array
     {
-        return $response->getHeaders();
+        return $response->getHeaders(false);
     }
 
     /**
@@ -83,7 +81,7 @@ class Transport implements TransportInterface
      */
     protected function getResponseData(ResponseInterface $response): mixed
     {
-        $data = $response->getContent();
+        $data = $response->getContent(false);
 
         if (true === $this->isJsonResponseType($response)) {
             $data = json_decode(json: $data, associative: true, flags: JSON_THROW_ON_ERROR);
@@ -102,7 +100,7 @@ class Transport implements TransportInterface
      */
     protected function isJsonResponseType(ResponseInterface $response): bool
     {
-        $headers = $response->getHeaders();
+        $headers = $response->getHeaders(false);
         $jsonTypes = [
             'application/json',
             'application/x-javascript',
