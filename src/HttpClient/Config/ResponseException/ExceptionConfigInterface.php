@@ -13,5 +13,5 @@ use LetsCompose\Core\HttpClient\Config\ConfigInterface;
 
 interface ExceptionConfigInterface extends ConfigInterface
 {
-    const CONFIG_KEY_WHEN_RESPONSE_CODE = 'when_response_code';
+    const CONFIG_KEY_RAISE_WHEN_RESPONSE_CODE = 'raise_when_response_code';
 }

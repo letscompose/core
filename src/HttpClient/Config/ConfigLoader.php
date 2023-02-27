@@ -50,8 +50,13 @@ class ConfigLoader implements ConfigLoaderInterface
         $clientConfig = new ClientConfig();
 
         $config = $this->getConfig($config, static::CONFIG_KEY);
-        $this->validate($config);
 
+        $config[static::CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG] =
+            $this->normalizeExceptionConfig
+            (
+                static::CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG,
+                $config[static::CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG] ?? []
+            );
         $options = $this->extendOptions($config[static::CONFIG_KEY_OPTIONS_EXTEND] ?? []);
         $actions = $this->loadActions($config);
 
@@ -189,14 +194,6 @@ class ConfigLoader implements ConfigLoaderInterface
     }
 
     /**
-     * @throws ExceptionInterface
-     */
-    protected function validate(array $config): void
-    {
-        $this->validateExceptionConfig(static::CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG, $config[static::CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG] ?? []);
-    }
-
-    /**
      * @return ActionConfigInterface[]
      * @throws ExceptionInterface
      * @throws InvalidArgumentException
@@ -247,30 +244,63 @@ class ConfigLoader implements ConfigLoaderInterface
      */
     protected function createResponseExceptionConfig(string $path, array $config, array $defaultConfig): ExceptionConfigList
     {
+        $config = $this->normalizeExceptionConfig($path, $config);
 
-        $this->validateExceptionConfig($path, $config);
+        $canAdd = function(array $newConfig, array $configList)
+        {
+            $raiseOn = $newConfig['raise_when_response_code'] ?? [];
+            $default = $newConfig['default'] ?? false;
+            foreach ($configList as $config)
+            {
+                if (true === ($config['default'] ?? false) && $default)
+                {
+                    return false;
+                }
 
+                if (array_intersect($raiseOn, $config['raise_when_response_code'] ?? [] ))
+                {
+                    return false;
+                }
+
+                if ($newConfig['class'] === $config['class'])
+                {
+                    return false;
+                }
+            };
+            return true;
+        };
+
+        $defaultConfigList = $defaultConfig['exceptions'];
+        $exceptionConfigList = $config['exceptions'];
+
+        // apply defaults
         if (!empty($defaultConfig))
         {
             if ($config[ConfigInterface::CONFIG_KEY_USE_DEFAULTS] ?? true)
             {
+                // merge current and default normalized exception configs
+                foreach ($defaultConfigList as $exceptionConfig)
+                {
+                    if ($canAdd($exceptionConfig, $exceptionConfigList))
+                    {
+                        $exceptionConfigList[] = $exceptionConfig;
+                    }
+                }
+
                 $config = array_replace_recursive($defaultConfig, $config);
             }
         }
 
-        $exceptionConfigList = new ExceptionConfigList();
-        $configList = $config['exceptions'] ?? [];
-        foreach ($configList as $key => $exceptionConfig)
+        $exceptionConfigListObject = new ExceptionConfigList();
+        foreach ($exceptionConfigList as $exceptionConfig)
         {
-            $exceptionConfig['class'] = $exceptionConfig['class'] ?? $key;
-            $exceptionConfig['message_prefix'] = $config['message_prefix'];
-
-            /**
-             * @var ExceptionConfig $exceptionConfig
-             */
+            $exceptionConfig['message_prefix'] = $config['message_prefix'] ?? null;
             $exceptionConfig = $this->createConfigObject(ExceptionConfig::class, $exceptionConfig);
             try {
-                $exceptionConfigList->addExceptionConfig($exceptionConfig);
+                /**
+                 * @var ExceptionConfig $exceptionConfig
+                 */
+                $exceptionConfigListObject->addExceptionConfig($exceptionConfig);
             } catch (\Exception $e)
             {
                 throw (new InvalidLogicException())
@@ -279,7 +309,18 @@ class ConfigLoader implements ConfigLoaderInterface
             }
         }
 
-        return $exceptionConfigList;
+        $mute = $config['mute'] ?? null;
+        if (empty($mute))
+        {
+            $mute = false;
+        }
+
+        $exceptionConfigListObject->setPath($path);
+        $exceptionConfigListObject->setMessagePrefix($config['message_prefix'] ?? null);
+        $exceptionConfigListObject->setMessage($config['message'] ?? null);
+        $exceptionConfigListObject->setCode($config['code'] ?? null);
+        $exceptionConfigListObject->setMute($mute);
+        return $exceptionConfigListObject;
     }
 
 
@@ -288,44 +329,118 @@ class ConfigLoader implements ConfigLoaderInterface
      * @throws NotExistsException
      * @throws ExceptionInterface
      */
-    protected function validateExceptionConfig(string $path, array $config): void
+    protected function normalizeExceptionConfig(string $path, array $config): array
     {
+        $mute = $config['mute'] ?? null;;
+        if (is_string($mute) || is_numeric($mute))
+        {
+            throw (new InvalidArgumentException())
+                ->setMessage(
+                    'Invalid response exception config section [%s]. [mute] key can be only boolean with true/false value or array of muted response codes',
+                    $path
+                )
+            ;
+        }
+
         $configList = $config['exceptions'] ?? [];
+        $defaultExceptionClass = null;
+        $raiseWhenResponseCodes = [];
+        $result = [];
+
         foreach ($configList as $key => $exceptionConfig)
         {
             $class = $exceptionConfig['class'] ?? $key;
-            if (empty($class))
+            $exceptionConfig['class'] = $class;
+            $this->validateExceptionClass($class);
+
+            // check raise on response code conditions,
+            // if response code already configured, throw an exception
+            $configuredOnResponseCodes = $exceptionConfig['raise_when_response_code'] ?? [];
+            foreach ($configuredOnResponseCodes as $code)
             {
-                throw (new InvalidArgumentException())
-                    ->setMessage(
-                        'Invalid response exception config section [%s]. Exception config must define an valid exception class by [class] key or key of configuration block',
-                        $path
-                    )
-                ;
+                if ($supportedByClass = $raiseWhenResponseCodes[$code] ?? null)
+                {
+                    throw  (new InvalidLogicException())
+                        ->setMessage(
+                            'You try to configure [%s] exception for response code [%s], but this code already supported by [%s]. Please fix exception config',
+                            $class,
+                            $code,
+                            $supportedByClass
+                        );
+                }
+
+                $raiseWhenResponseCodes[$code] = $class;
             }
 
-            if (false === class_exists($class))
+            $defaultConfig = $exceptionConfig['default'] ?? false;
+            $defaultConfig = ($defaultConfig || (empty($configuredOnResponseCodes) && false === $defaultConfig));
+            if ($defaultConfig)
             {
-                throw (new NotExistsException())
-                    ->setMessage(
-                        'Invalid response exception config section [%s]. Class [%s] doest not exists',
-                        $path,
-                        $class
-                    )
-                ;
-            }
+                if (false === empty($configuredOnResponseCodes))
+                {
+                    throw (new InvalidArgumentException())
+                        ->setMessage(
+                            'Exception config [%s] can\'t define [default] and [raise_when_response_code] config keys at once',
+                            $class
+                        );
+                }
 
-            if (false === ObjectHelper::hasParent($class, \Exception::class))
-            {
-                throw (new InvalidArgumentException())
-                    ->setMessage(
-                        'Invalid response exception config section [%s]. Your exception class [%s] must extends [%s]',
-                        $path,
-                        $class,
-                        \Exception::class
-                    )
-                ;
+                if (null === $defaultExceptionClass)
+                {
+                    $defaultExceptionClass = $class;
+                    $exceptionConfig['default'] = true;
+                }
+                else
+                {
+                    throw (new InvalidArgumentException())
+                        ->setMessage(
+                            'Default exception already defined by [%s], exception list can have only one default exception',
+                            $defaultExceptionClass
+                        );
+                }
             }
+            $result[] = $exceptionConfig;
+        }
+
+        $config['exceptions'] = $result;
+        return $config;
+    }
+
+    /**
+     * @throws ExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotExistsException
+     */
+    protected function validateExceptionClass(string $class): void
+    {
+        if (empty($class) || is_numeric($class))
+        {
+            throw (new InvalidArgumentException())
+                ->setMessage(
+                    'Config must define an valid class by [class] key or key of configuration block',
+                )
+            ;
+        }
+
+        if (false === class_exists($class))
+        {
+            throw (new NotExistsException())
+                ->setMessage(
+                    'Class [%s] doest not exists',
+                    $class
+                )
+            ;
+        }
+
+        if (false === ObjectHelper::hasParent($class, \Exception::class))
+        {
+            throw (new InvalidArgumentException())
+                ->setMessage(
+                    'Your class [%s] must extends [%s]',
+                    $class,
+                    \Exception::class
+                )
+            ;
         }
     }
 

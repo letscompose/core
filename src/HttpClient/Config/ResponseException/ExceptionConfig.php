@@ -19,7 +19,7 @@ class ExceptionConfig implements ExceptionConfigInterface
 
     private ?string $messagePrefix = null;
 
-    private array $whenResponseCode = [];
+    private array $raiseWhenResponseCode = [];
 
     private bool $default = false;
 
@@ -67,14 +67,14 @@ class ExceptionConfig implements ExceptionConfigInterface
         return $this;
     }
 
-    public function getWhenResponseCode(): array
+    public function getRaiseWhenResponseCode(): array
     {
-        return $this->whenResponseCode;
+        return $this->raiseWhenResponseCode;
     }
 
-    public function setWhenResponseCode(array $whenResponseCode): self
+    public function setRaiseWhenResponseCode(array $raiseWhenResponseCode): self
     {
-        $this->whenResponseCode = $whenResponseCode;
+        $this->raiseWhenResponseCode = $raiseWhenResponseCode;
         return $this;
     }
 

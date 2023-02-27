@@ -11,9 +11,14 @@ namespace LetsCompose\Core\HttpClient;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\NotExistsException;
+use LetsCompose\Core\HttpClient\Config\Action\ActionConfig;
+use LetsCompose\Core\HttpClient\Config\Action\ActionConfigInterface;
 use LetsCompose\Core\HttpClient\Config\ClientConfigInterface;
+use LetsCompose\Core\HttpClient\Config\Response\ResponseCodeHelper;
 use LetsCompose\Core\HttpClient\Config\Response\ResponseConfigInterface;
+use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfig;
 use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfigListInterface;
+use LetsCompose\Core\HttpClient\Exception\TransportException;
 use LetsCompose\Core\HttpClient\Request\Request;
 use LetsCompose\Core\HttpClient\Request\RequestInterface;
 use LetsCompose\Core\HttpClient\Response\ResponseInterface;
@@ -55,25 +60,16 @@ class HttpClient implements HttpClientInterface
 
     /**
      * @throws \Exception
+     * @throws ExceptionInterface
      */
     public function send(RequestInterface $request): ResponseInterface
     {
         $actionConfig = $this->config->getAction($request->getPath());
         $request = $this->applyRequestOptions($request);
-
-        try
-        {
-            $transportResponse = $this->transport->send($request);
-        }
-        catch (\Exception $exception)
-        {
-            throw $this->createException($exception, $actionConfig->getResponseExceptionConfig());
-        }
-
-        // TODO check exception conditions. HttpClient must not throw an error exception on 400 - 500 http code range
+        $transportResponse = $this->transport->send($request);
 
 
-        $response = $this->createResponse($transportResponse, $actionConfig->getResponseConfig());
+        $response = $this->createResponse($transportResponse, $actionConfig);
 
         $response = $this->applyResponseOptions($response);
         return $response;
@@ -89,14 +85,69 @@ class HttpClient implements HttpClientInterface
         return $response;
     }
 
-    protected function createResponse(TransportResponseInterface $transportResponse, ResponseConfigInterface $responseConfig): ResponseInterface
+    /**
+     * @throws ExceptionInterface
+     */
+    protected function createResponse(TransportResponseInterface $transportResponse, ActionConfigInterface $actionConfig): ResponseInterface
     {
+        $responseCode = $transportResponse->getStatusCode();
+        if (!ResponseCodeHelper::isHttpResponseCode($responseCode))
+        {
+            throw (new TransportException())
+                ->setMessage(
+                    'Unknown http response status code [%s] returned by request [%s]',
+                    $responseCode,
+                    $actionConfig->getPath()
+                );
+        }
+
+        $exception = null;
+        if (false === ResponseCodeHelper::isSuccessful($responseCode) )
+        {
+            $exception = $this->createException($transportResponse, $actionConfig->getResponseExceptionConfig());
+        }
+
+        dump($exception);
+        die;
 
     }
 
-    protected function createException(\Exception $e, ExceptionConfigListInterface $responseExceptionConfig): \Exception
+    protected function createException(TransportResponseInterface $transportResponse, ExceptionConfigListInterface $responseExceptionConfig): ?ExceptionConfig
     {
-        return new \Exception();
+        $responseCode = $transportResponse->getStatusCode();
+
+        $mute = $responseExceptionConfig->getMute();
+        if ((true === $mute) || is_array($mute) && in_array($responseCode, $mute))
+        {
+            return null;
+        }
+
+        $exceptionConfig = $responseExceptionConfig->getExceptionConfigByRaiseWhenResponseCode([$responseCode]);
+        if ($exceptionConfig)
+        {
+            return $exceptionConfig;
+        }
+
+        $defaultException = $responseExceptionConfig->getDefaultExceptionConfig();
+        if (!$defaultException)
+        {
+            $defaultException = new ExceptionConfig();
+            $defaultException->setMessagePrefix
+            (
+                $responseExceptionConfig->getMessagePrefix()
+                    ?? sprintf('[%s]', $responseExceptionConfig->getPath())
+            );
+            $defaultException->setMessage
+            (
+                $responseExceptionConfig->getMessage() ?? 'Invalid API response'
+            );
+            $defaultException->setCode
+            (
+                $responseExceptionConfig->getCode() ?? $responseCode
+            );
+        }
+
+        return $defaultException;
     }
 
 }

@@ -20,9 +20,25 @@ class ExceptionConfigList implements ExceptionConfigListInterface
      */
     private array $exceptionConfigs = [];
 
-    public function getExceptionConfigs(): array
+    private ?string $messagePrefix = null;
+
+    private ?string $message = null;
+
+    private ?int $code = null;
+
+    private bool|array $mute = false;
+
+    private string $path;
+
+    public function getPath(): string
     {
-        return $this->exceptionConfigs;
+        return $this->path;
+    }
+
+    public function setPath(string $path): ExceptionConfigList
+    {
+        $this->path = $path;
+        return $this;
     }
 
     /**
@@ -38,68 +54,7 @@ class ExceptionConfigList implements ExceptionConfigListInterface
             ;
         }
 
-        $configuredCodes = $exceptionConfig->getWhenResponseCode();
-        if (!empty($configuredCodes) && $exceptionConfig->isDefault())
-        {
-            throw  (new InvalidLogicException())
-            ->setMessage(
-                'You try to configure [%s] exception as default with not empty [%s] key, please fix your config',
-                $exceptionConfig->getClass(),
-                ExceptionConfigInterface::CONFIG_KEY_WHEN_RESPONSE_CODE
-            );
-        }
-
-        if (empty($configuredCodes) || $exceptionConfig->isDefault())
-        {
-            $exceptionConfig->setDefault(true);
-            return $this->addDefaultExceptionConfig($exceptionConfig);
-        }
-
-
-        if (false !== $configured = $this->getExceptionConfigByWhenResponseCode($exceptionConfig->getWhenResponseCode()))
-        {
-
-            $code = 0;
-            foreach ($configured->getWhenResponseCode() as $code)
-            {
-                if (in_array($code, $configuredCodes))
-                {
-                    break;
-                }
-            }
-
-            throw (new NotUniqueException())
-                ->setMessage(
-                    'You try configure an exception for code [%s] but this code already supported by [%s]',
-                    $code,
-                    $configured->getClass()
-                )
-            ;
-        }
-
         $this->exceptionConfigs[$exceptionConfig->getClass()] = $exceptionConfig;
-        return $this;
-    }
-
-    /**
-     * @throws ExceptionInterface
-     */
-    protected function addDefaultExceptionConfig(ExceptionConfigInterface $exceptionConfig): self
-    {
-        if (false !== $configured = $this->getDefaultExceptionConfig())
-        {
-            throw (new NotUniqueException())
-                ->setMessage(
-                    'You try to overwrite already defined default exception [%s] by [%s] to resolve this issue resolve conflict in your config or add [%s] condition key',
-                    $configured->getClass(),
-                    $exceptionConfig->getClass(),
-                    ExceptionConfigInterface::CONFIG_KEY_WHEN_RESPONSE_CODE
-                )
-            ;
-        }
-
-        $this->exceptionConfigs[$exceptionConfig->getClass()] = $exceptionConfig;
-
         return $this;
     }
 
@@ -107,7 +62,7 @@ class ExceptionConfigList implements ExceptionConfigListInterface
     {
         foreach ($this->exceptionConfigs as $config)
         {
-            if (!$config->getWhenResponseCode() && $config->isDefault())
+            if (!$config->getRaiseWhenResponseCode() && $config->isDefault())
             {
                 return $config;
             }
@@ -115,11 +70,11 @@ class ExceptionConfigList implements ExceptionConfigListInterface
         return false;
     }
 
-    public function getExceptionConfigByWhenResponseCode(array $codes): ExceptionConfigInterface|false
+    public function getExceptionConfigByRaiseWhenResponseCode(array $codes): ExceptionConfigInterface|false
     {
         foreach ($this->exceptionConfigs as $config)
         {
-            if (array_intersect($config->getWhenResponseCode(), $codes))
+            if (array_intersect($config->getRaiseWhenResponseCode(), $codes))
             {
                 return $config;
             }
@@ -132,4 +87,50 @@ class ExceptionConfigList implements ExceptionConfigListInterface
         return false !== ($this->exceptionConfigs[$class] ?? false);
     }
 
+    /**
+     * @return string|null
+     */
+    public function getMessagePrefix(): ?string
+    {
+        return $this->messagePrefix;
+    }
+
+    public function setMessagePrefix(?string $messagePrefix): self
+    {
+        $this->messagePrefix = $messagePrefix;
+        return $this;
+    }
+
+    public function getMessage(): ?string
+    {
+        return $this->message;
+    }
+
+    public function setMessage(?string $message): self
+    {
+        $this->message = $message;
+        return $this;
+    }
+
+    public function getCode(): ?int
+    {
+        return $this->code;
+    }
+
+    public function setCode(?int $code): self
+    {
+        $this->code = $code;
+        return $this;
+    }
+
+    public function getMute(): bool|array
+    {
+        return $this->mute;
+    }
+
+    public function setMute(bool|array $mute): self
+    {
+        $this->mute = $mute;
+        return $this;
+    }
 }
