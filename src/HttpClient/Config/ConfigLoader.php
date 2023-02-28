@@ -18,6 +18,7 @@ use LetsCompose\Core\HttpClient\Config\Action\ActionConfig;
 use LetsCompose\Core\HttpClient\Config\Action\ActionConfigInterface;
 use LetsCompose\Core\HttpClient\Config\Option\OptionConfig;
 use LetsCompose\Core\HttpClient\Config\Option\OptionLoaderConfig;
+use LetsCompose\Core\HttpClient\Config\Response\ResponseCodeHelper;
 use LetsCompose\Core\HttpClient\Config\Response\ResponseConfigInterface;
 use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfig;
 use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfigList;
@@ -358,6 +359,16 @@ class ConfigLoader implements ConfigLoaderInterface
             $configuredOnResponseCodes = $exceptionConfig['raise_when_response_code'] ?? [];
             foreach ($configuredOnResponseCodes as $code)
             {
+                if (false === ResponseCodeHelper::isHttpResponseCode($code))
+                {
+                    throw  (new InvalidLogicException())
+                        ->setMessage(
+                            'You try to configure [raise_when_response_code] with [%s] code, but this code not a valid http response code. Please fix config for [%s] exception',
+                            $code,
+                            $class
+                        );
+                }
+
                 if ($supportedByClass = $raiseWhenResponseCodes[$code] ?? null)
                 {
                     throw  (new InvalidLogicException())
