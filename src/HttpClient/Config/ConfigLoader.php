@@ -369,6 +369,16 @@ class ConfigLoader implements ConfigLoaderInterface
                         );
                 }
 
+                if (true === ResponseCodeHelper::isSuccessful($code))
+                {
+                    throw  (new InvalidLogicException())
+                        ->setMessage(
+                            'You try to configure [raise_when_response_code] with [%s] code, but this code used for successful http response. You can\'t configure exception for successful http response. Please fix config for [%s] exception',
+                            $code,
+                            $class
+                        );
+                }
+
                 if ($supportedByClass = $raiseWhenResponseCodes[$code] ?? null)
                 {
                     throw  (new InvalidLogicException())
