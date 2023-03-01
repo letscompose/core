@@ -34,7 +34,7 @@ class CreateAction extends AbstractAction
         if ($storage->isExists($file))
         {
             ExceptionHelper::create(new FileAlreadyExistException())
-                ->message('You try to create already existing file [%s]', $fullFilePath)
+                ->setMessage('You try to create already existing file [%s]', $fullFilePath)
                 ->throw();
         }
 

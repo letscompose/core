@@ -104,7 +104,7 @@ class PropertyList implements PropertyListInterface, \Iterator, \Countable
         if (false === ObjectHelper::hasInterface($propertyClass, PropertyInterface::class))
         {
             ExceptionHelper::create(new MustImplementException())
-                ->message('Property [%s] of [%s] must implement interface [%s]', $propertyClass, ObjectHelper::getClassShortName(get_class($this)), PropertyInterface::class)
+                ->setMessage('Property [%s] of [%s] must implement interface [%s]', $propertyClass, ObjectHelper::getClassShortName(get_class($this)), PropertyInterface::class)
                 ->throw();
         }
 
@@ -186,7 +186,7 @@ class PropertyList implements PropertyListInterface, \Iterator, \Countable
     private function throwNotExistsException(string $name)
     {
             ExceptionHelper::create(new NotExistsException())
-                ->message('You try to get not existing property [%s]', $name)
+                ->setMessage('You try to get not existing property [%s]', $name)
                 ->throw()
             ;
     }
@@ -200,7 +200,7 @@ class PropertyList implements PropertyListInterface, \Iterator, \Countable
     private function throwNotUniqueException(string $name): void
     {
         ExceptionHelper::create(new NotUniqueException())
-            ->message('Not Unique property [%s]', $name)
+            ->setMessage('Not Unique property [%s]', $name)
             ->throw()
         ;
     }

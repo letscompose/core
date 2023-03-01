@@ -37,7 +37,7 @@ class OpenAction extends AbstractAction
         if (false === $storage->isExists($directory))
         {
             ExceptionHelper::create(new DirectoryNotFoundException())
-                ->message('Can\'t open directory at path [%s]. Directory does not exist on storage [%s]', $directory->getPath(), $directory->getStorageClass())
+                ->setMessage('Can\'t open directory at path [%s]. Directory does not exist on storage [%s]', $directory->getPath(), $directory->getStorageClass())
                 ->throw()
             ;
         }
@@ -45,7 +45,7 @@ class OpenAction extends AbstractAction
         if (false === $storage->isReadable($directory))
         {
             ExceptionHelper::create(new DirectoryNotReadableException())
-                ->message('Not readable directory at path [%s] on storage [%s]. Have you all of needed permissions ?', $directory->getPath(), $directory->getStorageClass())
+                ->setMessage('Not readable directory at path [%s] on storage [%s]. Have you all of needed permissions ?', $directory->getPath(), $directory->getStorageClass())
                 ->throw()
             ;
         }

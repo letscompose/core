@@ -11,24 +11,23 @@
 namespace LetsCompose\Core\Tools;
 
 use Exception;
-use LetsCompose\Core\Exception\ExceptionInterface;
 
 class ExceptionHelper
 {
     /**
      * @var string
      */
-    private const CLOSURE_SET_MESSAGE  = 'message';
+    private const CLOSURE_SET_MESSAGE  = 'setMessage';
 
     /**
      * @var string
      */
-    private const CLOSURE_SET_CODE  = 'code';
+    private const CLOSURE_SET_CODE  = 'setCode';
 
     /**
      * @var string
      */
-    private const CLOSURE_SET_PREVIOUS  = 'previous';
+    private const CLOSURE_SET_PREVIOUS  = 'setPrevious';
 
     /**
      * @var Closure[]
@@ -36,11 +35,11 @@ class ExceptionHelper
     private array $closureMap = [];
 
     /**
-     * @param ExceptionInterface $exception
+     * @param Exception $exception
      */
     public function __construct
     (
-        private readonly ExceptionInterface $exception
+        private readonly Exception $exception
     ) {
         $this->closureMap = [
             self::CLOSURE_SET_MESSAGE => fn (string $message, ...$params) => $this->message = sprintf($message, ...$params),
@@ -48,21 +47,22 @@ class ExceptionHelper
             self::CLOSURE_SET_PREVIOUS => (fn (\Throwable $previous) => $this->previous = $previous),
         ];
 
-        $test = function (string $message, ...$params) {
-            $this->message = sprintf($message, ...$params);
-        };
-
-        foreach ($this->closureMap as &$closure)
+        foreach ($this->closureMap as $method => &$closure)
         {
-            $closure = $closure->bindTo($this->exception, $this->exception);
+            if (false === method_exists($exception, $method))
+            {
+                $closure = $closure->bindTo($exception, $exception);
+            } else {
+                $closure = fn (...$params) => $this->exception->{$method}(...$params);
+            }
         }
     }
 
     /**
-     * @param ExceptionInterface $exception
+     * @param Exception $exception
      * @return ExceptionHelper
      */
-    public static function create(ExceptionInterface $exception): self
+    public static function create(Exception $exception): self
     {
         return new self($exception);
     }
@@ -72,7 +72,7 @@ class ExceptionHelper
      * @param ...$params
      * @return ExceptionHelper
      */
-    public function message(string $message, ...$params): self {
+    public function setMessage(string $message, ...$params): self {
         $this->closureMap[__FUNCTION__]($message, ...$params);
         return $this;
     }
@@ -81,7 +81,7 @@ class ExceptionHelper
      * @param int $code
      * @return ExceptionHelper
      */
-    public function code(int $code): self {
+    public function setCode(int $code): self {
         $this->closureMap[__FUNCTION__]($code);
         return $this;
     }
@@ -90,16 +90,21 @@ class ExceptionHelper
      * @param \Throwable $exception
      * @return ExceptionHelper
      */
-    public function previous(\Throwable $exception): self {
+    public function setPrevious(\Throwable $exception): self {
         $this->closureMap[__FUNCTION__]($exception);
         return $this;
     }
 
+    public function get(): \Exception
+    {
+        return $this->exception;
+    }
+
     /**
      * @return never
-     * @throws Exception|ExceptionInterface
+     * @throws Exception
      */
     public function throw(): never {
-        throw $this->exception;
+        throw $this->get();
     }
 }

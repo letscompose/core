@@ -45,7 +45,7 @@ class StringPlaceholderHelper
         if (false === in_array($token, self::PLACEHOLDER_TOKEN_MAP))
         {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message('Unknown placeholder token format, you can use only theses [%s]', implode(',',self::PLACEHOLDER_TOKEN_MAP))
+                ->setMessage('Unknown placeholder token format, you can use only theses [%s]', implode(',',self::PLACEHOLDER_TOKEN_MAP))
                 ->throw()
             ;
         }

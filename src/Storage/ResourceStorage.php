@@ -112,7 +112,7 @@ class ResourceStorage extends AbstractResourceStorage
         if (false === PathHelper::isAbsolute($path))
         {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message('Invalid storage root path [%s]. Path must beginning with "/"', $path)
+                ->setMessage('Invalid storage root path [%s]. Path must beginning with "/"', $path)
                 ->throw()
             ;
         }
@@ -121,7 +121,7 @@ class ResourceStorage extends AbstractResourceStorage
         if (false === $realPath)
         {
             ExceptionHelper::create(new PathNotFoundException())
-                ->message('Invalid storage root path [%s]. Path does not found "/"', $path)
+                ->setMessage('Invalid storage root path [%s]. Path does not found "/"', $path)
                 ->throw()
             ;
         }

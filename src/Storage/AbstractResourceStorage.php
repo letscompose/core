@@ -97,7 +97,7 @@ abstract class AbstractResourceStorage implements StorageInterface
         {
             $resourceAdapter = $this->getResourceAdapter($resourceClass);
             ExceptionHelper::create(new ResourceAlreadyManagedException())
-                ->message('You try to add an adapter [%s] for resource [%s] supported by an other adapter [%s]. Check your storage config', $adapter::class, $resourceClass, $resourceAdapter::class)
+                ->setMessage('You try to add an adapter [%s] for resource [%s] supported by an other adapter [%s]. Check your storage config', $adapter::class, $resourceClass, $resourceAdapter::class)
                 ->throw();
         }
         $adapter->setStorage($this);
@@ -118,7 +118,7 @@ abstract class AbstractResourceStorage implements StorageInterface
             }
         }
         ExceptionHelper::create(new UnknownStorageResourceClassException())
-            ->message('Not supported storage resource [%s]', $resourceClass)
+            ->setMessage('Not supported storage resource [%s]', $resourceClass)
             ->throw()
         ;
     }

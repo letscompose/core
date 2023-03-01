@@ -229,7 +229,7 @@ class YamlContentParser implements StringParserInterface
                 if (!$loaderInstance instanceof ContentLoaderInterface)
                 {
                     ExceptionHelper::create(new MustImplementException())
-                        ->message('Content loader [%s] must implement interface [%s]', $loaderClass, ContentLoaderInterface::class)
+                        ->setMessage('Content loader [%s] must implement interface [%s]', $loaderClass, ContentLoaderInterface::class)
                         ->throw();
                 }
                 $this->addContentLoader($loaderInstance);
@@ -246,7 +246,7 @@ class YamlContentParser implements StringParserInterface
         }
 
         ExceptionHelper::create(new NotFoundException())
-            ->message('Can\'t import source [%s], without valid content loader', $sourceImportConfig->getSource())
+            ->setMessage('Can\'t import source [%s], without valid content loader', $sourceImportConfig->getSource())
             ->throw();
     }
 
@@ -272,7 +272,7 @@ class YamlContentParser implements StringParserInterface
         if (!$source)
         {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message('Invalid import config, minimum you must define [source] key')
+                ->setMessage('Invalid import config, minimum you must define [source] key')
                 ->throw()
             ;
         }
@@ -301,7 +301,7 @@ class YamlContentParser implements StringParserInterface
             if (!is_string($class) || !$class)
             {
                 ExceptionHelper::create(new InvalidArgumentException())
-                    ->message('Invalid import config, loader class must be an valid object class')
+                    ->setMessage('Invalid import config, loader class must be an valid object class')
                     ->throw()
                 ;
             }
@@ -313,7 +313,7 @@ class YamlContentParser implements StringParserInterface
         }
 
         ExceptionHelper::create(new InvalidArgumentException())
-            ->message('Invalid import config, [loader] key must be an string or valid import config object')
+            ->setMessage('Invalid import config, [loader] key must be an string or valid import config object')
             ->throw()
         ;
     }

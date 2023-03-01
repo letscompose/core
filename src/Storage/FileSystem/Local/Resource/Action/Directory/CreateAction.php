@@ -27,7 +27,7 @@ class CreateAction extends AbstractAction
         if (false === $storage->isWritable($directory))
         {
             ExceptionHelper::create(new DirectoryNotFoundException())
-                ->message('Can\'t write to directory at path [%s]. Directory not writable on storage [%s]', $directory->getPath(), $directory->getStorageClass())
+                ->setMessage('Can\'t write to directory at path [%s]. Directory not writable on storage [%s]', $directory->getPath(), $directory->getStorageClass())
                 ->throw()
             ;
         }

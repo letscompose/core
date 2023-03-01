@@ -29,7 +29,7 @@ class OpenAction extends AbstractAction
         if (false === $storage->isExists($file))
         {
             ExceptionHelper::create(new FileNotFoundException())
-                ->message('Can\'t open file at path [%s]. File does not exist on storage [%s]', $storage->getFullPath($file), $file->getStorageClass())
+                ->setMessage('Can\'t open file at path [%s]. File does not exist on storage [%s]', $storage->getFullPath($file), $file->getStorageClass())
                 ->throw()
             ;
         }
@@ -38,7 +38,7 @@ class OpenAction extends AbstractAction
             case FileOpenModeEnum::READ:
                 if (false === $storage->isReadable($file)) {
                     ExceptionHelper::create(new FileNotReadableException())
-                        ->message('Not readable file at path [%s] on storage [%s]', $storage->getFullPath($file), $file->getStorageClass())
+                        ->setMessage('Not readable file at path [%s] on storage [%s]', $storage->getFullPath($file), $file->getStorageClass())
                         ->throw();
                 }
                 break;
@@ -46,13 +46,13 @@ class OpenAction extends AbstractAction
             case FileOpenModeEnum::APPEND:
                 if (false === $storage->isWritable($file)) {
                     ExceptionHelper::create(new FileNotWritableException())
-                        ->message('Not writable file at path [%s] on storage [%s]', $storage->getFullPath($file), $file->getStorageClass())
+                        ->setMessage('Not writable file at path [%s] on storage [%s]', $storage->getFullPath($file), $file->getStorageClass())
                         ->throw();
                 }
                 break;
             default:
                 ExceptionHelper::create(new FileNotWritableException())
-                    ->message('Not implemented open file mode [%s]. File open mode can be only one of theses [%s]', $mode->name)
+                    ->setMessage('Not implemented open file mode [%s]. File open mode can be only one of theses [%s]', $mode->name)
                     ->throw();
         }
 
