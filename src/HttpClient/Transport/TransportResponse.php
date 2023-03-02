@@ -9,6 +9,8 @@
  */
 namespace LetsCompose\Core\HttpClient\Transport;
 
+use \Throwable;
+
 class TransportResponse implements TransportResponseInterface
 {
     public function __construct
@@ -16,6 +18,7 @@ class TransportResponse implements TransportResponseInterface
         private readonly int $statusCode,
         private readonly ?array $headers,
         private readonly mixed $content,
+        private readonly ?Throwable $exception = null
     )
     {
     }
@@ -34,4 +37,16 @@ class TransportResponse implements TransportResponseInterface
     {
         return $this->content;
     }
+
+    public function getException(): ?Throwable
+    {
+        return $this->exception;
+    }
+
+    public function hasException(): bool
+    {
+        return null !== $this->exception;
+    }
+
+
 }

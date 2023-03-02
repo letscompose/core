@@ -9,6 +9,8 @@
  */
 namespace LetsCompose\Core\HttpClient\Config\ResponseException;
 
+use Throwable;
+
 class ExceptionConfig implements ExceptionConfigInterface
 {
     private string $class;
@@ -22,6 +24,8 @@ class ExceptionConfig implements ExceptionConfigInterface
     private array $raiseWhenResponseCode = [];
 
     private bool $default = false;
+
+    private ?Throwable $previous = null;
 
     public function getClass(): string
     {
@@ -78,21 +82,25 @@ class ExceptionConfig implements ExceptionConfigInterface
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function isDefault(): bool
     {
         return $this->default;
     }
 
-    /**
-     * @param bool $default
-     * @return ExceptionConfig
-     */
-    public function setDefault(bool $default): ExceptionConfig
+    public function setDefault(bool $default): self
     {
         $this->default = $default;
+        return $this;
+    }
+
+    public function getPrevious(): ?Throwable
+    {
+        return $this->previous;
+    }
+
+    public function setPrevious(?Throwable $previous): self
+    {
+        $this->previous = $previous;
         return $this;
     }
 }

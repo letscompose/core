@@ -11,18 +11,19 @@ namespace LetsCompose\Core\HttpClient;
 
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\NotExistsException;
-use LetsCompose\Core\HttpClient\Config\Action\ActionConfig;
 use LetsCompose\Core\HttpClient\Config\Action\ActionConfigInterface;
 use LetsCompose\Core\HttpClient\Config\ClientConfigInterface;
 use LetsCompose\Core\HttpClient\Config\Response\ResponseCodeHelper;
-use LetsCompose\Core\HttpClient\Config\Response\ResponseConfigInterface;
 use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfig;
+use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfigInterface;
 use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfigListInterface;
 use LetsCompose\Core\HttpClient\Exception\TransportException;
 use LetsCompose\Core\HttpClient\Request\Request;
 use LetsCompose\Core\HttpClient\Request\RequestInterface;
 use LetsCompose\Core\HttpClient\Response\ResponseInterface;
+use LetsCompose\Core\HttpClient\Response\Response;
 use LetsCompose\Core\HttpClient\Transport\TransportInterface;
+use LetsCompose\Core\HttpClient\Transport\TransportResponse;
 use LetsCompose\Core\HttpClient\Transport\TransportResponseInterface;
 
 class HttpClient implements HttpClientInterface
@@ -66,10 +67,22 @@ class HttpClient implements HttpClientInterface
     {
         $actionConfig = $this->config->getAction($request->getPath());
         $request = $this->applyRequestOptions($request);
-        $transportResponse = $this->transport->send($request);
-
+        try {
+            $transportResponse = $this->transport->send($request);
+        } catch (\Throwable $exception)
+        {
+            $transportResponse = new TransportResponse
+            (
+                $exception->getCode(),
+                null,
+                null,
+                $exception
+            );
+        }
 
         $response = $this->createResponse($transportResponse, $actionConfig);
+
+        $content = $response->getContent();
 
         $response = $this->applyResponseOptions($response);
         return $response;
@@ -90,64 +103,64 @@ class HttpClient implements HttpClientInterface
      */
     protected function createResponse(TransportResponseInterface $transportResponse, ActionConfigInterface $actionConfig): ResponseInterface
     {
-        $responseCode = $transportResponse->getStatusCode();
-        if (!ResponseCodeHelper::isHttpResponseCode($responseCode))
+        $responseStatusCode = $transportResponse->getStatusCode();
+        if (!ResponseCodeHelper::isHttpResponseCode($responseStatusCode))
         {
             throw (new TransportException())
                 ->setMessage(
                     'Unknown http response status code [%s] returned by request [%s]',
-                    $responseCode,
+                    $responseStatusCode,
                     $actionConfig->getPath()
                 );
         }
 
         $exception = null;
-        if (false === ResponseCodeHelper::isSuccessful($responseCode) )
+        if (false === ResponseCodeHelper::isSuccessful($responseStatusCode) )
         {
             $exception = $this->createException($transportResponse, $actionConfig->getResponseExceptionConfig());
         }
 
-        dump($exception);
-        die;
-
+        return (new Response())
+            ->setStatusCode($responseStatusCode)
+            ->setExceptionConfig($exception)
+            ->setHeaders($transportResponse->getHeaders())
+            ->setContent($transportResponse->getContent());
     }
 
-    protected function createException(TransportResponseInterface $transportResponse, ExceptionConfigListInterface $responseExceptionConfig): ?ExceptionConfig
+    protected function createException(TransportResponseInterface $transportResponse, ExceptionConfigListInterface $responseExceptionConfig): ?ExceptionConfigInterface
     {
         $responseCode = $transportResponse->getStatusCode();
 
         $mute = $responseExceptionConfig->getMute();
-        if ((true === $mute) || is_array($mute) && in_array($responseCode, $mute))
+        if (true === $mute || (is_array($mute) && in_array($responseCode, $mute)))
         {
             return null;
         }
 
         $exceptionConfig = $responseExceptionConfig->getExceptionConfigByRaiseWhenResponseCode([$responseCode]);
-        if ($exceptionConfig)
-        {
-            return $exceptionConfig;
-        }
 
-        $defaultException = $responseExceptionConfig->getDefaultExceptionConfig();
-        if (!$defaultException)
-        {
-            $defaultException = new ExceptionConfig();
-            $defaultException->setMessagePrefix
-            (
-                $responseExceptionConfig->getMessagePrefix()
-                    ?? sprintf('[%s]', $responseExceptionConfig->getPath())
-            );
-            $defaultException->setMessage
-            (
-                $responseExceptionConfig->getMessage() ?? 'Invalid API response'
-            );
-            $defaultException->setCode
+        $exceptionConfig = $exceptionConfig
+            ?: $responseExceptionConfig->getDefaultExceptionConfig()
+            ?: (new ExceptionConfig())
+                ->setClass(TransportException::class)
+        ;
+
+        $exceptionMessage = trim(sprintf('%s %s', $exceptionConfig->getMessagePrefix(), $exceptionConfig->getMessage()));
+        $exceptionMessage = sprintf('[%s] request exception: [%s]', $responseExceptionConfig->getPath(), $exceptionMessage);
+
+        $exceptionConfig->setMessage($exceptionMessage);
+        $exceptionConfig->setCode
             (
                 $responseExceptionConfig->getCode() ?? $responseCode
             );
+
+
+        if ($transportResponse->hasException())
+        {
+            $exceptionConfig->setPrevious($transportResponse->getException());
         }
 
-        return $defaultException;
+        return $exceptionConfig;
     }
 
 }

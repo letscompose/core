@@ -9,8 +9,7 @@
  */
 namespace LetsCompose\Core\HttpClient\Transport;
 
-use LetsCompose\Core\HttpClient\Request\RequestInterface;
-use LetsCompose\Core\HttpClient\Response\ResponseInterface;
+use Throwable;
 
 interface TransportResponseInterface
 {
@@ -19,4 +18,8 @@ interface TransportResponseInterface
     public function getContent(): mixed;
 
     public function getHeaders(): ?array;
+
+    public function getException(): ?Throwable;
+
+    public function hasException(): bool;
 }
