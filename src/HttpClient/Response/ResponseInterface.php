@@ -26,8 +26,8 @@ interface ResponseInterface
     public function throwException(bool $mute): void;
     public function getHeaders(): array;
     public function setHeaders(array $headers): self;
-    public function getContent(bool $muteException = false): mixed;
-    public function setContent(mixed $content): self;
+    public function getContent(bool $muteException = false): ?ResponseContentInterface;
+    public function setContent(ResponseContentInterface $content): self;
     public function addOption(string $optionClass): self;
     public function hasOption(string $optionClass): bool;
 }

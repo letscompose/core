@@ -25,6 +25,7 @@ use LetsCompose\Core\HttpClient\Option\RequestOptionInterface;
 use LetsCompose\Core\HttpClient\Option\ResponseOptionInterface;
 use LetsCompose\Core\HttpClient\Request\Request;
 use LetsCompose\Core\HttpClient\Request\RequestInterface;
+use LetsCompose\Core\HttpClient\Response\ResponseContent;
 use LetsCompose\Core\HttpClient\Response\ResponseInterface;
 use LetsCompose\Core\HttpClient\Response\Response;
 use LetsCompose\Core\HttpClient\Transport\TransportInterface;
@@ -131,10 +132,7 @@ class HttpClient implements HttpClientInterface
 
         $response = $this->createResponse($transportResponse, $actionConfig);
 
-        $content = $response->getContent();
-
-        $response = $this->applyResponseOptions($response);
-        return $response;
+        return $this->applyResponseOptions($response);
     }
 
     protected function applyRequestOptions(RequestInterface $request): RequestInterface
@@ -188,11 +186,14 @@ class HttpClient implements HttpClientInterface
             $exception = $this->createException($transportResponse, $actionConfig->getResponseExceptionConfig());
         }
 
+        $responseContent = new ResponseContent();
+        $responseContent->setRawContent($transportResponse->getContent());
+
         return (new Response())
             ->setStatusCode($responseStatusCode)
             ->setExceptionConfig($exception)
             ->setHeaders($transportResponse->getHeaders())
-            ->setContent($transportResponse->getContent());
+            ->setContent($responseContent);
     }
 
     protected function createException(TransportResponseInterface $transportResponse, ExceptionConfigListInterface $responseExceptionConfig): ?ExceptionConfigInterface

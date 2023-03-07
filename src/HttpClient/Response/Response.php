@@ -26,7 +26,7 @@ class Response implements ResponseInterface
 
     private array $headers = [];
 
-    private mixed $content = null;
+    private ResponseContentInterface $content;
 
     private array $options = [];
 
@@ -82,13 +82,13 @@ class Response implements ResponseInterface
     /**
      * @throws Exception
      */
-    public function getContent(bool $muteException = false): mixed
+    public function getContent(bool $muteException = false): ?ResponseContentInterface
     {
         $this->throwException($muteException);
         return $this->content;
     }
 
-    public function setContent(mixed $content): self
+    public function setContent(ResponseContentInterface $content): self
     {
         $this->content = $content;
         return $this;
