@@ -10,8 +10,8 @@
 namespace LetsCompose\Core\HttpClient\Config\Option;
 
 use LetsCompose\Core\HttpClient\Config\ConfigInterface;
+use LetsCompose\Core\HttpClient\Option\OptionInterface;
 
 class OptionLoaderConfig extends AbstractObjectConfig implements OptionLoaderConfigInterface
 {
-
 }

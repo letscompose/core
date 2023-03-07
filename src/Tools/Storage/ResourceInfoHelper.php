@@ -34,7 +34,7 @@ class ResourceInfoHelper
         if (false === is_readable($filePath))
         {
             ExceptionHelper::create(new NotReadableResourceException())
-                ->message('You try to get info on not readable resource [%s]', $filePath)
+                ->setMessage('You try to get info on not readable resource [%s]', $filePath)
                 ->throw()
                 ;
         }
@@ -71,7 +71,7 @@ class ResourceInfoHelper
             case 0x1000: // FIFO pipe
             default: // unknown
                 ExceptionHelper::create(new InvalidArgumentException())
-                    ->message('Can\'t get info for unsupported resource type');
+                    ->setMessage('Can\'t get info for unsupported resource type');
         }
 
         return $resourceInfo

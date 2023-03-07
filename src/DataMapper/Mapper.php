@@ -62,7 +62,7 @@ class Mapper implements MapperInterface
             if (!$config)
             {
                 ExceptionHelper::create(new InvalidArgumentException())
-                    ->message('can\'t create instance of [%s], invalid mapping config, key [%s] must be defined', get_called_class(), $configKey)
+                    ->setMessage('can\'t create instance of [%s], invalid mapping config, key [%s] must be defined', get_called_class(), $configKey)
                     ->throw();
             }
         };
@@ -104,7 +104,7 @@ class Mapper implements MapperInterface
         if (empty($config))
         {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message('can\'t get mapping config for [%s]', $configPath)
+                ->setMessage('can\'t get mapping config for [%s]', $configPath)
                 ->throw();
         }
 
@@ -139,7 +139,7 @@ class Mapper implements MapperInterface
         if (empty($mappingConfig))
         {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message('You must define an valid Mapping config')
+                ->setMessage('You must define an valid Mapping config')
                 ->throw();
         }
 
@@ -305,7 +305,7 @@ class Mapper implements MapperInterface
                 if (false === is_array($optionConfig) && false === is_string($optionConfig))
                 {
                     ExceptionHelper::create(new NotSupportedException())
-                        ->message('Not supported option config, option config must be an option class name or array with required [class] key')
+                        ->setMessage('Not supported option config, option config must be an option class name or array with required [class] key')
                         ->throw();
                 }
                 $config = [
@@ -322,7 +322,7 @@ class Mapper implements MapperInterface
                     if (empty($class))
                     {
                         ExceptionHelper::create(new NotSupportedException())
-                            ->message('Not supported option config, option config must be an option class name or array with required [class] key')
+                            ->setMessage('Not supported option config, option config must be an option class name or array with required [class] key')
                             ->throw();
                     }
                     $config['class'] = $class;
@@ -362,7 +362,7 @@ class Mapper implements MapperInterface
         if (isset($this->optionsExtend[$group][$name]) || isset(static::DEFAULT_MAPPING_OPTIONS[$name]))
         {
             ExceptionHelper::create(new NotUniqueException())
-                ->message('You try to define already defined Mapping option [%s]', $name)
+                ->setMessage('You try to define already defined Mapping option [%s]', $name)
                 ->throw();
         }
 
@@ -370,7 +370,7 @@ class Mapper implements MapperInterface
         if (!$option instanceof OptionInterface)
         {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message('You must define an valid Mapping config')
+                ->setMessage('You must define an valid Mapping config')
                 ->throw();
         }
         $option->setName($name);
@@ -389,7 +389,7 @@ class Mapper implements MapperInterface
         if (!$option)
         {
             ExceptionHelper::create(new NotUniqueException())
-                ->message('You try to get not defined Mapping option [%s]', $name)
+                ->setMessage('You try to get not defined Mapping option [%s]', $name)
                 ->throw();
         }
         return $option;
@@ -407,7 +407,7 @@ class Mapper implements MapperInterface
         if ($unsupportedOptions)
         {
             ExceptionHelper::create(new NotExistsException())
-                ->message(
+                ->setMessage(
                     'You try to use unknown mapper option(s) [%s] in [%s] config section. You can use only theses [%s] options',
                     implode(',', array_keys($unsupportedOptions)),
                     $optionsConfigKey,

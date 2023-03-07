@@ -1,0 +1,101 @@
+http_client:
+  parameters:
+    name: 'API Activation Code client'
+
+  options_extend:
+    request:
+      mapping_key:
+        LetsCompose\Core\HttpClient\Option\MapKeysOption:
+          config: 'schema\mapping\activation-code.yaml'
+          loader:
+            class: LetsCompose\Core\HttpClient\Option\MapKeysOptionLoader
+            config: ~
+
+
+  default_request_config:
+    for_all:
+      headers: []
+      query_params: []
+      uri_prefix: 'v3'
+#    by_method:
+#      -
+#        headers: ~
+#        query_params: ~
+#        uri_prefix: '456'
+#        apply_for: ['POST', 'GET']
+#        use_defaults: false
+
+  default_response_config:
+    headers: ~
+    options: ~
+
+  default_response_exception_config:
+    message_prefix: '[{action_name}]'
+    mute: false
+    exceptions:
+      -
+        class: LetsCompose\Core\Exception\InvalidLogicException
+        code: 400
+        message: 'Error on API Call'
+#        raise_when_response_code: [400]
+        default: true
+#      -
+#        class: LetsCompose\Core\Exception\NotFoundException
+#        code: 400
+#        message: 'Error on API Call'
+#        raise_when_response_code: [400]
+#        default: true
+  actions:
+    test:
+#      api:
+#        request:
+#          method: GET
+#          use_defaults: true
+#          uri: /372ab66d-c619-4960-92bf-149d32f564ad
+      400:
+        request:
+          method: GET
+          use_defaults: true
+#          uri: /b74171d5-b5a0-4c6f-a6d5-b8f0296b1f89
+          uri: /bebebe
+          options:
+            mapping_key: bebebe
+
+        response_exception:
+          message_prefix: 'heeeey'
+          message: 'error on upload action'
+          mute: false
+          exceptions:
+            InvalidArgumentException:
+              code: 404
+              message: 'resource not found exception'
+#              default: true
+              raise_when_response_code: [405]
+#            LetsCompose\Core\Exception\NotFoundException:
+#              code: 400
+#              message: 'default - resource not found exception'
+#              default: true
+#              raise_when_response_code: [400]
+#    activation-codes:
+#      upload:
+#        request:
+#          use_defaults: true
+#          method: POST
+#          uri: /activation-code/import-file
+#          options:
+#            keys_to_camel_case: true
+#
+#        response:
+#          options:
+#            mapping_key: "activation-codes.upload-file"
+#
+#        response_exception:
+#          message_prefix: ''
+#          message: 'error on upload action'
+#          mute: true
+#          exceptions:
+#            \InvalidArgumentException:
+#              code: 400
+#              message: 'resource not found exception'
+##              default: true
+#              raise_when_response_code: [400]

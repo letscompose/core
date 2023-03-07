@@ -10,6 +10,7 @@
 
 namespace LetsCompose\Core\Tools;
 
+use Exception;
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
 
@@ -114,9 +115,11 @@ class StringHelper
      * generate UUID v4
      * @url https://www.uuidgenerator.net/dev-corner/php
      * @url https://stackoverflow.com/questions/2040240/php-function-to-generate-v4-uuid
+     * @throws Exception
      */
-    public static function uuidv4() {
-        $data = $data ?? random_bytes(16);
+    public static function uuidv4(): string
+    {
+        $data = random_bytes(16);
 
         // Set version to 0100
         $data[6] = chr(ord($data[6]) & 0x0f | 0x40);

@@ -53,7 +53,7 @@ class ReadAction extends AbstractAction
             } else
             {
                 ExceptionHelper::create(new UnsupportedResourceException())
-                    ->message('Unsupported storage resource [%s]', $fullResourcePath)
+                    ->setMessage('Unsupported storage resource [%s]', $fullResourcePath)
                     ->throw();
             }
             yield $resource;

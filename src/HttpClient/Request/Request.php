@@ -27,11 +27,18 @@ class Request implements RequestInterface
 
     private array $headers = [];
 
-    private array $data;
+    private array $data = [];
+
+    private array $options = [];
 
     public function __construct(private readonly RequestConfigInterface $config)
     {
         $this->uuid = StringHelper::uuidv4();
+    }
+
+    public function getConfig(): RequestConfigInterface
+    {
+        return $this->config;
     }
 
     /**
@@ -45,6 +52,11 @@ class Request implements RequestInterface
     public function getPath(): string
     {
         return $this->config->getPath();
+    }
+
+    public function getMethod(): string
+    {
+        return $this->config->getMethod();
     }
 
     /**
@@ -162,5 +174,16 @@ class Request implements RequestInterface
     {
         $this->data = $data;
         return $this;
+    }
+
+    public function addOption(string $optionClass): self
+    {
+        $this->options[] = $optionClass;
+        return $this;
+    }
+
+    public function hasOption(string $optionClass): bool
+    {
+        return in_array($optionClass, $this->options);
     }
 }

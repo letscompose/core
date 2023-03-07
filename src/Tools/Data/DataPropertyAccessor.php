@@ -39,7 +39,7 @@ class DataPropertyAccessor
         if (!$path)
         {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message('parameter $path must be not empty string')
+                ->setMessage('parameter $path must be not empty string')
                 ->throw();
         }
 
@@ -51,7 +51,7 @@ class DataPropertyAccessor
         if (!$target)
         {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message('parameter $target must be not empty array or object')
+                ->setMessage('parameter $target must be not empty array or object')
                 ->throw();
         }
 
@@ -96,7 +96,7 @@ class DataPropertyAccessor
                 }
             } catch (InvalidArgumentException $exception) {
                 ExceptionHelper::create(new InvalidArgumentException())
-                    ->message('not readable data property [%s] at path [%s]. %s', $part, $path, $exception->getMessage())
+                    ->setMessage('not readable data property [%s] at path [%s]. %s', $part, $path, $exception->getMessage())
                     ->throw();
             }
         }
@@ -118,14 +118,14 @@ class DataPropertyAccessor
         if (!is_array($target))
         {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message('$target not an array')
+                ->setMessage('$target not an array')
                 ->throw();
         }
 
         if (!array_key_exists($path, $target))
         {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message('Data property at path [%s] doest not exist', $path)
+                ->setMessage('Data property at path [%s] doest not exist', $path)
                 ->throw();
         }
 

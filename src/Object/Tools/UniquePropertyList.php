@@ -33,7 +33,7 @@ class UniquePropertyList extends PropertyList implements UniquePropertyListInter
         if (false === $property instanceof UniquePropertyInterface)
         {
             ExceptionHelper::create(new MustImplementException())
-                ->message('Property [%s] of [%s] must implement interface [%s]', $property::class, ObjectHelper::getClassShortName(get_class($this)), UniquePropertyInterface::class)
+                ->setMessage('Property [%s] of [%s] must implement interface [%s]', $property::class, ObjectHelper::getClassShortName(get_class($this)), UniquePropertyInterface::class)
                 ->throw();
         }
         return parent::checkPropertyInstance($property);

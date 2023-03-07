@@ -10,7 +10,8 @@
 
 namespace LetsCompose\Core\HttpClient\Option;
 
+
 interface OptionInterface
 {
-
+    public function configure(mixed $config): self;
 }

@@ -8,13 +8,15 @@
  * file that was distributed with this source code.
  */
 
-namespace LetsCompose\Core\HttpClient\Option;
+namespace LetsCompose\Core\HttpClient\Exception;
 
-class MapKeysOptionLoader implements OptionLoaderInterface
+
+use LetsCompose\Core\Exception\Exception;
+
+/**
+ * @author Igor ZLOBINE <izlobine@gmail.com>
+ */
+class TransportException extends Exception
 {
-    public function load(string $class, mixed $config): OptionInterface
-    {
-        return new $class($config);
-    }
 
 }

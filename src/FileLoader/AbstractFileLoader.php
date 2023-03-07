@@ -34,7 +34,7 @@ abstract class AbstractFileLoader implements FileLoaderInterface
 
         if (false === PathHelper::isAbsolute($path)) {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message('You try to use relative path [%s] for configure [%s], instead you must provide an absolute path beginning by "/"', $path, ObjectHelper::getClassShortName(get_called_class()));
+                ->setMessage('You try to use relative path [%s] for configure [%s], instead you must provide an absolute path beginning by "/"', $path, ObjectHelper::getClassShortName(get_called_class()));
         }
 
         return self::$instance[$path] = self::createInstance($path);

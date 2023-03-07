@@ -31,7 +31,7 @@ class RemoveAction extends AbstractAction
         if (false === $storage->isExists($file))
         {
             ExceptionHelper::create(new FileNotFoundException())
-                ->message('Can\'t remove file at path [%s]. File does not exist on storage [%s]', $file->getPath(), $file->getStorageClass())
+                ->setMessage('Can\'t remove file at path [%s]. File does not exist on storage [%s]', $file->getPath(), $file->getStorageClass())
                 ->throw()
             ;
         }
@@ -46,7 +46,7 @@ class RemoveAction extends AbstractAction
         if (false === unlink($filePath))
         {
             ExceptionHelper::create(new UnableToRemoveFileException())
-                ->message('Unable to remove file at path [%s], ensure what file exist and you have all of needed permissions', $filePath)
+                ->setMessage('Unable to remove file at path [%s], ensure what file exist and you have all of needed permissions', $filePath)
                 ->throw();
         }
 

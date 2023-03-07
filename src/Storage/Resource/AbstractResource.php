@@ -68,7 +68,7 @@ abstract class AbstractResource implements ResourceInterface
         {
             ExceptionHelper
                 ::create(new InvalidArgumentException())
-                ->message('Unknown resource state, state can be only one of theses [%s]', implode(',', self::STATE_MAP))
+                ->setMessage('Unknown resource state, state can be only one of theses [%s]', implode(',', self::STATE_MAP))
                 ->throw();
         }
         $this->state = $state;
@@ -109,7 +109,7 @@ abstract class AbstractResource implements ResourceInterface
         if (false === class_exists($class))
         {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message('You try bind File to unknown storage class [%s]', $class)
+                ->setMessage('You try bind File to unknown storage class [%s]', $class)
                 ->throw()
                 ;
         }

@@ -30,7 +30,7 @@ class YamlContentLoader implements ContentLoaderInterface
     {
         if (!$this->supports($source)) {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message(
+                ->setMessage(
                     'This loader can\'t be use for this source [%s]',
                     $source
                 )

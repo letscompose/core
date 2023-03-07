@@ -7,19 +7,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace LetsCompose\Core\HttpClient\Transport;
 
-use Throwable;
+namespace LetsCompose\Core\HttpClient\Response;
 
-interface TransportResponseInterface
+interface ResponseContentInterface
 {
-    public function getStatusCode(): int;
-
     public function getContent(): mixed;
+    public function setContent(mixed $content): self;
 
-    public function getHeaders(): ?array;
-
-    public function getException(): ?Throwable;
-
-    public function hasException(): bool;
+    public function getRawContent(): mixed;
+    public function setRawContent(mixed $content): self;
 }

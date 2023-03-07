@@ -10,11 +10,16 @@
 
 namespace LetsCompose\Core\HttpClient\Request;
 
+use LetsCompose\Core\HttpClient\Config\Request\RequestConfigInterface;
+
 interface RequestInterface
 {
+    public function getConfig(): RequestConfigInterface;
     public function getUuid(): string;
 
     public function getPath(): string;
+
+    public function getMethod(): string;
 
     public function getUri(): string;
 
@@ -37,4 +42,7 @@ interface RequestInterface
     public function getData(): array;
 
     public function setData(array $data): self;
+
+    public function addOption(string $optionClass): self;
+    public function hasOption(string $optionClass): bool;
 }

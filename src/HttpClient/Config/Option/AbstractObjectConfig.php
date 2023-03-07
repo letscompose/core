@@ -9,9 +9,7 @@
  */
 namespace LetsCompose\Core\HttpClient\Config\Option;
 
-use LetsCompose\Core\HttpClient\Config\ConfigInterface;
-
-abstract class AbstractObjectConfig
+abstract class AbstractObjectConfig implements ObjectConfigInterface
 {
     private string $class;
 
@@ -24,7 +22,7 @@ abstract class AbstractObjectConfig
         return $this->class;
     }
 
-    public function setClass(string $class): AbstractObjectConfig
+    public function setClass(string $class): self
     {
         $this->class = $class;
         return $this;
@@ -35,7 +33,7 @@ abstract class AbstractObjectConfig
         return $this->config;
     }
 
-    public function setConfig(mixed $config): AbstractObjectConfig
+    public function setConfig(mixed $config): self
     {
         $this->config = $config;
         return $this;
@@ -46,7 +44,7 @@ abstract class AbstractObjectConfig
         return $this->priority;
     }
 
-    public function setPriority(?int $priority): AbstractObjectConfig
+    public function setPriority(?int $priority): self
     {
         $this->priority = $priority;
         return $this;

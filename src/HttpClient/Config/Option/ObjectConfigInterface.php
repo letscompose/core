@@ -13,4 +13,10 @@ use LetsCompose\Core\HttpClient\Config\ConfigInterface;
 
 interface ObjectConfigInterface extends ConfigInterface
 {
+    public function getClass(): string;
+    public function setClass(string $class): self;
+    public function getConfig(): mixed;
+    public function setConfig(mixed $config): self;
+    public function getPriority(): ?int;
+    public function setPriority(?int $priority): self;
 }

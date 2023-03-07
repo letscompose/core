@@ -20,10 +20,16 @@ class ClientConfig implements ClientConfigInterface
      */
     private array $actions;
 
+
     /**
      * @var OptionConfig[]
      */
-    private array $options = [];
+    private array $requestOptions = [];
+
+    /**
+     * @var OptionConfig[]
+     */
+    private array $responseOptions = [];
 
     /**
      * @return array
@@ -56,30 +62,36 @@ class ClientConfig implements ClientConfigInterface
     /**
      * @return array
      */
-    public function getOptions(): array
+    public function getRequestOptions(): array
     {
-        return $this->options;
+        return $this->requestOptions;
     }
 
     /**
-     * @param array $options
+     * @param array $requestOptions
      * @return ClientConfig
      */
-    public function setOptions(array $options): ClientConfig
+    public function setRequestOptions(array $requestOptions): ClientConfig
     {
-        $this->options = $options;
+        $this->requestOptions = $requestOptions;
         return $this;
     }
 
-    public function getOption(string $name): OptionConfigInterface
+    /**
+     * @return array
+     */
+    public function getResponseOptions(): array
     {
-       return $this->options[$name];
+        return $this->responseOptions;
     }
 
-    public function hasOption(string $name): bool
+    /**
+     * @param array $responseOptions
+     * @return ClientConfig
+     */
+    public function setResponseOptions(array $responseOptions): ClientConfig
     {
-        return isset($this->options[$name]);
+        $this->responseOptions = $responseOptions;
+        return $this;
     }
-
-
 }

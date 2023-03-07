@@ -33,7 +33,7 @@ class YamlFileLoader extends AbstractFileLoader
         if (!$this->supports($path))
         {
             ExceptionHelper::create(new InvalidArgumentException())
-                ->message(
+                ->setMessage(
                     'Unsupported file type at path [%s], you can use only one of theses file types [%s]',
                     $path, implode(', ', self::SUPPORTED_FILE_TYPES)
                 )

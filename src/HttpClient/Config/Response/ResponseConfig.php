@@ -17,6 +17,8 @@ class ResponseConfig implements ResponseConfigInterface
 
     private ?array $headers = null;
 
+    private ?array $options = null;
+
     public function getPath(): string
     {
         return $this->path;
@@ -32,9 +34,20 @@ class ResponseConfig implements ResponseConfigInterface
         return $this->headers;
     }
 
-    public function setHeaders(?array $headers): ResponseConfig
+    public function setHeaders(?array $headers): self
     {
         $this->headers = $headers;
+        return $this;
+    }
+
+    public function getOptions(): ?array
+    {
+        return $this->options;
+    }
+
+    public function setOptions(?array $options): self
+    {
+        $this->options = $options;
         return $this;
     }
 }
