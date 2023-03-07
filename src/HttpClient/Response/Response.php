@@ -28,6 +28,8 @@ class Response implements ResponseInterface
 
     private mixed $content = null;
 
+    private array $options = [];
+
     public function getConfig(): ?ResponseConfigInterface
     {
         return $this->config;
@@ -92,11 +94,10 @@ class Response implements ResponseInterface
         return $this;
     }
 
-    public function isValid():bool
+    public function isValid(): bool
     {
         return ResponseCodeHelper::isSuccessful($this->statusCode) && false === $this->hasException();
     }
-
 
     /**
      * @throws Exception
@@ -119,4 +120,14 @@ class Response implements ResponseInterface
         );
     }
 
+    public function addOption(string $optionClass): self
+    {
+        $this->options[] = $optionClass;
+        return $this;
+    }
+
+    public function hasOption(string $optionClass): bool
+    {
+        return in_array($optionClass, $this->options);
+    }
 }

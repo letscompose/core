@@ -15,4 +15,8 @@ interface ResponseConfigInterface extends ConfigInterface
 {
     public function getPath(): string;
     public function setPath(string $path): self;
+    public function getHeaders(): ?array;
+    public function setHeaders(?array $headers): self;
+    public function getOptions(): ?array;
+    public function setOptions(?array $options): self;
 }

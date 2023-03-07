@@ -10,7 +10,23 @@
 
 namespace LetsCompose\Core\HttpClient\Option;
 
-class MapKeysOption implements OptionInterface
-{
+use LetsCompose\Core\HttpClient\Request\RequestInterface;
 
+class MapKeysOption implements RequestOptionInterface
+{
+    public function process(RequestInterface $request): RequestInterface
+    {
+        return $request;
+    }
+
+    public function configure(mixed $config): self
+    {
+        // TODO: Implement configure() method.
+        return $this;
+    }
+
+    public function supports(RequestInterface $request): bool
+    {
+        return true;
+    }
 }

@@ -12,5 +12,5 @@ namespace LetsCompose\Core\HttpClient\Option;
 
 interface OptionLoaderInterface
 {
-
+    public function load(string $class, mixed $config): OptionInterface;
 }

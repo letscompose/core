@@ -40,6 +40,8 @@ class RequestConfig implements RequestConfigInterface
 
     private bool $useDefaults = true;
 
+    private ?array $options = null;
+
     public function getPath(): string
     {
         return $this->path;
@@ -116,6 +118,17 @@ class RequestConfig implements RequestConfigInterface
     public function setUseDefaults(bool $useDefaults): self
     {
         $this->useDefaults = $useDefaults;
+        return $this;
+    }
+
+    public function getOptions(): ?array
+    {
+        return $this->options;
+    }
+
+    public function setOptions(?array $options): RequestConfig
+    {
+        $this->options = $options;
         return $this;
     }
 }

@@ -10,11 +10,10 @@
 
 namespace LetsCompose\Core\HttpClient\Option;
 
-class MapKeysOptionLoader implements OptionLoaderInterface
-{
-    public function load(string $class, mixed $config): OptionInterface
-    {
-        return new $class($config);
-    }
+use LetsCompose\Core\HttpClient\Request\RequestInterface;
 
+interface RequestOptionInterface extends OptionInterface
+{
+    public function supports(RequestInterface $request): bool;
+    public function process(RequestInterface $request): RequestInterface;
 }

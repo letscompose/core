@@ -17,7 +17,9 @@ use LetsCompose\Core\Exception\NotExistsException;
 use LetsCompose\Core\HttpClient\Config\Action\ActionConfig;
 use LetsCompose\Core\HttpClient\Config\Action\ActionConfigInterface;
 use LetsCompose\Core\HttpClient\Config\Option\OptionConfig;
+use LetsCompose\Core\HttpClient\Config\Option\OptionConfigInterface;
 use LetsCompose\Core\HttpClient\Config\Option\OptionLoaderConfig;
+use LetsCompose\Core\HttpClient\Config\Request\RequestMethodEnum;
 use LetsCompose\Core\HttpClient\Config\Response\ResponseCodeHelper;
 use LetsCompose\Core\HttpClient\Config\Response\ResponseConfigInterface;
 use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfig;
@@ -25,7 +27,6 @@ use LetsCompose\Core\HttpClient\Config\ResponseException\ExceptionConfigList;
 use LetsCompose\Core\HttpClient\Config\Request\RequestConfig;
 use LetsCompose\Core\HttpClient\Config\Request\RequestConfigInterface;
 use LetsCompose\Core\HttpClient\Config\Response\ResponseConfig;
-use LetsCompose\Core\HttpClient\Option\OptionInterface;
 use LetsCompose\Core\HttpClient\Option\OptionLoaderInterface;
 use LetsCompose\Core\Tools\ArrayHelper;
 use LetsCompose\Core\Tools\Data\Hydrator;
@@ -37,11 +38,12 @@ class ConfigLoader implements ConfigLoaderInterface
     protected const CONFIG_KEY_DEFAULT_REQUEST_OPTIONS = 'default_request_config';
     protected const CONFIG_KEY_DEFAULT_RESPONSE_OPTIONS = 'default_response_config';
     protected const CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG = 'default_response_exception_config';
-    protected const CONFIG_KEY_OPTIONS_EXTEND = 'options-extend';
+    protected const CONFIG_KEY_OPTIONS_EXTEND = 'options_extend';
     protected const CONFIG_KEY_ACTIONS = 'actions';
     protected const CONFIG_KEY_ACTION_REQUEST = 'request';
     protected const CONFIG_KEY_ACTION_RESPONSE = 'response';
     protected const CONFIG_KEY_ACTION_RESPONSE_EXCEPTION = 'response_exception';
+    protected array $availableOptions = [];
 
     /**
      * @throws ExceptionInterface
@@ -58,18 +60,25 @@ class ConfigLoader implements ConfigLoaderInterface
                 static::CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG,
                 $config[static::CONFIG_KEY_DEFAULT_RESPONSE_EXCEPTION_CONFIG] ?? []
             );
-        $options = $this->extendOptions($config[static::CONFIG_KEY_OPTIONS_EXTEND] ?? []);
+        $requestOptions = $this->extendOptions(OptionConfigInterface::TYPE_REQUEST, $config[static::CONFIG_KEY_OPTIONS_EXTEND] ?? []);
+        $responseOptions = $this->extendOptions(OptionConfigInterface::TYPE_RESPONSE, $config[static::CONFIG_KEY_OPTIONS_EXTEND] ?? []);
         $actions = $this->loadActions($config);
 
-        $clientConfig->setOptions($options);
+        $clientConfig->setRequestOptions($requestOptions);
+        $clientConfig->setResponseOptions($responseOptions);
         $clientConfig->setActions($actions);
 
         return $clientConfig;
-
     }
 
-    protected function extendOptions(array $config)
+    protected function extendOptions(string $optionType, array $config): array
     {
+        $config = $config[$optionType] ?? [];
+        if (empty($config))
+        {
+            return $config;
+        }
+
         $getOptionsConfig = function (array $optionsConfig, array &$path = []) use (&$getOptionsConfig): array
         {
             $defaults  = [
@@ -78,7 +87,7 @@ class ConfigLoader implements ConfigLoaderInterface
                 'config' => [],
                 'priority' => null,
             ];
-
+            $defaultPriority = 0;
             $configList = [];
 
             foreach ($optionsConfig as $option => $config)
@@ -98,15 +107,19 @@ class ConfigLoader implements ConfigLoaderInterface
                     $config['name'] = $key;
                     $config['class'] = $config['class'] ?? $option;
                     $config = array_replace($defaults, $config);
+                    if (false === is_int($config['priority']))
+                    {
+                        $config['priority'] = $defaultPriority;
+                        $defaultPriority++;
+                    }
                     if (false === empty($config['loader'] ?? [] ))
                     {
-                        $config  = array_replace($config, $getOptionsConfig(['loader' => $config['loader']]));
+                        $config = array_replace($config, $getOptionsConfig(['loader' => $config['loader']]));
                     }
                     $configList[$key][] = $config;
                 }
 
             }
-
             return $configList;
         };
 
@@ -129,6 +142,7 @@ class ConfigLoader implements ConfigLoaderInterface
 
             $config = current($config);
             $class = $config['class'] ?? '';
+
             if (empty($class))
             {
                 throw (new InvalidArgumentException())
@@ -167,12 +181,12 @@ class ConfigLoader implements ConfigLoaderInterface
          * @throws InvalidArgumentException
          * @throws ExceptionInterface
          */
-        $processOptionsConfig = function (array $optionsConfig) use ($validateObjectConfig): array
+        $processOptionsConfig = function (string $optionType, array $optionsConfig) use ($validateObjectConfig): array
         {
             $result = [];
             foreach ($optionsConfig as $option => $config)
             {
-                $config = $validateObjectConfig($option, OptionInterface::class, $config);
+                $config = $validateObjectConfig($option, OptionConfigInterface::INTERFACE_MAP[$optionType], $config);
                 $option = $this->createConfigObject(OptionConfig::class, $config);
                 $config = $config['loader'] ?? [];
                 if (!empty($config))
@@ -181,16 +195,19 @@ class ConfigLoader implements ConfigLoaderInterface
                     $loader = $this->createConfigObject(OptionLoaderConfig::class, $config);
                     $option->setLoaderConfig($loader);
                 }
-                $result[$option->getName()] = $option;
+                $result[] = $option;
             }
+            usort($result, fn (array $a, array $b) => ($a['priority'] <=> $b['priority']));
             return $result;
         };
 
         $result = $getOptionsConfig($config);
         if ($result)
         {
-            $result = $processOptionsConfig($result);
+            $this->availableOptions[$optionType] = array_keys($result);
+            $result = $processOptionsConfig($optionType, $result);
         }
+
         return $result;
     }
 
@@ -479,6 +496,9 @@ class ConfigLoader implements ConfigLoaderInterface
             }
         }
 
+        $options = $config['options'] ?? [];
+        $this->validateOptions($options, OptionConfigInterface::TYPE_RESPONSE);
+
         $config['path'] = $path;
         return $this->createConfigObject(ResponseConfig::class, $config);
     }
@@ -521,32 +541,86 @@ class ConfigLoader implements ConfigLoaderInterface
             $config = array_replace_recursive($defaults, $config);
         }
 
+        $options = $config['options'] ?? [];
+        $this->validateOptions($options, OptionConfigInterface::TYPE_REQUEST);
+
         $config['path'] = $path;
         return $this->createConfigObject(RequestConfig::class, $config);
     }
 
+    /**
+     * @throws ExceptionInterface
+     */
+    protected function validateOptions(mixed $options, string $optionsType): void
+    {
+        if (empty($options))
+        {
+            return;
+        }
+
+        if (false === is_array($options))
+        {
+            throw (new InvalidArgumentException())
+                ->setMessage(
+                    'Invalid [options] config. [options] can be only array, null or false values',
+                );
+        }
+
+        $options = array_keys($options);
+        $knownOptions = $this->availableOptions[$optionsType] ?? [];
+        if (empty($knownOptions))
+        {
+            throw (new InvalidArgumentException())
+                ->setMessage(
+                    'Invalid [options] config. You can\'t define [%s] options because HttpClient config does not have defined options. Please define options in [options_extend/%s] section',
+                    $optionsType,
+                    $optionsType,
+                );
+        }
+        foreach ($options as $name)
+        {
+            if (false === in_array($name, $knownOptions))
+            {
+                throw (new InvalidArgumentException())
+                    ->setMessage(
+                        'Invalid [options] config. Unknown option [%s], you can use only theses [%s]',
+                        $name,
+                        implode(',', $knownOptions)
+                    );
+            }
+        }
+    }
 
     protected function getActionsList(array $config): array
     {
         $result = [];
         $path = [];
 
-        $validateRequestConfig = function (string $path, mixed $config) {
+        $validateRequestConfig = function (string $path, mixed $config)
+        {
             if (false === is_array($config))
             {
                 throw (new InvalidArgumentException())
-                    ->setMessage('Invalid action request config at path [%s], config must be an valid array', $path)
-                ;
+                    ->setMessage('Invalid action request config at path [%s], config must be an valid array', $path);
             }
 
             if (count(RequestConfig::CONFIG_REQUIRED_KEYS) !== count(array_intersect(RequestConfig::CONFIG_REQUIRED_KEYS, array_keys($config))))
             {
                 throw (new InvalidArgumentException())
-                    ->setMessage('Invalid action request config at path [%s], you must define all of theses keys [%s]', $path, implode('; ',RequestConfig::CONFIG_REQUIRED_KEYS))
-                ;
+                    ->setMessage('Invalid action request config at path [%s], you must define all of theses keys [%s]', $path, implode('; ', RequestConfig::CONFIG_REQUIRED_KEYS));
             }
 
-            //TODO validate method and URI Keys
+            $method = RequestMethodEnum::tryFrom($config['method']);
+            if (null === $method)
+            {
+                throw (new InvalidArgumentException())
+                    ->setMessage(
+                        'Invalid action request config at path [%s], key [method] has an invalid value [%s]. Defined value must be one of theses [%s]',
+                        $path,
+                        $config['method'],
+                        implode(', ', array_column(RequestMethodEnum::cases(), 'name'))
+                    );
+            }
 
         };
 

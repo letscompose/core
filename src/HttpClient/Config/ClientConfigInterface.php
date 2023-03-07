@@ -30,14 +30,20 @@ interface ClientConfigInterface extends ConfigInterface
     /**
      * @param OptionConfigInterface[] $options
      */
-    public function setOptions(array $options): self;
+    public function setRequestOptions(array $options): self;
+
+    /**
+     * @param OptionConfigInterface[] $options
+     */
+    public function setResponseOptions(array $options): self;
 
     /**
      * @return OptionConfigInterface[]
      */
-    public function getOptions(): array;
+    public function getRequestOptions(): array;
 
-    public function getOption(string $name): OptionConfigInterface;
-
-    public function hasOption(string $name): bool;
+    /**
+     * @return OptionConfigInterface[]
+     */
+    public function getResponseOptions(): array;
 }
