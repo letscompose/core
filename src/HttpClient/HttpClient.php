@@ -148,10 +148,10 @@ class HttpClient implements HttpClientInterface
     protected function applyOptions(RequestInterface|ResponseInterface $transportObject, array $options): RequestInterface|ResponseInterface
     {
         $config = $transportObject->getConfig();
-        $options = $config->getOptions();
-        foreach ($options as $name => $config)
+        $configOptions = $config->getOptions() ?? [];
+        foreach ($configOptions as $name => $config)
         {
-            $optionHandler = $this->requestOptions[$name];
+            $optionHandler = $options[$name];
             if ($optionHandler->supports($transportObject))
             {
                 $optionHandler->configure($config);
@@ -190,6 +190,7 @@ class HttpClient implements HttpClientInterface
         $responseContent->setRawContent($transportResponse->getContent());
 
         return (new Response())
+            ->setConfig($actionConfig->getResponseConfig())
             ->setStatusCode($responseStatusCode)
             ->setExceptionConfig($exception)
             ->setHeaders($transportResponse->getHeaders())
