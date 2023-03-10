@@ -10,8 +10,8 @@
 
 namespace LetsCompose\Core\FileLoader;
 
+use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
-use LetsCompose\Core\Tools\ExceptionHelper;
 use LetsCompose\Core\Tools\ObjectHelper;
 use LetsCompose\Core\Tools\Storage\PathHelper;
 
@@ -24,6 +24,9 @@ abstract class AbstractFileLoader implements FileLoaderInterface
 
     protected string $path;
 
+    /**
+     * @throws ExceptionInterface
+     */
     public static function getInstance(string $path): FileLoaderInterface
     {
         $path = PathHelper::normalize($path);
@@ -33,8 +36,12 @@ abstract class AbstractFileLoader implements FileLoaderInterface
         }
 
         if (false === PathHelper::isAbsolute($path)) {
-            ExceptionHelper::create(new InvalidArgumentException())
-                ->setMessage('You try to use relative path [%s] for configure [%s], instead you must provide an absolute path beginning by "/"', $path, ObjectHelper::getClassShortName(get_called_class()));
+            throw (new InvalidArgumentException())
+                ->setMessage(
+                    'You try to use relative path [%s] for configure [%s], instead you must provide an absolute path beginning by "/"',
+                    $path,
+                    ObjectHelper::getClassShortName(get_called_class())
+                );
         }
 
         return self::$instance[$path] = self::createInstance($path);
