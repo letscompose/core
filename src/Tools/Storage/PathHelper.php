@@ -47,4 +47,42 @@ class PathHelper
     {
         return '/' === $path[0];
     }
+
+    static function getInfo(string $path): PathInfoInterface
+    {
+        $pathInfo = (new PathInfo())
+            ->setExists(file_exists($path))
+            ->setAbsolutePath(self::isAbsolute($path))
+            ->setPath($path)
+        ;
+
+        $infos = pathinfo($pathInfo->getPath());
+        $baseName = $infos['basename'];
+        $pos = strpos($baseName, '.');
+
+        if (false !== $pos && (0 !== $pos || 1 < substr_count($baseName, '.')))
+        {
+            $pathInfo->setExtension($infos['extension'] ?? null);
+        }
+
+        if (false === $pathInfo->isExists())
+        {
+            return $pathInfo;
+        }
+
+        $pathInfo
+            ->setFile(is_file($path))
+            ->setDir(is_dir($path))
+            ->setSymLink(is_link($path))
+            ->setReadable(is_readable($path))
+            ->setWritable(is_writable($path))
+        ;
+
+        if ($pathInfo->isFile())
+        {
+            $pathInfo->setFileName($baseName);
+            $pathInfo->setPath($infos['dirname']);
+        }
+        return $pathInfo;
+    }
 }
