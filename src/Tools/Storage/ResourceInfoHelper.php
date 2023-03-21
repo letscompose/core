@@ -10,9 +10,10 @@
 
 namespace LetsCompose\Core\Tools\Storage;
 
+use Exception;
 use LetsCompose\Core\Exception\ExceptionInterface;
 use LetsCompose\Core\Exception\InvalidArgumentException;
-use LetsCompose\Core\Exception\NotReadableResourceException;
+use LetsCompose\Core\Exception\NotReadableException;
 use LetsCompose\Core\Tools\ExceptionHelper;
 use LetsCompose\Core\Tools\Storage\Resource\ResourceInfoInterface;
 use LetsCompose\Core\Tools\Storage\Resource\DirectoryInfo;
@@ -27,13 +28,13 @@ use \DateTime;
 class ResourceInfoHelper
 {
     /**
-     * @throws ExceptionInterface
+     * @throws ExceptionInterface|Exception
      */
     public static function getResourceInfo(string $filePath): ResourceInfoInterface
     {
         if (false === is_readable($filePath))
         {
-            ExceptionHelper::create(new NotReadableResourceException())
+            ExceptionHelper::create(new NotReadableException())
                 ->setMessage('You try to get info on not readable resource [%s]', $filePath)
                 ->throw()
                 ;

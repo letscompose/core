@@ -10,10 +10,11 @@
 
 namespace LetsCompose\Core\Exception;
 
+
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class NotReadableResourceException extends Exception
+class InvalidFileException extends InvalidResourceException
 {
 
 }
