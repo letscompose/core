@@ -29,7 +29,7 @@ class Hydrator
          */
         if (true === is_string($object))
         {
-            $object = new $object();
+            $object = new $object(...$params);
             $putIntoCache = false;
         }
 
