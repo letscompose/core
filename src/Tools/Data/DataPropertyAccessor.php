@@ -133,7 +133,7 @@ class DataPropertyAccessor
     }
 
 
-    public static function objectToArray(object $object): array
+    public static function objectToArray(object $object, array $excludeMethods = []): array
     {
         if ($object instanceof \DateTimeInterface || $object instanceof \DateTimeZone)
         {
@@ -174,6 +174,10 @@ class DataPropertyAccessor
              * construct object methods list.
              */
             $objectMethods = get_class_methods($object);
+            if (false === empty($excludeMethods))
+            {
+                $objectMethods = array_diff($objectMethods, $excludeMethods);
+            }
             $finalMethodsList = [];
             foreach ($objectMethods as $methodName) {
                 $detectResult = $getterDetect($methodName);
