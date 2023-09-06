@@ -11,18 +11,21 @@
 namespace LetsCompose\Core\Exception;
 
 use \Exception as PHPException;
+use LetsCompose\Core\Interface\PayloadInterface;
 use Throwable;
 
 
 /**
  * @author Igor ZLOBINE <izlobine@gmail.com>
  */
-class Exception extends PHPException implements ExceptionInterface
+class Exception extends PHPException implements ExceptionInterface, PayloadInterface
 {
     /**
      * @var Throwable
      */
     private Throwable $previous;
+
+    private mixed $payload = null;
 
     /**
      * @inheritDoc
@@ -48,6 +51,17 @@ class Exception extends PHPException implements ExceptionInterface
     public function setPrevious(Throwable $exception): ExceptionInterface
     {
         $this->previous = $exception;
+        return $this;
     }
 
+    public function getPayload(): mixed
+    {
+        return $this->payload;
+    }
+
+    public function setPayload(mixed $payload): self
+    {
+        $this->payload = $payload;
+        return $this;
+    }
 }
